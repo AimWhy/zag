@@ -1,150 +1,128 @@
-import { dataAttr, visuallyHiddenStyle } from "@zag-js/dom-utils"
+import { dataAttr, getEventTarget, visuallyHiddenStyle } from "@zag-js/dom-query"
 import type { NormalizeProps, PropTypes } from "@zag-js/types"
+import { parts } from "./checkbox.anatomy"
 import { dom } from "./checkbox.dom"
-import type { Send, State } from "./checkbox.types"
+import type { MachineApi, Send, State } from "./checkbox.types"
+import { isFocusVisible } from "@zag-js/focus-visible"
 
-export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>) {
-  const isChecked = state.matches("checked")
+export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>): MachineApi<T> {
+  const disabled = state.context.isDisabled
+  const readOnly = state.context.readOnly
 
-  const isInteractive = state.context.isInteractive
-  const isIndeterminate = state.context.indeterminate
-  const isDisabled = state.context.disabled
-  const isInvalid = state.context.invalid
-  const isReadOnly = state.context.readOnly
-  const isRequired = state.context.required
-  const isFocusable = state.context.focusable
+  const focused = !disabled && state.context.focused
+  const focusVisible = !disabled && state.context.focusVisible
 
-  const isActive = state.context.active
-  const isHovered = state.context.hovered
-  const isFocused = !isDisabled && state.context.focused
+  const checked = state.context.isChecked
+  const indeterminate = state.context.isIndeterminate
 
-  const ariaLabel = state.context["aria-label"]
-  const ariaLabelledBy = state.context["aria-labelledby"] ?? dom.getLabelId(state.context)
-  const ariaDescribedBy = state.context["aria-describedby"]
-  const ariaChecked = isIndeterminate ? "mixed" : isChecked
-
-  const name = state.context.name
-  const form = state.context.form
-  const value = state.context.value
-
-  const trulyDisabled = isDisabled && !isFocusable
-
-  const stateView = state.matches("checked") ? "checked" : "unchecked"
-  const view = state.context.indeterminate ? "mixed" : stateView
+  const dataAttrs = {
+    "data-active": dataAttr(state.context.active),
+    "data-focus": dataAttr(focused),
+    "data-focus-visible": dataAttr(focusVisible),
+    "data-readonly": dataAttr(readOnly),
+    "data-hover": dataAttr(state.context.hovered),
+    "data-disabled": dataAttr(disabled),
+    "data-state": indeterminate ? "indeterminate" : state.context.checked ? "checked" : "unchecked",
+    "data-invalid": dataAttr(state.context.invalid),
+  }
 
   return {
-    isChecked,
-    isDisabled,
-    isIndeterminate,
-    isFocused,
-    isReadOnly,
-    view,
-    setChecked(checked: boolean) {
-      send({ type: "SET_STATE", checked, manual: true })
-    },
-    setIndeterminate(indeterminate: boolean) {
-      send({ type: "SET_INDETERMINATE", value: indeterminate })
+    checked,
+    disabled,
+    indeterminate,
+    focused,
+    checkedState: state.context.checked,
+
+    setChecked(checked) {
+      send({ type: "CHECKED.SET", checked, isTrusted: false })
     },
 
-    rootProps: normalize.element({
-      "data-part": "root",
-      id: dom.getRootId(state.context),
-      "data-focus": dataAttr(isFocused),
-      "data-disabled": dataAttr(isDisabled),
-      "data-checked": dataAttr(isChecked),
-      "data-hover": dataAttr(isHovered),
-      "data-invalid": dataAttr(isInvalid),
-      "data-readonly": dataAttr(isReadOnly),
-      onPointerMove() {
-        if (!isInteractive) return
-        send({ type: "SET_HOVERED", value: true })
-      },
-      onPointerLeave() {
-        if (!isInteractive) return
-        send({ type: "SET_HOVERED", value: false })
-      },
-      onPointerDown(event) {
-        if (!isInteractive) return
-        // On pointerdown, the input blurs and returns focus to the `body`,
-        // we need to prevent this.
-        if (isFocused) event.preventDefault()
-        send({ type: "SET_ACTIVE", value: true })
-      },
-      onPointerUp() {
-        if (!isInteractive) return
-        send({ type: "SET_ACTIVE", value: false })
-      },
-    }),
+    toggleChecked() {
+      send({ type: "CHECKED.TOGGLE", checked: checked, isTrusted: false })
+    },
 
-    labelProps: normalize.label({
-      "data-part": "label",
-      htmlFor: dom.getInputId(state.context),
-      id: dom.getLabelId(state.context),
-      "data-focus": dataAttr(isFocused),
-      "data-hover": dataAttr(isHovered),
-      "data-readonly": dataAttr(isReadOnly),
-      "data-disabled": dataAttr(isDisabled),
-      "data-checked": dataAttr(isChecked),
-      "data-invalid": dataAttr(isInvalid),
-      onPointerDown(event) {
-        if (!isInteractive) return
-        event.preventDefault()
-        event.stopPropagation()
-      },
-    }),
+    getRootProps() {
+      return normalize.label({
+        ...parts.root.attrs,
+        ...dataAttrs,
+        dir: state.context.dir,
+        id: dom.getRootId(state.context),
+        htmlFor: dom.getHiddenInputId(state.context),
+        onPointerMove() {
+          if (disabled) return
+          send({ type: "CONTEXT.SET", context: { hovered: true } })
+        },
+        onPointerLeave() {
+          if (disabled) return
+          send({ type: "CONTEXT.SET", context: { hovered: false } })
+        },
+        onClick(event) {
+          const target = getEventTarget<Element>(event)
+          if (target === dom.getHiddenInputEl(state.context)) {
+            event.stopPropagation()
+          }
+        },
+      })
+    },
 
-    controlProps: normalize.element({
-      "data-part": "control",
-      id: dom.getControlId(state.context),
-      "data-focus": dataAttr(isFocused),
-      "data-disabled": dataAttr(isDisabled),
-      "data-hover": dataAttr(isHovered),
-      "data-indeterminate": dataAttr(isIndeterminate),
-      "data-invalid": dataAttr(isInvalid),
-      "data-checked": dataAttr(isChecked),
-      "data-readonly": dataAttr(isReadOnly),
-      "aria-hidden": true,
-      "data-active": dataAttr(isActive),
-    }),
+    getLabelProps() {
+      return normalize.element({
+        ...parts.label.attrs,
+        ...dataAttrs,
+        dir: state.context.dir,
+        id: dom.getLabelId(state.context),
+      })
+    },
 
-    inputProps: normalize.input({
-      "data-part": "input",
-      id: dom.getInputId(state.context),
-      type: "checkbox",
-      required: isRequired,
-      defaultChecked: isChecked,
-      disabled: trulyDisabled,
-      "data-disabled": dataAttr(isDisabled),
-      readOnly: isReadOnly,
-      "aria-label": ariaLabel,
-      "aria-labelledby": ariaLabelledBy,
-      "aria-invalid": isInvalid,
-      "aria-checked": ariaChecked,
-      "aria-describedby": ariaDescribedBy,
-      "aria-disabled": isDisabled,
-      name,
-      form,
-      value,
-      style: visuallyHiddenStyle,
-      onChange() {
-        send({ type: "TOGGLE" })
-      },
-      onBlur() {
-        send({ type: "SET_FOCUSED", value: false })
-      },
-      onFocus() {
-        send({ type: "SET_FOCUSED", value: true })
-      },
-      onKeyDown(event) {
-        if (event.key === " ") {
-          send({ type: "SET_ACTIVE", value: true })
-        }
-      },
-      onKeyUp(event) {
-        if (event.key === " ") {
-          send({ type: "SET_ACTIVE", value: false })
-        }
-      },
-    }),
+    getControlProps() {
+      return normalize.element({
+        ...parts.control.attrs,
+        ...dataAttrs,
+        dir: state.context.dir,
+        id: dom.getControlId(state.context),
+        "aria-hidden": true,
+      })
+    },
+
+    getIndicatorProps() {
+      return normalize.element({
+        ...parts.indicator.attrs,
+        ...dataAttrs,
+        dir: state.context.dir,
+        hidden: !indeterminate && !state.context.checked,
+      })
+    },
+
+    getHiddenInputProps() {
+      return normalize.input({
+        id: dom.getHiddenInputId(state.context),
+        type: "checkbox",
+        required: state.context.required,
+        defaultChecked: checked,
+        disabled: disabled,
+        "aria-labelledby": dom.getLabelId(state.context),
+        "aria-invalid": state.context.invalid,
+        name: state.context.name,
+        form: state.context.form,
+        value: state.context.value,
+        style: visuallyHiddenStyle,
+        onFocus() {
+          const focusVisible = isFocusVisible()
+          send({ type: "CONTEXT.SET", context: { focused: true, focusVisible } })
+        },
+        onBlur() {
+          send({ type: "CONTEXT.SET", context: { focused: false, focusVisible: false } })
+        },
+        onClick(event) {
+          if (readOnly) {
+            event.preventDefault()
+            return
+          }
+
+          const checked = event.currentTarget.checked
+          send({ type: "CHECKED.SET", checked, isTrusted: true })
+        },
+      })
+    },
   }
 }

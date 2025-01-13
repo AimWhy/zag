@@ -1,22 +1,13 @@
-import { defineDomHelpers } from "@zag-js/dom-utils"
-import type { GroupMachineContext as GroupCtx, MachineContext as Ctx, Placement } from "./toast.types"
+import { createScope } from "@zag-js/dom-query"
+import type { MachineContext as Ctx, Placement, GroupMachineContext as GroupCtx } from "./toast.types"
 
-export const dom = defineDomHelpers({
-  getGroupId: (placement: Placement) => `toast-group:${placement}`,
-  getContainerId: (ctx: Ctx) => `toast:${ctx.id}`,
-  getTitleId: (ctx: Ctx) => `toast-title:${ctx.id}`,
-  getDescriptionId: (ctx: Ctx) => `toast-description:${ctx.id}`,
-  getCloseButtonId: (ctx: Ctx) => `toast-close-button:${ctx.id}`,
+export const dom = createScope({
+  getRegionId: (placement: Placement) => `toast-group:${placement}`,
+  getRegionEl: (ctx: GroupCtx, placement: Placement) => dom.getById(ctx, `toast-group:${placement}`),
 
-  getPortalId: (ctx: GroupCtx) => `toast-portal:${ctx.id}`,
-  // using `getDoc` instead of `getRootNode` since the portal is not a child of the root node
-  getPortalEl: (ctx: GroupCtx) => dom.getDoc(ctx).getElementById(dom.getPortalId(ctx)),
-
-  createPortalEl: (ctx: GroupCtx) => {
-    const existing = dom.getPortalEl(ctx)
-    if (existing) return existing
-    const portal = dom.getDoc(ctx).createElement("toast-portal")
-    portal.id = dom.getPortalId(ctx)
-    return portal
-  },
+  getRootId: (ctx: Ctx) => `toast:${ctx.id}`,
+  getRootEl: (ctx: Ctx) => dom.getById(ctx, dom.getRootId(ctx)),
+  getTitleId: (ctx: Ctx) => `toast:${ctx.id}:title`,
+  getDescriptionId: (ctx: Ctx) => `toast:${ctx.id}:description`,
+  getCloseTriggerId: (ctx: Ctx) => `toast${ctx.id}:close`,
 })

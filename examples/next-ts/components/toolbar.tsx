@@ -1,18 +1,20 @@
-import { dataAttr } from "@zag-js/dom-utils"
+import { dataAttr } from "@zag-js/dom-query"
 import { ReactNode, useState } from "react"
 
-type ToolbarProps = {
-  controls: null | (() => JSX.Element)
+type ToolbarProps = React.HTMLAttributes<HTMLDivElement> & {
+  controls?: null | (() => JSX.Element)
   children: ReactNode
+  viz?: boolean
 }
 
 export function Toolbar(props: ToolbarProps) {
-  const [active, setActive] = useState(props.controls === null ? 1 : 0)
+  const { controls, children, viz, ...rest } = props
+  const [active, setActive] = useState(viz ? 1 : !controls ? 1 : 0)
 
   return (
-    <div className="toolbar">
+    <div className="toolbar" {...rest}>
       <nav>
-        {props.controls !== null && (
+        {controls && (
           <button data-active={dataAttr(active === 0)} onClick={() => setActive(0)}>
             Controls
           </button>
@@ -22,13 +24,13 @@ export function Toolbar(props: ToolbarProps) {
         </button>
       </nav>
       <div>
-        {props.controls !== null && (
+        {controls && (
           <div data-content data-active={dataAttr(active === 0)}>
-            <props.controls />
+            {controls()}
           </div>
         )}
         <div data-content data-active={dataAttr(active === 1)}>
-          {props.children}
+          {children}
         </div>
       </div>
     </div>

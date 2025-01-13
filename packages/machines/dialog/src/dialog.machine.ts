@@ -1,10 +1,10 @@
 import { ariaHidden } from "@zag-js/aria-hidden"
 import { createMachine } from "@zag-js/core"
 import { trackDismissableElement } from "@zag-js/dismissable"
-import { nextTick, raf } from "@zag-js/dom-utils"
+import { raf } from "@zag-js/dom-query"
+import { trapFocus } from "@zag-js/focus-trap"
 import { preventBodyScroll } from "@zag-js/remove-scroll"
-import { compact, runIfFn } from "@zag-js/utils"
-import { createFocusTrap, FocusTrap } from "focus-trap"
+import { compact } from "@zag-js/utils"
 import { dom } from "./dialog.dom"
 import type { MachineContext, MachineState, UserDefinedContext } from "./dialog.types"
 
@@ -13,7 +13,7 @@ export function machine(userContext: UserDefinedContext) {
   return createMachine<MachineContext, MachineState>(
     {
       id: "dialog",
-      initial: "unknown",
+      initial: ctx.open ? "open" : "closed",
 
       context: {
         role: "dialog",
@@ -24,105 +24,163 @@ export function machine(userContext: UserDefinedContext) {
         modal: true,
         trapFocus: true,
         preventScroll: true,
-        closeOnOutsideClick: true,
-        closeOnEsc: true,
+        closeOnInteractOutside: true,
+        closeOnEscape: true,
         restoreFocus: true,
         ...ctx,
       },
 
+      created: ["setAlertDialogProps"],
+
+      watch: {
+        open: ["toggleVisibility"],
+      },
+
       states: {
-        unknown: {
-          on: {
-            SETUP: ctx.defaultOpen ? "open" : "closed",
-          },
-        },
         open: {
-          entry: ["checkRenderedElements"],
+          entry: ["checkRenderedElements", "syncZIndex"],
           activities: ["trackDismissableElement", "trapFocus", "preventScroll", "hideContentBelow"],
           on: {
-            CLOSE: "closed",
-            TOGGLE: "closed",
+            "CONTROLLED.CLOSE": {
+              target: "closed",
+            },
+            CLOSE: [
+              {
+                guard: "isOpenControlled",
+                actions: ["invokeOnClose"],
+              },
+              {
+                target: "closed",
+                actions: ["invokeOnClose"],
+              },
+            ],
+            TOGGLE: [
+              {
+                guard: "isOpenControlled",
+                actions: ["invokeOnClose"],
+              },
+              {
+                target: "closed",
+                actions: ["invokeOnClose"],
+              },
+            ],
           },
         },
         closed: {
-          entry: ["invokeOnClose"],
           on: {
-            OPEN: "open",
-            TOGGLE: "open",
+            "CONTROLLED.OPEN": {
+              target: "open",
+            },
+            OPEN: [
+              {
+                guard: "isOpenControlled",
+                actions: ["invokeOnOpen"],
+              },
+              {
+                target: "open",
+                actions: ["invokeOnOpen"],
+              },
+            ],
+            TOGGLE: [
+              {
+                guard: "isOpenControlled",
+                actions: ["invokeOnOpen"],
+              },
+              {
+                target: "open",
+                actions: ["invokeOnOpen"],
+              },
+            ],
           },
         },
       },
     },
     {
+      guards: {
+        isOpenControlled: (ctx) => !!ctx["open.controlled"],
+      },
       activities: {
         trackDismissableElement(ctx, _evt, { send }) {
-          let cleanup: VoidFunction | undefined
-          nextTick(() => {
-            cleanup = trackDismissableElement(dom.getContentEl(ctx), {
-              pointerBlocking: ctx.modal,
-              exclude: [dom.getTriggerEl(ctx)],
-              onDismiss: () => send({ type: "CLOSE", src: "interact-outside" }),
-              onEscapeKeyDown(event) {
-                if (!ctx.closeOnEsc) {
-                  event.preventDefault()
-                } else {
-                  send({ type: "CLOSE", src: "escape-key" })
-                }
-                ctx.onEsc?.()
-              },
-              onPointerDownOutside(event) {
-                if (!ctx.closeOnOutsideClick) {
-                  event.preventDefault()
-                }
-                ctx.onOutsideClick?.()
-              },
-            })
+          const getContentEl = () => dom.getContentEl(ctx)
+          return trackDismissableElement(getContentEl, {
+            defer: true,
+            pointerBlocking: ctx.modal,
+            exclude: [dom.getTriggerEl(ctx)],
+            onInteractOutside(event) {
+              ctx.onInteractOutside?.(event)
+              if (!ctx.closeOnInteractOutside) {
+                event.preventDefault()
+              }
+            },
+            persistentElements: ctx.persistentElements,
+            onFocusOutside: ctx.onFocusOutside,
+            onPointerDownOutside: ctx.onPointerDownOutside,
+            onEscapeKeyDown(event) {
+              ctx.onEscapeKeyDown?.(event)
+              if (!ctx.closeOnEscape) {
+                event.preventDefault()
+              }
+            },
+            onDismiss() {
+              send({ type: "CLOSE", src: "interact-outside" })
+            },
           })
-          return () => cleanup?.()
         },
         preventScroll(ctx) {
           if (!ctx.preventScroll) return
           return preventBodyScroll(dom.getDoc(ctx))
         },
         trapFocus(ctx) {
-          if (!ctx.trapFocus) return
-          let trap: FocusTrap
-          nextTick(() => {
-            const el = dom.getContentEl(ctx)
-            if (!el) return
-            trap = createFocusTrap(el, {
-              document: dom.getDoc(ctx),
-              escapeDeactivates: false,
-              fallbackFocus: el,
-              allowOutsideClick: true,
-              returnFocusOnDeactivate: ctx.restoreFocus,
-              initialFocus: runIfFn(ctx.initialFocusEl),
-              setReturnFocus: runIfFn(ctx.finalFocusEl),
-            })
-            try {
-              trap.activate()
-            } catch {}
+          if (!ctx.trapFocus || !ctx.modal) return
+          const contentEl = () => dom.getContentEl(ctx)
+          return trapFocus(contentEl, {
+            preventScroll: true,
+            returnFocusOnDeactivate: !!ctx.restoreFocus,
+            initialFocus: ctx.initialFocusEl,
+            setReturnFocus: (el) => ctx.finalFocusEl?.() ?? el,
           })
-          return () => trap?.deactivate()
         },
         hideContentBelow(ctx) {
           if (!ctx.modal) return
-          let cleanup: VoidFunction | undefined
-          nextTick(() => {
-            cleanup = ariaHidden([dom.getUnderlayEl(ctx)])
-          })
-          return () => cleanup?.()
+          const getElements = () => [dom.getContentEl(ctx)]
+          return ariaHidden(getElements, { defer: true })
         },
       },
       actions: {
+        setAlertDialogProps(ctx) {
+          if (ctx.role !== "alertdialog") return
+          ctx.initialFocusEl ||= () => dom.getCloseTriggerEl(ctx)
+          ctx.closeOnInteractOutside = false
+        },
         checkRenderedElements(ctx) {
           raf(() => {
             ctx.renderedElements.title = !!dom.getTitleEl(ctx)
             ctx.renderedElements.description = !!dom.getDescriptionEl(ctx)
           })
         },
+        syncZIndex(ctx) {
+          raf(() => {
+            // sync z-index of positioner with content
+            const contentEl = dom.getContentEl(ctx)
+            if (!contentEl) return
+
+            const win = dom.getWin(ctx)
+            const styles = win.getComputedStyle(contentEl)
+
+            const elems = [dom.getPositionerEl(ctx), dom.getBackdropEl(ctx)]
+            elems.forEach((node) => {
+              node?.style.setProperty("--z-index", styles.zIndex)
+            })
+          })
+        },
         invokeOnClose(ctx) {
-          ctx.onClose?.()
+          ctx.onOpenChange?.({ open: false })
+        },
+        invokeOnOpen(ctx) {
+          ctx.onOpenChange?.({ open: true })
+        },
+        toggleVisibility(ctx, evt, { send }) {
+          send({ type: ctx.open ? "CONTROLLED.OPEN" : "CONTROLLED.CLOSE", previousEvent: evt })
         },
       },
     },

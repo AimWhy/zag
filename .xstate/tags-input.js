@@ -11,39 +11,44 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "tags-input",
-  initial: "unknown",
+  initial: ctx.autoFocus ? "focused:input" : "idle",
   context: {
-    "allowEditTag": false,
-    "!isTagFocused": false,
+    "isTagEditable": false,
     "(!isAtMax || allowOverflow) && !isInputValueEmpty": false,
     "addOnBlur": false,
     "clearOnBlur": false,
-    "autoFocus": false,
-    "!hasFocusedId": false,
+    "!hasHighlightedTag": false,
     "addOnBlur": false,
     "clearOnBlur": false,
     "hasTags && isInputCaretAtStart": false,
     "hasTags && isInputCaretAtStart": false,
+    "hasHighlightedTag": false,
     "addOnPaste": false,
-    "hasTags && isInputCaretAtStart && !isLastTagFocused": false,
-    "allowEditTag && hasFocusedId": false,
-    "isFirstTagFocused": false,
-    "isInputRelatedTarget": false
+    "hasTags && isInputCaretAtStart && !isLastTagHighlighted": false,
+    "isTagEditable && hasHighlightedTag": false,
+    "isFirstTagHighlighted": false,
+    "hasHighlightedTag": false,
+    "addOnPaste": false,
+    "isInputRelatedTarget": false,
+    "isEditedTagEmpty": false
   },
-  activities: ["trackFormControlState"],
-  exit: ["removeLiveRegion", "clearLog"],
+  activities: ["trackLiveRegion", "trackFormControlState"],
+  exit: ["clearLog"],
   on: {
     DOUBLE_CLICK_TAG: {
       internal: true,
-      cond: "allowEditTag",
+      cond: "isTagEditable",
       target: "editing:tag",
       actions: ["setEditedId", "initializeEditedTagValue"]
     },
     POINTER_DOWN_TAG: {
       internal: true,
-      cond: "!isTagFocused",
       target: "navigating:tag",
-      actions: ["focusTag", "focusInput"]
+      actions: ["highlightTag", "focusInput"]
+    },
+    CLICK_DELETE_TAG: {
+      target: "focused:input",
+      actions: ["deleteTag"]
     },
     SET_INPUT_VALUE: {
       actions: ["setInputValue"]
@@ -51,23 +56,26 @@ const fetchMachine = createMachine({
     SET_VALUE: {
       actions: ["setValue"]
     },
-    DELETE_TAG: {
+    CLEAR_TAG: {
       actions: ["deleteTag"]
     },
     SET_VALUE_AT_INDEX: {
       actions: ["setValueAtIndex"]
     },
-    CLEAR_ALL: {
-      actions: ["clearTags", "focusInput"]
+    CLEAR_VALUE: {
+      actions: ["clearTags", "clearInputValue", "focusInput"]
     },
     ADD_TAG: {
+      actions: ["addTag"]
+    },
+    INSERT_TAG: {
       // (!isAtMax || allowOverflow) && !inputValueIsEmpty
       cond: "(!isAtMax || allowOverflow) && !isInputValueEmpty",
       actions: ["addTag", "clearInputValue"]
     },
     EXTERNAL_BLUR: [{
       cond: "addOnBlur",
-      actions: "raiseAddTagEvent"
+      actions: "raiseInsertTagEvent"
     }, {
       cond: "clearOnBlur",
       actions: "clearInputValue"
@@ -79,30 +87,18 @@ const fetchMachine = createMachine({
     }
   },
   states: {
-    unknown: {
-      on: {
-        SETUP: [{
-          cond: "autoFocus",
-          target: "focused:input",
-          actions: ["setupDocument", "checkValue"]
-        }, {
-          target: "idle",
-          actions: ["setupDocument", "checkValue"]
-        }]
-      }
-    },
     idle: {
       on: {
         FOCUS: "focused:input",
         POINTER_DOWN: {
-          cond: "!hasFocusedId",
+          cond: "!hasHighlightedTag",
           target: "focused:input"
         }
       }
     },
     "focused:input": {
       tags: ["focused"],
-      entry: ["focusInput", "clearFocusedId"],
+      entry: ["focusInput", "clearHighlightedId"],
       activities: ["trackInteractOutside"],
       on: {
         TYPE: {
@@ -111,7 +107,7 @@ const fetchMachine = createMachine({
         BLUR: [{
           cond: "addOnBlur",
           target: "idle",
-          actions: "raiseAddTagEvent"
+          actions: "raiseInsertTagEvent"
         }, {
           cond: "clearOnBlur",
           target: "idle",
@@ -120,25 +116,31 @@ const fetchMachine = createMachine({
           target: "idle"
         }],
         ENTER: {
-          actions: ["raiseAddTagEvent"]
+          actions: ["raiseInsertTagEvent"]
         },
         DELIMITER_KEY: {
-          actions: ["raiseAddTagEvent"]
+          actions: ["raiseInsertTagEvent"]
         },
         ARROW_LEFT: {
           cond: "hasTags && isInputCaretAtStart",
           target: "navigating:tag",
-          actions: "focusLastTag"
+          actions: "highlightLastTag"
         },
         BACKSPACE: {
           target: "navigating:tag",
           cond: "hasTags && isInputCaretAtStart",
-          actions: "focusLastTag"
+          actions: "highlightLastTag"
         },
-        PASTE: {
+        DELETE: {
+          cond: "hasHighlightedTag",
+          actions: ["deleteHighlightedTag", "highlightTagAtIndex"]
+        },
+        PASTE: [{
           cond: "addOnPaste",
           actions: ["setInputValue", "addTagFromPaste"]
-        }
+        }, {
+          actions: "setInputValue"
+        }]
       }
     },
     "navigating:tag": {
@@ -146,20 +148,20 @@ const fetchMachine = createMachine({
       activities: ["trackInteractOutside"],
       on: {
         ARROW_RIGHT: [{
-          cond: "hasTags && isInputCaretAtStart && !isLastTagFocused",
-          actions: "focusNextTag"
+          cond: "hasTags && isInputCaretAtStart && !isLastTagHighlighted",
+          actions: "highlightNextTag"
         }, {
           target: "focused:input"
         }],
         ARROW_LEFT: {
-          actions: "focusPrevTag"
+          actions: "highlightPrevTag"
         },
         BLUR: {
           target: "idle",
-          actions: "clearFocusedId"
+          actions: "clearHighlightedId"
         },
         ENTER: {
-          cond: "allowEditTag && hasFocusedId",
+          cond: "isTagEditable && hasHighlightedTag",
           target: "editing:tag",
           actions: ["setEditedId", "initializeEditedTagValue", "focusEditedTagInput"]
         },
@@ -170,14 +172,26 @@ const fetchMachine = createMachine({
           actions: "setInputValue"
         },
         BACKSPACE: [{
-          cond: "isFirstTagFocused",
-          actions: ["deleteFocusedTag", "focusFirstTag"]
+          cond: "isFirstTagHighlighted",
+          actions: ["deleteHighlightedTag", "highlightFirstTag"]
         }, {
-          actions: ["deleteFocusedTag", "focusPrevTag"]
+          cond: "hasHighlightedTag",
+          actions: ["deleteHighlightedTag", "highlightPrevTag"]
+        }, {
+          actions: ["highlightLastTag"]
         }],
         DELETE: {
-          actions: ["deleteFocusedTag", "focusTagAtIndex"]
-        }
+          target: "focused:input",
+          actions: ["deleteHighlightedTag", "highlightTagAtIndex"]
+        },
+        PASTE: [{
+          cond: "addOnPaste",
+          target: "focused:input",
+          actions: ["setInputValue", "addTagFromPaste"]
+        }, {
+          target: "focused:input",
+          actions: "setInputValue"
+        }]
       }
     },
     "editing:tag": {
@@ -190,20 +204,24 @@ const fetchMachine = createMachine({
         },
         TAG_INPUT_ESCAPE: {
           target: "navigating:tag",
-          actions: ["clearEditedTagValue", "focusInput", "clearEditedId", "focusTagAtIndex"]
+          actions: ["clearEditedTagValue", "focusInput", "clearEditedId", "highlightTagAtIndex"]
         },
         TAG_INPUT_BLUR: [{
           cond: "isInputRelatedTarget",
           target: "navigating:tag",
-          actions: ["clearEditedTagValue", "clearFocusedId", "clearEditedId"]
+          actions: ["clearEditedTagValue", "clearHighlightedId", "clearEditedId"]
         }, {
           target: "idle",
-          actions: ["clearEditedTagValue", "clearFocusedId", "clearEditedId", "raiseExternalBlurEvent"]
+          actions: ["clearEditedTagValue", "clearHighlightedId", "clearEditedId", "raiseExternalBlurEvent"]
         }],
-        TAG_INPUT_ENTER: {
+        TAG_INPUT_ENTER: [{
+          cond: "isEditedTagEmpty",
           target: "navigating:tag",
-          actions: ["submitEditedTagValue", "focusInput", "clearEditedId", "focusTagAtIndex", "invokeOnTagUpdate"]
-        }
+          actions: ["deleteHighlightedTag", "focusInput", "clearEditedId", "highlightTagAtIndex"]
+        }, {
+          target: "navigating:tag",
+          actions: ["submitEditedTagValue", "focusInput", "clearEditedId", "highlightTagAtIndex"]
+        }]
       }
     }
   }
@@ -216,18 +234,18 @@ const fetchMachine = createMachine({
     })
   },
   guards: {
-    "allowEditTag": ctx => ctx["allowEditTag"],
-    "!isTagFocused": ctx => ctx["!isTagFocused"],
+    "isTagEditable": ctx => ctx["isTagEditable"],
     "(!isAtMax || allowOverflow) && !isInputValueEmpty": ctx => ctx["(!isAtMax || allowOverflow) && !isInputValueEmpty"],
     "addOnBlur": ctx => ctx["addOnBlur"],
     "clearOnBlur": ctx => ctx["clearOnBlur"],
-    "autoFocus": ctx => ctx["autoFocus"],
-    "!hasFocusedId": ctx => ctx["!hasFocusedId"],
+    "!hasHighlightedTag": ctx => ctx["!hasHighlightedTag"],
     "hasTags && isInputCaretAtStart": ctx => ctx["hasTags && isInputCaretAtStart"],
+    "hasHighlightedTag": ctx => ctx["hasHighlightedTag"],
     "addOnPaste": ctx => ctx["addOnPaste"],
-    "hasTags && isInputCaretAtStart && !isLastTagFocused": ctx => ctx["hasTags && isInputCaretAtStart && !isLastTagFocused"],
-    "allowEditTag && hasFocusedId": ctx => ctx["allowEditTag && hasFocusedId"],
-    "isFirstTagFocused": ctx => ctx["isFirstTagFocused"],
-    "isInputRelatedTarget": ctx => ctx["isInputRelatedTarget"]
+    "hasTags && isInputCaretAtStart && !isLastTagHighlighted": ctx => ctx["hasTags && isInputCaretAtStart && !isLastTagHighlighted"],
+    "isTagEditable && hasHighlightedTag": ctx => ctx["isTagEditable && hasHighlightedTag"],
+    "isFirstTagHighlighted": ctx => ctx["isFirstTagHighlighted"],
+    "isInputRelatedTarget": ctx => ctx["isInputRelatedTarget"],
+    "isEditedTagEmpty": ctx => ctx["isEditedTagEmpty"]
   }
 });

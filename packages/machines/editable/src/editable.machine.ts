@@ -1,25 +1,30 @@
-import { createMachine, guards } from "@zag-js/core"
-import { contains, raf } from "@zag-js/dom-utils"
+import { createMachine } from "@zag-js/core"
+import { contains, raf } from "@zag-js/dom-query"
 import { trackInteractOutside } from "@zag-js/interact-outside"
-import { compact } from "@zag-js/utils"
+import { compact, isEqual } from "@zag-js/utils"
 import { dom } from "./editable.dom"
 import type { MachineContext, MachineState, UserDefinedContext } from "./editable.types"
 
-const { not } = guards
+const submitOnEnter = (ctx: MachineContext) => ["both", "enter"].includes(ctx.submitMode)
+const submitOnBlur = (ctx: MachineContext) => ["both", "blur"].includes(ctx.submitMode)
 
 export function machine(userContext: UserDefinedContext) {
   const ctx = compact(userContext)
   return createMachine<MachineContext, MachineState>(
     {
       id: "editable",
-      initial: "unknown",
+
+      initial: ctx.edit ? "edit" : "preview",
+      entry: ctx.edit ? ["focusInput"] : undefined,
+
       context: {
-        startWithEditView: false,
         activationMode: "focus",
         submitMode: "both",
         value: "",
         previousValue: "",
         selectOnFocus: true,
+        disabled: false,
+        readOnly: false,
         ...ctx,
         translations: {
           input: "editable input",
@@ -31,155 +36,153 @@ export function machine(userContext: UserDefinedContext) {
       },
 
       watch: {
-        value: ["invokeOnChange", "syncInputValue"],
+        value: ["syncInputValue"],
+        edit: ["toggleEditing"],
       },
 
       computed: {
-        submitOnEnter: (ctx) => ["both", "enter"].includes(ctx.submitMode),
-        submitOnBlur: (ctx) => ["both", "blur"].includes(ctx.submitMode),
+        submitOnEnter,
+        submitOnBlur,
         isInteractive: (ctx) => !(ctx.disabled || ctx.readOnly),
-        isValueEmpty: (ctx) => ctx.value === "",
-        isPreviewFocusable: (ctx) => ctx.activationMode === "focus",
       },
 
       on: {
-        SET_VALUE: {
+        "VALUE.SET": {
           actions: "setValue",
         },
       },
 
       states: {
-        unknown: {
-          on: {
-            SETUP: [
-              {
-                guard: "startWithEditView",
-                target: "edit",
-              },
-              {
-                target: "preview",
-              },
-            ],
-          },
-        },
-
         preview: {
-          // // https://bugzilla.mozilla.org/show_bug.cgi?id=559561
+          // https://bugzilla.mozilla.org/show_bug.cgi?id=559561
           entry: ["blurInputIfNeeded"],
           on: {
-            EDIT: "edit",
-            DBLCLICK: {
-              guard: "activateOnDblClick",
+            "CONTROLLED.EDIT": {
               target: "edit",
+              actions: ["setPreviousValue", "focusInput"],
             },
-            FOCUS: {
-              guard: "activateOnFocus",
-              target: "edit",
-              actions: "setPreviousValue",
-            },
+            EDIT: [
+              {
+                guard: "isEditControlled",
+                actions: ["invokeOnEdit"],
+              },
+              {
+                target: "edit",
+                actions: ["setPreviousValue", "focusInput", "invokeOnEdit"],
+              },
+            ],
           },
         },
 
         edit: {
           activities: ["trackInteractOutside"],
-          entry: ["focusInput", "invokeOnEdit"],
           on: {
-            TYPE: {
-              guard: not("isAtMaxLength"),
-              actions: "setValue",
-            },
-            BLUR: [
+            "CONTROLLED.PREVIEW": [
               {
-                guard: "submitOnBlur",
+                guard: "isSubmitEvent",
                 target: "preview",
-                actions: ["focusEditButton", "invokeOnSubmit"],
+                actions: ["setPreviousValue", "restoreFocus", "invokeOnSubmit"],
               },
               {
                 target: "preview",
-                actions: ["resetValueIfNeeded", "focusEditButton", "invokeOnCancel"],
+                actions: ["revertValue", "restoreFocus", "invokeOnCancel"],
               },
             ],
-            CANCEL: {
-              target: "preview",
-              actions: ["focusEditButton", "resetValueIfNeeded", "invokeOnCancel"],
-            },
-            ENTER: {
-              guard: "submitOnEnter",
-              target: "preview",
-              actions: ["setPreviousValue", "invokeOnSubmit", "focusEditButton"],
-            },
-            SUBMIT: {
-              target: "preview",
-              actions: ["setPreviousValue", "invokeOnSubmit", "focusEditButton"],
-            },
+            CANCEL: [
+              {
+                guard: "isEditControlled",
+                actions: ["invokeOnPreview"],
+              },
+              {
+                target: "preview",
+                actions: ["revertValue", "restoreFocus", "invokeOnCancel", "invokeOnPreview"],
+              },
+            ],
+            SUBMIT: [
+              {
+                guard: "isEditControlled",
+                actions: ["invokeOnPreview"],
+              },
+              {
+                target: "preview",
+                actions: ["setPreviousValue", "restoreFocus", "invokeOnSubmit", "invokeOnPreview"],
+              },
+            ],
           },
         },
       },
     },
     {
       guards: {
-        submitOnBlur: (ctx) => ctx.submitOnBlur,
-        submitOnEnter: (ctx) => ctx.submitOnEnter,
-        isAtMaxLength: (ctx) => ctx.maxLength != null && ctx.value.length === ctx.maxLength,
-        activateOnDblClick: (ctx) => ctx.activationMode === "dblclick",
-        activateOnFocus: (ctx) => ctx.activationMode === "focus",
-        startWithEditView: (ctx) => ctx.startWithEditView,
+        isEditControlled: (ctx) => !!ctx["edit.controlled"],
+        isSubmitEvent: (_ctx, evt) => evt.previousEvent?.type === "SUBMIT",
       },
 
       activities: {
         trackInteractOutside(ctx, _evt, { send }) {
           return trackInteractOutside(dom.getInputEl(ctx), {
             exclude(target) {
-              const ignore = [dom.getCancelBtnEl(ctx), dom.getSubmitBtnEl(ctx)]
+              const ignore = [dom.getCancelTriggerEl(ctx), dom.getSubmitTriggerEl(ctx)]
               return ignore.some((el) => contains(el, target))
             },
-            onInteractOutside() {
-              send({ type: "BLUR", src: "interact-outside" })
+            onFocusOutside: ctx.onFocusOutside,
+            onPointerDownOutside: ctx.onPointerDownOutside,
+            onInteractOutside(event) {
+              ctx.onInteractOutside?.(event)
+              if (event.defaultPrevented) return
+              const { focusable } = event.detail
+              send({ type: submitOnBlur(ctx) ? "SUBMIT" : "CANCEL", src: "interact-outside", focusable })
             },
           })
         },
       },
 
       actions: {
-        focusEditButton(ctx) {
+        restoreFocus(ctx, evt) {
+          if (evt.focusable) return
           raf(() => {
-            dom.getEditBtnEl(ctx)?.focus()
+            const finalEl = ctx.finalFocusEl?.() ?? dom.getEditTriggerEl(ctx)
+            finalEl?.focus({ preventScroll: true })
           })
         },
         focusInput(ctx) {
           raf(() => {
-            const input = dom.getInputEl(ctx)
-            if (!input) return
-            if (ctx.selectOnFocus) input.select()
-            else input.focus()
+            const inputEl = dom.getInputEl(ctx)
+            if (!inputEl) return
+            if (ctx.selectOnFocus) {
+              inputEl.select()
+            } else {
+              inputEl.focus({ preventScroll: true })
+            }
           })
         },
         invokeOnCancel(ctx) {
-          ctx.onCancel?.({ value: ctx.previousValue })
+          ctx.onValueRevert?.({ value: ctx.previousValue })
         },
         invokeOnSubmit(ctx) {
-          ctx.onSubmit?.({ value: ctx.value })
+          ctx.onValueCommit?.({ value: ctx.value })
         },
         invokeOnEdit(ctx) {
-          ctx.onEdit?.()
+          ctx.onEditChange?.({ edit: true })
         },
-        invokeOnChange(ctx) {
-          ctx.onChange?.({ value: ctx.value })
+        invokeOnPreview(ctx) {
+          ctx.onEditChange?.({ edit: false })
+        },
+        toggleEditing(ctx, evt, { send }) {
+          send({ type: ctx.edit ? "CONTROLLED.EDIT" : "CONTROLLED.PREVIEW", previousEvent: evt })
         },
         syncInputValue(ctx) {
-          const input = dom.getInputEl(ctx)
-          if (!input) return
-          input.value = ctx.value
+          sync.value(ctx)
         },
         setValue(ctx, evt) {
-          ctx.value = evt.value
+          const value = ctx.maxLength != null ? evt.value.slice(0, ctx.maxLength) : evt.value
+          set.value(ctx, value)
         },
         setPreviousValue(ctx) {
           ctx.previousValue = ctx.value
         },
-        resetValueIfNeeded(ctx) {
-          if (!ctx.previousValue) return
-          ctx.value = ctx.previousValue
+        revertValue(ctx) {
+          set.value(ctx, ctx.previousValue)
         },
         blurInputIfNeeded(ctx) {
           dom.getInputEl(ctx)?.blur()
@@ -187,4 +190,26 @@ export function machine(userContext: UserDefinedContext) {
       },
     },
   )
+}
+
+const sync = {
+  value: (ctx: MachineContext) => {
+    const inputEl = dom.getInputEl(ctx)
+    dom.setValue(inputEl, ctx.value)
+  },
+}
+
+const invoke = {
+  change(ctx: MachineContext) {
+    ctx.onValueChange?.({ value: ctx.value })
+    sync.value(ctx)
+  },
+}
+
+const set = {
+  value(ctx: MachineContext, value: string) {
+    if (isEqual(ctx.value, value)) return
+    ctx.value = value
+    invoke.change(ctx)
+  },
 }

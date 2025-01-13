@@ -1,52 +1,46 @@
-import { getPointRelativeToNode, defineDomHelpers } from "@zag-js/dom-utils"
-import { dispatchInputValueEvent } from "@zag-js/form-utils"
-import { styles } from "./slider.style"
-import type { MachineContext as Ctx, Point } from "./slider.types"
-import { utils } from "./slider.utils"
+import { createScope, dispatchInputValueEvent, getRelativePoint, queryAll } from "@zag-js/dom-query"
+import type { Point } from "@zag-js/types"
+import { getPercentValue } from "@zag-js/utils"
+import { styleGetterFns } from "./slider.style"
+import type { MachineContext as Ctx } from "./slider.types"
 
-export const dom = defineDomHelpers({
-  ...styles,
-
+export const dom = createScope({
+  ...styleGetterFns,
   getRootId: (ctx: Ctx) => ctx.ids?.root ?? `slider:${ctx.id}`,
-  getThumbId: (ctx: Ctx) => ctx.ids?.thumb ?? `slider:${ctx.id}:thumb`,
+  getThumbId: (ctx: Ctx, index: number) => ctx.ids?.thumb?.(index) ?? `slider:${ctx.id}:thumb:${index}`,
+  getHiddenInputId: (ctx: Ctx, index: number) => ctx.ids?.hiddenInput?.(index) ?? `slider:${ctx.id}:input:${index}`,
   getControlId: (ctx: Ctx) => ctx.ids?.control ?? `slider:${ctx.id}:control`,
-  getInputId: (ctx: Ctx) => `slider:${ctx.id}:input`,
-  getOutputId: (ctx: Ctx) => ctx.ids?.output ?? `slider:${ctx.id}:output`,
-  getTrackId: (ctx: Ctx) => ctx.ids?.track ?? `slider:${ctx.id}track`,
-  getRangeId: (ctx: Ctx) => ctx.ids?.track ?? `slider:${ctx.id}:range`,
+  getTrackId: (ctx: Ctx) => ctx.ids?.track ?? `slider:${ctx.id}:track`,
+  getRangeId: (ctx: Ctx) => ctx.ids?.range ?? `slider:${ctx.id}:range`,
   getLabelId: (ctx: Ctx) => ctx.ids?.label ?? `slider:${ctx.id}:label`,
-  getMarkerId: (ctx: Ctx, value: number) => `slider:${ctx.id}:marker:${value}`,
+  getValueTextId: (ctx: Ctx) => ctx.ids?.valueText ?? `slider:${ctx.id}:value-text`,
+  getMarkerId: (ctx: Ctx, value: number) => ctx.ids?.marker?.(value) ?? `slider:${ctx.id}:marker:${value}`,
 
   getRootEl: (ctx: Ctx) => dom.getById(ctx, dom.getRootId(ctx)),
-  getThumbEl: (ctx: Ctx) => dom.getById(ctx, dom.getThumbId(ctx)),
+  getThumbEl: (ctx: Ctx, index: number) => dom.getById(ctx, dom.getThumbId(ctx, index)),
+  getHiddenInputEl: (ctx: Ctx, index: number) => dom.getById<HTMLInputElement>(ctx, dom.getHiddenInputId(ctx, index)),
   getControlEl: (ctx: Ctx) => dom.getById(ctx, dom.getControlId(ctx)),
-  getInputEl: (ctx: Ctx) => dom.getById<HTMLInputElement>(ctx, dom.getInputId(ctx)),
+  getElements: (ctx: Ctx) => queryAll(dom.getControlEl(ctx), "[role=slider]"),
+  getFirstEl: (ctx: Ctx) => dom.getElements(ctx)[0],
+  getRangeEl: (ctx: Ctx) => dom.getById(ctx, dom.getRangeId(ctx)),
 
-  getValueFromPoint(ctx: Ctx, point: Point): number | undefined {
-    // get the slider root element
-    const el = dom.getControlEl(ctx)
-    if (!el) return
-
-    // get the position/progress % of the point relative to the root's width/height
-    const relativePoint = getPointRelativeToNode(point, el)
-    const percentX = relativePoint.x / el.offsetWidth
-    const percentY = relativePoint.y / el.offsetHeight
-
-    // get the progress % depending on the orientation
-    let percent: number
-
-    if (ctx.isHorizontal) {
-      percent = ctx.isRtl ? 1 - percentX : percentX
-    } else {
-      percent = 1 - percentY
-    }
-
-    return utils.fromPercent(ctx, percent)
+  getValueFromPoint(ctx: Ctx, point: Point) {
+    const controlEl = dom.getControlEl(ctx)
+    if (!controlEl) return
+    const relativePoint = getRelativePoint(point, controlEl)
+    const percent = relativePoint.getPercentValue({
+      orientation: ctx.orientation,
+      dir: ctx.dir,
+      inverted: { y: true },
+    })
+    return getPercentValue(percent, ctx.min, ctx.max, ctx.step)
   },
-
   dispatchChangeEvent(ctx: Ctx) {
-    const input = dom.getInputEl(ctx)
-    if (!input) return
-    dispatchInputValueEvent(input, ctx.value)
+    const valueArray = Array.from(ctx.value)
+    valueArray.forEach((value, index) => {
+      const inputEl = dom.getHiddenInputEl(ctx, index)
+      if (!inputEl) return
+      dispatchInputValueEvent(inputEl, { value })
+    })
   },
 })

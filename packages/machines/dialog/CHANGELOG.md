@@ -1,5 +1,2027 @@
 # @zag-js/dialog
 
+## 0.81.2
+
+### Patch Changes
+
+- Updated dependencies [[`e9313a3`](https://github.com/chakra-ui/zag/commit/e9313a3663285a05c9ac9ac92f1c09fcb27ac818)]:
+  - @zag-js/dom-query@0.81.2
+  - @zag-js/dismissable@0.81.2
+  - @zag-js/focus-trap@0.81.2
+  - @zag-js/remove-scroll@0.81.2
+  - @zag-js/anatomy@0.81.2
+  - @zag-js/core@0.81.2
+  - @zag-js/types@0.81.2
+  - @zag-js/aria-hidden@0.81.2
+  - @zag-js/utils@0.81.2
+
+## 0.81.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.81.1
+  - @zag-js/core@0.81.1
+  - @zag-js/types@0.81.1
+  - @zag-js/aria-hidden@0.81.1
+  - @zag-js/utils@0.81.1
+  - @zag-js/dismissable@0.81.1
+  - @zag-js/dom-query@0.81.1
+  - @zag-js/focus-trap@0.81.1
+  - @zag-js/remove-scroll@0.81.1
+
+## 0.81.0
+
+### Patch Changes
+
+- Updated dependencies [[`792939f`](https://github.com/chakra-ui/zag/commit/792939f9d9eac5a97cc46f1b0ab286666ba1edd8),
+  [`552e55d`](https://github.com/chakra-ui/zag/commit/552e55db4ec8c0fa86c5b7e5ce3ad08eb350ca68)]:
+  - @zag-js/dom-query@0.81.0
+  - @zag-js/dismissable@0.81.0
+  - @zag-js/types@0.81.0
+  - @zag-js/focus-trap@0.81.0
+  - @zag-js/remove-scroll@0.81.0
+  - @zag-js/anatomy@0.81.0
+  - @zag-js/core@0.81.0
+  - @zag-js/aria-hidden@0.81.0
+  - @zag-js/utils@0.81.0
+
+## 0.80.0
+
+### Patch Changes
+
+- Updated dependencies [[`d7617d1`](https://github.com/chakra-ui/zag/commit/d7617d1d95f93b3557eb88ba879737894da42d51)]:
+  - @zag-js/dom-query@0.80.0
+  - @zag-js/dismissable@0.80.0
+  - @zag-js/focus-trap@0.80.0
+  - @zag-js/remove-scroll@0.80.0
+  - @zag-js/anatomy@0.80.0
+  - @zag-js/core@0.80.0
+  - @zag-js/types@0.80.0
+  - @zag-js/aria-hidden@0.80.0
+  - @zag-js/utils@0.80.0
+
+## 0.79.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/dismissable@0.79.3
+  - @zag-js/anatomy@0.79.3
+  - @zag-js/core@0.79.3
+  - @zag-js/types@0.79.3
+  - @zag-js/aria-hidden@0.79.3
+  - @zag-js/utils@0.79.3
+  - @zag-js/dom-query@0.79.3
+  - @zag-js/focus-trap@0.79.3
+  - @zag-js/remove-scroll@0.79.3
+
+## 0.79.2
+
+### Patch Changes
+
+- Updated dependencies [[`525e645`](https://github.com/chakra-ui/zag/commit/525e645404f56c10919cc9d36279044dff253a08),
+  [`5bfca99`](https://github.com/chakra-ui/zag/commit/5bfca9934030eac6b25dd1fd78db2371a74c3b33)]:
+  - @zag-js/focus-trap@0.79.2
+  - @zag-js/dom-query@0.79.2
+  - @zag-js/dismissable@0.79.2
+  - @zag-js/remove-scroll@0.79.2
+  - @zag-js/anatomy@0.79.2
+  - @zag-js/core@0.79.2
+  - @zag-js/types@0.79.2
+  - @zag-js/aria-hidden@0.79.2
+  - @zag-js/utils@0.79.2
+
+## 0.79.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.79.1
+  - @zag-js/core@0.79.1
+  - @zag-js/types@0.79.1
+  - @zag-js/aria-hidden@0.79.1
+  - @zag-js/utils@0.79.1
+  - @zag-js/dismissable@0.79.1
+  - @zag-js/dom-query@0.79.1
+  - @zag-js/focus-trap@0.79.1
+  - @zag-js/remove-scroll@0.79.1
+
+## 0.79.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.79.0
+  - @zag-js/core@0.79.0
+  - @zag-js/types@0.79.0
+  - @zag-js/aria-hidden@0.79.0
+  - @zag-js/utils@0.79.0
+  - @zag-js/dismissable@0.79.0
+  - @zag-js/dom-query@0.79.0
+  - @zag-js/focus-trap@0.79.0
+  - @zag-js/remove-scroll@0.79.0
+
+## 0.78.3
+
+### Patch Changes
+
+- Updated dependencies [[`5584a83`](https://github.com/chakra-ui/zag/commit/5584a833151ee9f2c2ef9c07b6d699addfbca18e)]:
+  - @zag-js/core@0.78.3
+  - @zag-js/anatomy@0.78.3
+  - @zag-js/types@0.78.3
+  - @zag-js/aria-hidden@0.78.3
+  - @zag-js/utils@0.78.3
+  - @zag-js/dismissable@0.78.3
+  - @zag-js/dom-query@0.78.3
+  - @zag-js/focus-trap@0.78.3
+  - @zag-js/remove-scroll@0.78.3
+
+## 0.78.2
+
+### Patch Changes
+
+- Updated dependencies [[`ce85272`](https://github.com/chakra-ui/zag/commit/ce85272c3d64dd4c7bae911ec4e4b813234850c2),
+  [`eb948dc`](https://github.com/chakra-ui/zag/commit/eb948dcd54ba24aa7a779199e330d1e90b180fae)]:
+  - @zag-js/dom-query@0.78.2
+  - @zag-js/aria-hidden@0.78.2
+  - @zag-js/dismissable@0.78.2
+  - @zag-js/focus-trap@0.78.2
+  - @zag-js/remove-scroll@0.78.2
+  - @zag-js/anatomy@0.78.2
+  - @zag-js/core@0.78.2
+  - @zag-js/types@0.78.2
+  - @zag-js/utils@0.78.2
+
+## 0.78.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.78.1
+  - @zag-js/core@0.78.1
+  - @zag-js/types@0.78.1
+  - @zag-js/aria-hidden@0.78.1
+  - @zag-js/utils@0.78.1
+  - @zag-js/dismissable@0.78.1
+  - @zag-js/dom-query@0.78.1
+  - @zag-js/remove-scroll@0.78.1
+
+## 0.78.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.78.0
+  - @zag-js/core@0.78.0
+  - @zag-js/types@0.78.0
+  - @zag-js/aria-hidden@0.78.0
+  - @zag-js/utils@0.78.0
+  - @zag-js/dismissable@0.78.0
+  - @zag-js/dom-query@0.78.0
+  - @zag-js/remove-scroll@0.78.0
+
+## 0.77.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.77.1
+  - @zag-js/core@0.77.1
+  - @zag-js/types@0.77.1
+  - @zag-js/aria-hidden@0.77.1
+  - @zag-js/utils@0.77.1
+  - @zag-js/dismissable@0.77.1
+  - @zag-js/dom-query@0.77.1
+  - @zag-js/remove-scroll@0.77.1
+
+## 0.77.0
+
+### Patch Changes
+
+- Updated dependencies [[`85aa147`](https://github.com/chakra-ui/zag/commit/85aa1475a83ad10a12c4fa017bcd2dc35853e758),
+  [`a2af4ad`](https://github.com/chakra-ui/zag/commit/a2af4adc6a0d9438e025eadd12eb7eb513131a90)]:
+  - @zag-js/remove-scroll@0.77.0
+  - @zag-js/dom-query@0.77.0
+  - @zag-js/utils@0.77.0
+  - @zag-js/dismissable@0.77.0
+  - @zag-js/core@0.77.0
+  - @zag-js/anatomy@0.77.0
+  - @zag-js/types@0.77.0
+  - @zag-js/aria-hidden@0.77.0
+
+## 0.76.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.76.0
+  - @zag-js/core@0.76.0
+  - @zag-js/types@0.76.0
+  - @zag-js/aria-hidden@0.76.0
+  - @zag-js/utils@0.76.0
+  - @zag-js/dismissable@0.76.0
+  - @zag-js/dom-query@0.76.0
+  - @zag-js/remove-scroll@0.76.0
+
+## 0.75.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.75.0
+  - @zag-js/core@0.75.0
+  - @zag-js/types@0.75.0
+  - @zag-js/aria-hidden@0.75.0
+  - @zag-js/utils@0.75.0
+  - @zag-js/dismissable@0.75.0
+  - @zag-js/dom-query@0.75.0
+  - @zag-js/remove-scroll@0.75.0
+
+## 0.74.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.74.2
+  - @zag-js/core@0.74.2
+  - @zag-js/types@0.74.2
+  - @zag-js/aria-hidden@0.74.2
+  - @zag-js/utils@0.74.2
+  - @zag-js/dismissable@0.74.2
+  - @zag-js/dom-query@0.74.2
+  - @zag-js/remove-scroll@0.74.2
+
+## 0.74.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.74.1
+  - @zag-js/core@0.74.1
+  - @zag-js/types@0.74.1
+  - @zag-js/aria-hidden@0.74.1
+  - @zag-js/utils@0.74.1
+  - @zag-js/dismissable@0.74.1
+  - @zag-js/dom-query@0.74.1
+  - @zag-js/remove-scroll@0.74.1
+
+## 0.74.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.74.0
+  - @zag-js/core@0.74.0
+  - @zag-js/types@0.74.0
+  - @zag-js/aria-hidden@0.74.0
+  - @zag-js/utils@0.74.0
+  - @zag-js/dismissable@0.74.0
+  - @zag-js/dom-query@0.74.0
+  - @zag-js/remove-scroll@0.74.0
+
+## 0.73.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.73.1
+  - @zag-js/core@0.73.1
+  - @zag-js/types@0.73.1
+  - @zag-js/aria-hidden@0.73.1
+  - @zag-js/utils@0.73.1
+  - @zag-js/dismissable@0.73.1
+  - @zag-js/dom-query@0.73.1
+  - @zag-js/remove-scroll@0.73.1
+
+## 0.73.0
+
+### Patch Changes
+
+- [`571852d`](https://github.com/chakra-ui/zag/commit/571852d3d279fed8d5d3c454e858938dbbb97c7a) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix issue where dialog closes when positioner is scrollable and
+  the scrollbar is clicked
+
+- Updated dependencies []:
+  - @zag-js/dismissable@0.73.0
+  - @zag-js/anatomy@0.73.0
+  - @zag-js/core@0.73.0
+  - @zag-js/types@0.73.0
+  - @zag-js/aria-hidden@0.73.0
+  - @zag-js/utils@0.73.0
+  - @zag-js/dom-query@0.73.0
+  - @zag-js/remove-scroll@0.73.0
+
+## 0.72.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.72.0
+  - @zag-js/core@0.72.0
+  - @zag-js/types@0.72.0
+  - @zag-js/aria-hidden@0.72.0
+  - @zag-js/utils@0.72.0
+  - @zag-js/dismissable@0.72.0
+  - @zag-js/dom-query@0.72.0
+  - @zag-js/remove-scroll@0.72.0
+
+## 0.71.0
+
+### Minor Changes
+
+- [`b3a251e`](https://github.com/chakra-ui/zag/commit/b3a251e5e10b9b27af353e0f41117329846b14e9) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - We no longer ship `src` files in the packages.
+
+### Patch Changes
+
+- Updated dependencies [[`b3a251e`](https://github.com/chakra-ui/zag/commit/b3a251e5e10b9b27af353e0f41117329846b14e9)]:
+  - @zag-js/core@0.71.0
+  - @zag-js/anatomy@0.71.0
+  - @zag-js/types@0.71.0
+  - @zag-js/aria-hidden@0.71.0
+  - @zag-js/utils@0.71.0
+  - @zag-js/dismissable@0.71.0
+  - @zag-js/dom-query@0.71.0
+  - @zag-js/remove-scroll@0.71.0
+
+## 0.70.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.70.0
+  - @zag-js/core@0.70.0
+  - @zag-js/types@0.70.0
+  - @zag-js/aria-hidden@0.70.0
+  - @zag-js/utils@0.70.0
+  - @zag-js/dismissable@0.70.0
+  - @zag-js/dom-query@0.70.0
+  - @zag-js/remove-scroll@0.70.0
+
+## 0.69.0
+
+### Patch Changes
+
+- Updated dependencies [[`bf57d7b`](https://github.com/chakra-ui/zag/commit/bf57d7b3933daf9974eaefc443da6f3c37706bb4)]:
+  - @zag-js/dom-query@0.69.0
+  - @zag-js/dismissable@0.69.0
+  - @zag-js/remove-scroll@0.69.0
+  - @zag-js/anatomy@0.69.0
+  - @zag-js/core@0.69.0
+  - @zag-js/types@0.69.0
+  - @zag-js/aria-hidden@0.69.0
+  - @zag-js/utils@0.69.0
+
+## 0.68.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.68.1
+  - @zag-js/core@0.68.1
+  - @zag-js/types@0.68.1
+  - @zag-js/aria-hidden@0.68.1
+  - @zag-js/utils@0.68.1
+  - @zag-js/dismissable@0.68.1
+  - @zag-js/dom-query@0.68.1
+  - @zag-js/remove-scroll@0.68.1
+
+## 0.68.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.68.0
+  - @zag-js/core@0.68.0
+  - @zag-js/types@0.68.0
+  - @zag-js/aria-hidden@0.68.0
+  - @zag-js/utils@0.68.0
+  - @zag-js/dismissable@0.68.0
+  - @zag-js/dom-query@0.68.0
+  - @zag-js/remove-scroll@0.68.0
+
+## 0.67.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.67.0
+  - @zag-js/core@0.67.0
+  - @zag-js/types@0.67.0
+  - @zag-js/aria-hidden@0.67.0
+  - @zag-js/utils@0.67.0
+  - @zag-js/dismissable@0.67.0
+  - @zag-js/dom-query@0.67.0
+  - @zag-js/remove-scroll@0.67.0
+
+## 0.66.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.66.1
+  - @zag-js/core@0.66.1
+  - @zag-js/types@0.66.1
+  - @zag-js/aria-hidden@0.66.1
+  - @zag-js/utils@0.66.1
+  - @zag-js/dismissable@0.66.1
+  - @zag-js/dom-query@0.66.1
+  - @zag-js/remove-scroll@0.66.1
+
+## 0.66.0
+
+### Patch Changes
+
+- Updated dependencies [[`6e35eed`](https://github.com/chakra-ui/zag/commit/6e35eed3bea08165623539b68a8d1ce0a5e92fe1)]:
+  - @zag-js/aria-hidden@0.66.0
+  - @zag-js/dismissable@0.66.0
+  - @zag-js/anatomy@0.66.0
+  - @zag-js/core@0.66.0
+  - @zag-js/types@0.66.0
+  - @zag-js/utils@0.66.0
+  - @zag-js/dom-query@0.66.0
+  - @zag-js/remove-scroll@0.66.0
+
+## 0.65.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.65.1
+  - @zag-js/core@0.65.1
+  - @zag-js/types@0.65.1
+  - @zag-js/aria-hidden@0.65.1
+  - @zag-js/utils@0.65.1
+  - @zag-js/dismissable@0.65.1
+  - @zag-js/dom-query@0.65.1
+  - @zag-js/remove-scroll@0.65.1
+
+## 0.65.0
+
+### Patch Changes
+
+- [`5e0f38e`](https://github.com/chakra-ui/zag/commit/5e0f38e7b762c9eb49452a9adb4d8f514e881a24) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix issue where closing a nested dialog focuses the first
+  focusable element in the parent dialog instead of the previously focused element.
+- Updated dependencies []:
+  - @zag-js/anatomy@0.65.0
+  - @zag-js/core@0.65.0
+  - @zag-js/types@0.65.0
+  - @zag-js/aria-hidden@0.65.0
+  - @zag-js/utils@0.65.0
+  - @zag-js/dismissable@0.65.0
+  - @zag-js/dom-query@0.65.0
+  - @zag-js/remove-scroll@0.65.0
+
+## 0.64.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.64.0
+  - @zag-js/core@0.64.0
+  - @zag-js/types@0.64.0
+  - @zag-js/aria-hidden@0.64.0
+  - @zag-js/utils@0.64.0
+  - @zag-js/dismissable@0.64.0
+  - @zag-js/dom-query@0.64.0
+  - @zag-js/remove-scroll@0.64.0
+
+## 0.63.0
+
+### Patch Changes
+
+- Updated dependencies [[`ca437b9`](https://github.com/chakra-ui/zag/commit/ca437b94b49760742bad69aa57a3d6527219782a)]:
+  - @zag-js/dom-query@0.63.0
+  - @zag-js/aria-hidden@0.63.0
+  - @zag-js/dismissable@0.63.0
+  - @zag-js/remove-scroll@0.63.0
+  - @zag-js/anatomy@0.63.0
+  - @zag-js/core@0.63.0
+  - @zag-js/types@0.63.0
+  - @zag-js/utils@0.63.0
+
+## 0.62.1
+
+### Patch Changes
+
+- Updated dependencies [[`5644790`](https://github.com/chakra-ui/zag/commit/564479081d37cd06bc38043fccf9c229379a1531)]:
+  - @zag-js/core@0.62.1
+  - @zag-js/anatomy@0.62.1
+  - @zag-js/types@0.62.1
+  - @zag-js/aria-hidden@0.62.1
+  - @zag-js/utils@0.62.1
+  - @zag-js/dismissable@0.62.1
+  - @zag-js/dom-query@0.62.1
+  - @zag-js/remove-scroll@0.62.1
+
+## 0.62.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.62.0
+  - @zag-js/core@0.62.0
+  - @zag-js/types@0.62.0
+  - @zag-js/aria-hidden@0.62.0
+  - @zag-js/utils@0.62.0
+  - @zag-js/dismissable@0.62.0
+  - @zag-js/dom-query@0.62.0
+  - @zag-js/remove-scroll@0.62.0
+
+## 0.61.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.61.1
+  - @zag-js/core@0.61.1
+  - @zag-js/types@0.61.1
+  - @zag-js/aria-hidden@0.61.1
+  - @zag-js/utils@0.61.1
+  - @zag-js/dismissable@0.61.1
+  - @zag-js/dom-query@0.61.1
+  - @zag-js/remove-scroll@0.61.1
+
+## 0.61.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.61.0
+  - @zag-js/core@0.61.0
+  - @zag-js/types@0.61.0
+  - @zag-js/aria-hidden@0.61.0
+  - @zag-js/utils@0.61.0
+  - @zag-js/dismissable@0.61.0
+  - @zag-js/dom-query@0.61.0
+  - @zag-js/remove-scroll@0.61.0
+
+## 0.60.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.60.0
+  - @zag-js/anatomy@0.60.0
+  - @zag-js/types@0.60.0
+  - @zag-js/aria-hidden@0.60.0
+  - @zag-js/utils@0.60.0
+  - @zag-js/dismissable@0.60.0
+  - @zag-js/dom-query@0.60.0
+  - @zag-js/remove-scroll@0.60.0
+
+## 0.59.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.59.0
+  - @zag-js/core@0.59.0
+  - @zag-js/types@0.59.0
+  - @zag-js/aria-hidden@0.59.0
+  - @zag-js/utils@0.59.0
+  - @zag-js/dismissable@0.59.0
+  - @zag-js/dom-query@0.59.0
+  - @zag-js/remove-scroll@0.59.0
+
+## 0.58.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.58.3
+  - @zag-js/core@0.58.3
+  - @zag-js/types@0.58.3
+  - @zag-js/aria-hidden@0.58.3
+  - @zag-js/utils@0.58.3
+  - @zag-js/dismissable@0.58.3
+  - @zag-js/dom-query@0.58.3
+  - @zag-js/remove-scroll@0.58.3
+
+## 0.58.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.58.2
+  - @zag-js/core@0.58.2
+  - @zag-js/types@0.58.2
+  - @zag-js/aria-hidden@0.58.2
+  - @zag-js/utils@0.58.2
+  - @zag-js/dismissable@0.58.2
+  - @zag-js/dom-query@0.58.2
+  - @zag-js/remove-scroll@0.58.2
+
+## 0.58.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.58.1
+  - @zag-js/core@0.58.1
+  - @zag-js/types@0.58.1
+  - @zag-js/aria-hidden@0.58.1
+  - @zag-js/utils@0.58.1
+  - @zag-js/dismissable@0.58.1
+  - @zag-js/dom-query@0.58.1
+  - @zag-js/remove-scroll@0.58.1
+
+## 0.58.0
+
+### Minor Changes
+
+- [`9216a62`](https://github.com/chakra-ui/zag/commit/9216a625e1be9f7dd169501515297a8214f12b93) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - - Ensure consistent application of form related properties like
+  `invalid`, `required`, and `readOnly`
+  - Export `Service` from all machines for use in Lit based components.
+
+### Patch Changes
+
+- Updated dependencies [[`9216a62`](https://github.com/chakra-ui/zag/commit/9216a625e1be9f7dd169501515297a8214f12b93)]:
+  - @zag-js/dom-query@0.58.0
+  - @zag-js/aria-hidden@0.58.0
+  - @zag-js/dismissable@0.58.0
+  - @zag-js/remove-scroll@0.58.0
+  - @zag-js/anatomy@0.58.0
+  - @zag-js/core@0.58.0
+  - @zag-js/types@0.58.0
+  - @zag-js/utils@0.58.0
+
+## 0.57.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/dismissable@0.57.0
+  - @zag-js/anatomy@0.57.0
+  - @zag-js/core@0.57.0
+  - @zag-js/types@0.57.0
+  - @zag-js/aria-hidden@0.57.0
+  - @zag-js/utils@0.57.0
+  - @zag-js/dom-query@0.57.0
+  - @zag-js/remove-scroll@0.57.0
+
+## 0.56.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.56.1
+  - @zag-js/core@0.56.1
+  - @zag-js/types@0.56.1
+  - @zag-js/aria-hidden@0.56.1
+  - @zag-js/utils@0.56.1
+  - @zag-js/dismissable@0.56.1
+  - @zag-js/dom-query@0.56.1
+  - @zag-js/remove-scroll@0.56.1
+
+## 0.56.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.56.0
+  - @zag-js/core@0.56.0
+  - @zag-js/types@0.56.0
+  - @zag-js/aria-hidden@0.56.0
+  - @zag-js/utils@0.56.0
+  - @zag-js/dismissable@0.56.0
+  - @zag-js/dom-query@0.56.0
+  - @zag-js/remove-scroll@0.56.0
+
+## 0.55.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.55.0
+  - @zag-js/core@0.55.0
+  - @zag-js/types@0.55.0
+  - @zag-js/aria-hidden@0.55.0
+  - @zag-js/utils@0.55.0
+  - @zag-js/dismissable@0.55.0
+  - @zag-js/dom-query@0.55.0
+  - @zag-js/remove-scroll@0.55.0
+
+## 0.54.0
+
+### Patch Changes
+
+- Updated dependencies [[`590c177`](https://github.com/chakra-ui/zag/commit/590c1779f5208fb99114c872175e779508f2f96d)]:
+  - @zag-js/core@0.54.0
+  - @zag-js/anatomy@0.54.0
+  - @zag-js/types@0.54.0
+  - @zag-js/aria-hidden@0.54.0
+  - @zag-js/utils@0.54.0
+  - @zag-js/dismissable@0.54.0
+  - @zag-js/dom-query@0.54.0
+  - @zag-js/remove-scroll@0.54.0
+
+## 0.53.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.53.0
+  - @zag-js/core@0.53.0
+  - @zag-js/types@0.53.0
+  - @zag-js/aria-hidden@0.53.0
+  - @zag-js/utils@0.53.0
+  - @zag-js/dismissable@0.53.0
+  - @zag-js/dom-query@0.53.0
+  - @zag-js/remove-scroll@0.53.0
+
+## 0.52.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.52.0
+  - @zag-js/core@0.52.0
+  - @zag-js/types@0.52.0
+  - @zag-js/aria-hidden@0.52.0
+  - @zag-js/utils@0.52.0
+  - @zag-js/dismissable@0.52.0
+  - @zag-js/dom-query@0.52.0
+  - @zag-js/remove-scroll@0.52.0
+
+## 0.51.2
+
+### Patch Changes
+
+- Updated dependencies [[`62eb21b`](https://github.com/chakra-ui/zag/commit/62eb21b60355dd0645936baf4692315134e7488c),
+  [`70c2108`](https://github.com/chakra-ui/zag/commit/70c2108928746583687ac50ec51bc701c217ffdc)]:
+  - @zag-js/core@0.51.2
+  - @zag-js/dom-query@0.51.2
+  - @zag-js/dismissable@0.51.2
+  - @zag-js/aria-hidden@0.51.2
+  - @zag-js/remove-scroll@0.51.2
+  - @zag-js/anatomy@0.51.2
+  - @zag-js/types@0.51.2
+  - @zag-js/utils@0.51.2
+
+## 0.51.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.51.1
+  - @zag-js/core@0.51.1
+  - @zag-js/types@0.51.1
+  - @zag-js/aria-hidden@0.51.1
+  - @zag-js/utils@0.51.1
+  - @zag-js/dismissable@0.51.1
+  - @zag-js/dom-query@0.51.1
+  - @zag-js/remove-scroll@0.51.1
+
+## 0.51.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.51.0
+  - @zag-js/core@0.51.0
+  - @zag-js/types@0.51.0
+  - @zag-js/aria-hidden@0.51.0
+  - @zag-js/utils@0.51.0
+  - @zag-js/dismissable@0.51.0
+  - @zag-js/dom-query@0.51.0
+  - @zag-js/remove-scroll@0.51.0
+
+## 0.50.0
+
+### Minor Changes
+
+- [#1489](https://github.com/chakra-ui/zag/pull/1489)
+  [`6784564`](https://github.com/chakra-ui/zag/commit/678456443f1ae958bb93bee8448e04a4ff2ce238) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - - Prevent closing dialog on outside click when `role=alertdialog`
+  is set.
+  - Set the initial focus to the close trigger, when `role=alertdialog` is set to prevent accidental selection of
+    destructive action.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.50.0
+  - @zag-js/core@0.50.0
+  - @zag-js/types@0.50.0
+  - @zag-js/aria-hidden@0.50.0
+  - @zag-js/utils@0.50.0
+  - @zag-js/dismissable@0.50.0
+  - @zag-js/dom-query@0.50.0
+  - @zag-js/remove-scroll@0.50.0
+
+## 0.49.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.49.0
+  - @zag-js/anatomy@0.49.0
+  - @zag-js/types@0.49.0
+  - @zag-js/aria-hidden@0.49.0
+  - @zag-js/utils@0.49.0
+  - @zag-js/dismissable@0.49.0
+  - @zag-js/dom-query@0.49.0
+  - @zag-js/remove-scroll@0.49.0
+
+## 0.48.0
+
+### Minor Changes
+
+- [#1431](https://github.com/chakra-ui/zag/pull/1431)
+  [`80b97a9`](https://github.com/chakra-ui/zag/commit/80b97a907382f0cece781abeae2a462f9bfba686) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Rename `closeOnEscapeKeyDown` to `closeOnEscape`
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.48.0
+  - @zag-js/core@0.48.0
+  - @zag-js/types@0.48.0
+  - @zag-js/aria-hidden@0.48.0
+  - @zag-js/utils@0.48.0
+  - @zag-js/dismissable@0.48.0
+  - @zag-js/dom-query@0.48.0
+  - @zag-js/remove-scroll@0.48.0
+
+## 0.47.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.47.0
+  - @zag-js/core@0.47.0
+  - @zag-js/types@0.47.0
+  - @zag-js/aria-hidden@0.47.0
+  - @zag-js/utils@0.47.0
+  - @zag-js/dismissable@0.47.0
+  - @zag-js/dom-query@0.47.0
+  - @zag-js/remove-scroll@0.47.0
+
+## 0.46.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.46.0
+  - @zag-js/core@0.46.0
+  - @zag-js/types@0.46.0
+  - @zag-js/aria-hidden@0.46.0
+  - @zag-js/utils@0.46.0
+  - @zag-js/dismissable@0.46.0
+  - @zag-js/dom-query@0.46.0
+  - @zag-js/remove-scroll@0.46.0
+
+## 0.45.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.45.0
+  - @zag-js/core@0.45.0
+  - @zag-js/types@0.45.0
+  - @zag-js/aria-hidden@0.45.0
+  - @zag-js/utils@0.45.0
+  - @zag-js/dismissable@0.45.0
+  - @zag-js/dom-query@0.45.0
+  - @zag-js/remove-scroll@0.45.0
+
+## 0.44.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.44.0
+  - @zag-js/core@0.44.0
+  - @zag-js/types@0.44.0
+  - @zag-js/aria-hidden@0.44.0
+  - @zag-js/utils@0.44.0
+  - @zag-js/dismissable@0.44.0
+  - @zag-js/dom-query@0.44.0
+  - @zag-js/remove-scroll@0.44.0
+
+## 0.43.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.43.0
+  - @zag-js/core@0.43.0
+  - @zag-js/types@0.43.0
+  - @zag-js/aria-hidden@0.43.0
+  - @zag-js/utils@0.43.0
+  - @zag-js/dismissable@0.43.0
+  - @zag-js/dom-query@0.43.0
+  - @zag-js/remove-scroll@0.43.0
+
+## 0.42.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/dismissable@0.42.0
+  - @zag-js/anatomy@0.42.0
+  - @zag-js/core@0.42.0
+  - @zag-js/types@0.42.0
+  - @zag-js/aria-hidden@0.42.0
+  - @zag-js/utils@0.42.0
+  - @zag-js/dom-query@0.42.0
+  - @zag-js/remove-scroll@0.42.0
+
+## 0.41.0
+
+### Minor Changes
+
+- [`e47d60d`](https://github.com/chakra-ui/zag/commit/e47d60d2d9357eb24331d12f330d46e2f545f45d) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Sync `zIndex` of content with positioner via `--z-index` css
+  variable
+
+### Patch Changes
+
+- Updated dependencies [[`e47d60d`](https://github.com/chakra-ui/zag/commit/e47d60d2d9357eb24331d12f330d46e2f545f45d)]:
+  - @zag-js/dismissable@0.41.0
+  - @zag-js/anatomy@0.41.0
+  - @zag-js/core@0.41.0
+  - @zag-js/types@0.41.0
+  - @zag-js/aria-hidden@0.41.0
+  - @zag-js/utils@0.41.0
+  - @zag-js/dom-query@0.41.0
+  - @zag-js/remove-scroll@0.41.0
+
+## 0.40.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.40.0
+  - @zag-js/core@0.40.0
+  - @zag-js/types@0.40.0
+  - @zag-js/aria-hidden@0.40.0
+  - @zag-js/utils@0.40.0
+  - @zag-js/dismissable@0.40.0
+  - @zag-js/dom-query@0.40.0
+  - @zag-js/remove-scroll@0.40.0
+
+## 0.39.0
+
+### Patch Changes
+
+- Updated dependencies [[`27f9ec0`](https://github.com/chakra-ui/zag/commit/27f9ec0812f19228921158885107ed43d559544a)]:
+  - @zag-js/dismissable@0.39.0
+  - @zag-js/anatomy@0.39.0
+  - @zag-js/core@0.39.0
+  - @zag-js/types@0.39.0
+  - @zag-js/aria-hidden@0.39.0
+  - @zag-js/utils@0.39.0
+  - @zag-js/dom-query@0.39.0
+  - @zag-js/remove-scroll@0.39.0
+
+## 0.38.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.38.1
+  - @zag-js/core@0.38.1
+  - @zag-js/types@0.38.1
+  - @zag-js/aria-hidden@0.38.1
+  - @zag-js/utils@0.38.1
+  - @zag-js/dismissable@0.38.1
+  - @zag-js/dom-query@0.38.1
+  - @zag-js/remove-scroll@0.38.1
+
+## 0.38.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.38.0
+  - @zag-js/core@0.38.0
+  - @zag-js/types@0.38.0
+  - @zag-js/aria-hidden@0.38.0
+  - @zag-js/utils@0.38.0
+  - @zag-js/dismissable@0.38.0
+  - @zag-js/dom-query@0.38.0
+  - @zag-js/remove-scroll@0.38.0
+
+## 0.37.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.37.3
+  - @zag-js/core@0.37.3
+  - @zag-js/types@0.37.3
+  - @zag-js/aria-hidden@0.37.3
+  - @zag-js/utils@0.37.3
+  - @zag-js/dismissable@0.37.3
+  - @zag-js/dom-query@0.37.3
+  - @zag-js/remove-scroll@0.37.3
+
+## 0.37.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.37.2
+  - @zag-js/core@0.37.2
+  - @zag-js/types@0.37.2
+  - @zag-js/aria-hidden@0.37.2
+  - @zag-js/utils@0.37.2
+  - @zag-js/dismissable@0.37.2
+  - @zag-js/dom-query@0.37.2
+  - @zag-js/remove-scroll@0.37.2
+
+## 0.37.1
+
+### Patch Changes
+
+- [`d9d5263`](https://github.com/chakra-ui/zag/commit/d9d52636fbd3a731a4764b865ac82afd4f163baf) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Expose `splitProps` function to improve DX of creating custom
+  components on top of Zag.js
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.37.1
+  - @zag-js/core@0.37.1
+  - @zag-js/types@0.37.1
+  - @zag-js/aria-hidden@0.37.1
+  - @zag-js/utils@0.37.1
+  - @zag-js/dismissable@0.37.1
+  - @zag-js/dom-query@0.37.1
+  - @zag-js/remove-scroll@0.37.1
+
+## 0.37.0
+
+### Patch Changes
+
+- Updated dependencies [[`2a024fb`](https://github.com/chakra-ui/zag/commit/2a024fbd2e98343218d4d658e91f1d8c751e1a4d)]:
+  - @zag-js/types@0.37.0
+  - @zag-js/dismissable@0.37.0
+  - @zag-js/anatomy@0.37.0
+  - @zag-js/core@0.37.0
+  - @zag-js/aria-hidden@0.37.0
+  - @zag-js/utils@0.37.0
+  - @zag-js/dom-query@0.37.0
+  - @zag-js/remove-scroll@0.37.0
+
+## 0.36.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.36.3
+  - @zag-js/core@0.36.3
+  - @zag-js/types@0.36.3
+  - @zag-js/aria-hidden@0.36.3
+  - @zag-js/utils@0.36.3
+  - @zag-js/dismissable@0.36.3
+  - @zag-js/dom-query@0.36.3
+  - @zag-js/remove-scroll@0.36.3
+
+## 0.36.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.36.2
+  - @zag-js/core@0.36.2
+  - @zag-js/types@0.36.2
+  - @zag-js/aria-hidden@0.36.2
+  - @zag-js/utils@0.36.2
+  - @zag-js/dismissable@0.36.2
+  - @zag-js/dom-query@0.36.2
+  - @zag-js/remove-scroll@0.36.2
+
+## 0.36.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.36.1
+  - @zag-js/core@0.36.1
+  - @zag-js/types@0.36.1
+  - @zag-js/aria-hidden@0.36.1
+  - @zag-js/utils@0.36.1
+  - @zag-js/dismissable@0.36.1
+  - @zag-js/dom-query@0.36.1
+  - @zag-js/remove-scroll@0.36.1
+
+## 0.36.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/dismissable@0.36.0
+  - @zag-js/anatomy@0.36.0
+  - @zag-js/core@0.36.0
+  - @zag-js/types@0.36.0
+  - @zag-js/aria-hidden@0.36.0
+  - @zag-js/utils@0.36.0
+  - @zag-js/dom-query@0.36.0
+  - @zag-js/remove-scroll@0.36.0
+
+## 0.35.0
+
+### Minor Changes
+
+- [`3881f34`](https://github.com/chakra-ui/zag/commit/3881f34622d7a6067e7a2e4eecbe83fa778bdb9e) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Add support for `open.controlled` in the machine context as a way
+  to fully control the machine's open state programmatically.
+
+### Patch Changes
+
+- Updated dependencies [[`76c1231`](https://github.com/chakra-ui/zag/commit/76c12313f68da94651360c23b065eab9b3d9d6f0),
+  [`0216161`](https://github.com/chakra-ui/zag/commit/0216161fd3d429409abc96941d33a0c333ef8d36)]:
+  - @zag-js/remove-scroll@0.35.0
+  - @zag-js/core@0.35.0
+  - @zag-js/anatomy@0.35.0
+  - @zag-js/types@0.35.0
+  - @zag-js/aria-hidden@0.35.0
+  - @zag-js/utils@0.35.0
+  - @zag-js/dismissable@0.35.0
+  - @zag-js/dom-query@0.35.0
+
+## 0.34.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.34.0
+  - @zag-js/core@0.34.0
+  - @zag-js/types@0.34.0
+  - @zag-js/aria-hidden@0.34.0
+  - @zag-js/utils@0.34.0
+  - @zag-js/dismissable@0.34.0
+  - @zag-js/dom-query@0.34.0
+  - @zag-js/remove-scroll@0.34.0
+
+## 0.33.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.33.2
+  - @zag-js/core@0.33.2
+  - @zag-js/types@0.33.2
+  - @zag-js/aria-hidden@0.33.2
+  - @zag-js/utils@0.33.2
+  - @zag-js/dismissable@0.33.2
+  - @zag-js/dom-query@0.33.2
+  - @zag-js/remove-scroll@0.33.2
+
+## 0.33.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.33.1
+  - @zag-js/anatomy@0.33.1
+  - @zag-js/types@0.33.1
+  - @zag-js/aria-hidden@0.33.1
+  - @zag-js/utils@0.33.1
+  - @zag-js/dismissable@0.33.1
+  - @zag-js/dom-query@0.33.1
+  - @zag-js/remove-scroll@0.33.1
+
+## 0.33.0
+
+### Patch Changes
+
+- Updated dependencies [[`7872cdf`](https://github.com/chakra-ui/zag/commit/7872cdf8aeb28b9a30cd4a016bd12e5366054511)]:
+  - @zag-js/core@0.33.0
+  - @zag-js/anatomy@0.33.0
+  - @zag-js/types@0.33.0
+  - @zag-js/aria-hidden@0.33.0
+  - @zag-js/utils@0.33.0
+  - @zag-js/dismissable@0.33.0
+  - @zag-js/dom-query@0.33.0
+  - @zag-js/remove-scroll@0.33.0
+
+## 0.32.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.32.1
+  - @zag-js/core@0.32.1
+  - @zag-js/types@0.32.1
+  - @zag-js/aria-hidden@0.32.1
+  - @zag-js/utils@0.32.1
+  - @zag-js/dismissable@0.32.1
+  - @zag-js/dom-query@0.32.1
+  - @zag-js/remove-scroll@0.32.1
+
+## 0.32.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.32.0
+  - @zag-js/core@0.32.0
+  - @zag-js/types@0.32.0
+  - @zag-js/aria-hidden@0.32.0
+  - @zag-js/utils@0.32.0
+  - @zag-js/dismissable@0.32.0
+  - @zag-js/dom-query@0.32.0
+  - @zag-js/remove-scroll@0.32.0
+
+## 0.31.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.31.1
+  - @zag-js/core@0.31.1
+  - @zag-js/types@0.31.1
+  - @zag-js/aria-hidden@0.31.1
+  - @zag-js/utils@0.31.1
+  - @zag-js/dismissable@0.31.1
+  - @zag-js/dom-query@0.31.1
+  - @zag-js/remove-scroll@0.31.1
+
+## 0.31.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.31.0
+  - @zag-js/core@0.31.0
+  - @zag-js/types@0.31.0
+  - @zag-js/aria-hidden@0.31.0
+  - @zag-js/utils@0.31.0
+  - @zag-js/dismissable@0.31.0
+  - @zag-js/dom-query@0.31.0
+  - @zag-js/remove-scroll@0.31.0
+
+## 0.30.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.30.0
+  - @zag-js/core@0.30.0
+  - @zag-js/types@0.30.0
+  - @zag-js/aria-hidden@0.30.0
+  - @zag-js/utils@0.30.0
+  - @zag-js/dismissable@0.30.0
+  - @zag-js/dom-query@0.30.0
+  - @zag-js/remove-scroll@0.30.0
+
+## 0.29.0
+
+### Minor Changes
+
+- [`b34c87f3`](https://github.com/chakra-ui/zag/commit/b34c87f30dd2803fa42551eac135b712814d661c) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Expose more internal for better DX when building component
+  libraries.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.29.0
+  - @zag-js/core@0.29.0
+  - @zag-js/types@0.29.0
+  - @zag-js/aria-hidden@0.29.0
+  - @zag-js/utils@0.29.0
+  - @zag-js/dismissable@0.29.0
+  - @zag-js/dom-query@0.29.0
+  - @zag-js/remove-scroll@0.29.0
+
+## 0.28.1
+
+### Patch Changes
+
+- [`259f3584`](https://github.com/chakra-ui/zag/commit/259f3584d257de7c811dbb4b031fb563f2a7976d) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix issue where dialog positioner applied the `hidden` attribute
+  when closed leading to pre-mature exit of css animations applied to the dialog content.
+
+  > Only the backdrop and content should use the `hidden` attribute.
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.28.1
+  - @zag-js/core@0.28.1
+  - @zag-js/types@0.28.1
+  - @zag-js/aria-hidden@0.28.1
+  - @zag-js/utils@0.28.1
+  - @zag-js/dismissable@0.28.1
+  - @zag-js/dom-query@0.28.1
+  - @zag-js/remove-scroll@0.28.1
+
+## 0.28.0
+
+### Patch Changes
+
+- Updated dependencies [[`e433b3ee`](https://github.com/chakra-ui/zag/commit/e433b3ee5b49a1099b8be2df99a4a5056fc1ecfd)]:
+  - @zag-js/utils@0.28.0
+  - @zag-js/core@0.28.0
+  - @zag-js/dismissable@0.28.0
+  - @zag-js/anatomy@0.28.0
+  - @zag-js/types@0.28.0
+  - @zag-js/aria-hidden@0.28.0
+  - @zag-js/dom-query@0.28.0
+  - @zag-js/remove-scroll@0.28.0
+
+## 0.27.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.27.1
+  - @zag-js/core@0.27.1
+  - @zag-js/types@0.27.1
+  - @zag-js/aria-hidden@0.27.1
+  - @zag-js/utils@0.27.1
+  - @zag-js/dismissable@0.27.1
+  - @zag-js/dom-query@0.27.1
+  - @zag-js/remove-scroll@0.27.1
+
+## 0.27.0
+
+### Patch Changes
+
+- Updated dependencies [[`152b0a78`](https://github.com/chakra-ui/zag/commit/152b0a78b6ba18442f38164ce90789bc243f6e00)]:
+  - @zag-js/core@0.27.0
+  - @zag-js/anatomy@0.27.0
+  - @zag-js/types@0.27.0
+  - @zag-js/aria-hidden@0.27.0
+  - @zag-js/utils@0.27.0
+  - @zag-js/dismissable@0.27.0
+  - @zag-js/dom-query@0.27.0
+  - @zag-js/remove-scroll@0.27.0
+
+## 0.26.0
+
+### Patch Changes
+
+- [`041a9e00`](https://github.com/chakra-ui/zag/commit/041a9e00e503ce62a198db45ea7b757de7c39263) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix issue where `dir` attribute was not applied to all element
+  parts
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.26.0
+  - @zag-js/core@0.26.0
+  - @zag-js/types@0.26.0
+  - @zag-js/aria-hidden@0.26.0
+  - @zag-js/utils@0.26.0
+  - @zag-js/dismissable@0.26.0
+  - @zag-js/dom-query@0.26.0
+  - @zag-js/remove-scroll@0.26.0
+
+## 0.25.0
+
+### Minor Changes
+
+- [`068c15d2`](https://github.com/chakra-ui/zag/commit/068c15d2647c364736103f81f174a21def0a3238) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Rename dialog container to dialog positioner for better API
+  consistency. This means `api.containerProps` is now `api.positionerProps`
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.25.0
+  - @zag-js/core@0.25.0
+  - @zag-js/types@0.25.0
+  - @zag-js/aria-hidden@0.25.0
+  - @zag-js/utils@0.25.0
+  - @zag-js/dismissable@0.25.0
+  - @zag-js/dom-query@0.25.0
+  - @zag-js/remove-scroll@0.25.0
+
+## 0.24.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.24.0
+  - @zag-js/core@0.24.0
+  - @zag-js/types@0.24.0
+  - @zag-js/aria-hidden@0.24.0
+  - @zag-js/utils@0.24.0
+  - @zag-js/dismissable@0.24.0
+  - @zag-js/dom-query@0.24.0
+  - @zag-js/remove-scroll@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.23.0
+  - @zag-js/core@0.23.0
+  - @zag-js/types@0.23.0
+  - @zag-js/aria-hidden@0.23.0
+  - @zag-js/utils@0.23.0
+  - @zag-js/dismissable@0.23.0
+  - @zag-js/dom-query@0.23.0
+  - @zag-js/remove-scroll@0.23.0
+
+## 0.22.0
+
+### Patch Changes
+
+- [`0f39f6fd`](https://github.com/chakra-ui/zag/commit/0f39f6fd580fb89110c43c24dd7fcc0a2a5f7a0a) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - - Fix issue where interact outside handlers are not exposed
+
+  - Fix issue where interacting with toast closes dialog
+
+  > Breaking Changes
+
+  - Rename `closeOnEsc` to `closeOnEscapeKeyDown`
+  - Rename `onEsc` to `onEscapeKeyDown`
+  - Rename `closeOnOutsideClick` to `closeOnInteractOutside`
+
+- [`6d439ac2`](https://github.com/chakra-ui/zag/commit/6d439ac2171d3158e8ba43dcc35f84e52707dae6) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - - Fix issue where `modal: false` doesn't disable focus trap
+
+- Updated dependencies [[`6d439ac2`](https://github.com/chakra-ui/zag/commit/6d439ac2171d3158e8ba43dcc35f84e52707dae6)]:
+  - @zag-js/dismissable@0.22.0
+  - @zag-js/anatomy@0.22.0
+  - @zag-js/core@0.22.0
+  - @zag-js/types@0.22.0
+  - @zag-js/aria-hidden@0.22.0
+  - @zag-js/utils@0.22.0
+  - @zag-js/dom-query@0.22.0
+  - @zag-js/remove-scroll@0.22.0
+
+## 0.21.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.21.0
+  - @zag-js/core@0.21.0
+  - @zag-js/types@0.21.0
+  - @zag-js/aria-hidden@0.21.0
+  - @zag-js/utils@0.21.0
+  - @zag-js/dismissable@0.21.0
+  - @zag-js/dom-query@0.21.0
+  - @zag-js/remove-scroll@0.21.0
+
+## 0.20.0
+
+### Minor Changes
+
+- [#862](https://github.com/chakra-ui/zag/pull/862)
+  [`9a3a82f0`](https://github.com/chakra-ui/zag/commit/9a3a82f0b3738beda59c313fafd51360e6b0322f) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - BREAKING: Unify all callbacks to follow a consistent naming
+  convention
+
+### Patch Changes
+
+- [`942db6ca`](https://github.com/chakra-ui/zag/commit/942db6caf9f699d6af56929c835b10ae80cfbc85) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Remove toggle machine
+
+- Updated dependencies [[`9a3a82f0`](https://github.com/chakra-ui/zag/commit/9a3a82f0b3738beda59c313fafd51360e6b0322f),
+  [`942db6ca`](https://github.com/chakra-ui/zag/commit/942db6caf9f699d6af56929c835b10ae80cfbc85)]:
+  - @zag-js/types@0.20.0
+  - @zag-js/anatomy@0.20.0
+  - @zag-js/core@0.20.0
+  - @zag-js/aria-hidden@0.20.0
+  - @zag-js/utils@0.20.0
+  - @zag-js/dismissable@0.20.0
+  - @zag-js/dom-query@0.20.0
+  - @zag-js/remove-scroll@0.20.0
+
+## 0.19.1
+
+### Patch Changes
+
+- Updated dependencies [[`f5dff3f4`](https://github.com/chakra-ui/zag/commit/f5dff3f4e1a13d5315d3bcfcc1295952b46e4016),
+  [`3f0b6a19`](https://github.com/chakra-ui/zag/commit/3f0b6a19dcf9779846efb2bc093235299301bbdb)]:
+  - @zag-js/utils@0.19.1
+  - @zag-js/core@0.19.1
+  - @zag-js/dismissable@0.19.1
+  - @zag-js/anatomy@0.19.1
+  - @zag-js/types@0.19.1
+  - @zag-js/aria-hidden@0.19.1
+  - @zag-js/dom-query@0.19.1
+  - @zag-js/remove-scroll@0.19.1
+
+## 0.19.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.19.0
+  - @zag-js/core@0.19.0
+  - @zag-js/types@0.19.0
+  - @zag-js/aria-hidden@0.19.0
+  - @zag-js/utils@0.19.0
+  - @zag-js/dismissable@0.19.0
+  - @zag-js/dom-query@0.19.0
+  - @zag-js/remove-scroll@0.19.0
+
+## 0.18.0
+
+### Patch Changes
+
+- Updated dependencies [[`224cbbb0`](https://github.com/chakra-ui/zag/commit/224cbbb02eef713d81acbee627dd9a0ed745c7fa)]:
+  - @zag-js/utils@0.18.0
+  - @zag-js/core@0.18.0
+  - @zag-js/dismissable@0.18.0
+  - @zag-js/anatomy@0.18.0
+  - @zag-js/types@0.18.0
+  - @zag-js/aria-hidden@0.18.0
+  - @zag-js/dom-query@0.18.0
+  - @zag-js/remove-scroll@0.18.0
+
+## 0.17.0
+
+### Minor Changes
+
+- [#789](https://github.com/chakra-ui/zag/pull/789)
+  [`db81eaab`](https://github.com/chakra-ui/zag/commit/db81eaab8c8b06d74cf81d46fa145f4b480b7e82) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Refactor machine event handling and rename `PublicApi` to `Api`
+
+### Patch Changes
+
+- Updated dependencies [[`db81eaab`](https://github.com/chakra-ui/zag/commit/db81eaab8c8b06d74cf81d46fa145f4b480b7e82)]:
+  - @zag-js/dom-query@0.17.0
+  - @zag-js/aria-hidden@0.17.0
+  - @zag-js/dismissable@0.17.0
+  - @zag-js/remove-scroll@0.17.0
+  - @zag-js/anatomy@0.17.0
+  - @zag-js/core@0.17.0
+  - @zag-js/types@0.17.0
+  - @zag-js/utils@0.17.0
+
+## 0.16.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.16.0
+  - @zag-js/core@0.16.0
+  - @zag-js/types@0.16.0
+  - @zag-js/aria-hidden@0.16.0
+  - @zag-js/utils@0.16.0
+  - @zag-js/dismissable@0.16.0
+  - @zag-js/dom-query@0.16.0
+  - @zag-js/remove-scroll@0.16.0
+
+## 0.15.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.15.0
+  - @zag-js/core@0.15.0
+  - @zag-js/types@0.15.0
+  - @zag-js/aria-hidden@0.15.0
+  - @zag-js/utils@0.15.0
+  - @zag-js/dismissable@0.15.0
+  - @zag-js/dom-query@0.15.0
+  - @zag-js/remove-scroll@0.15.0
+
+## 0.14.0
+
+### Patch Changes
+
+- Updated dependencies [[`7cf380b0`](https://github.com/chakra-ui/zag/commit/7cf380b0d3019507181b79e0fe99e894d9e83030)]:
+  - @zag-js/dom-query@0.14.0
+  - @zag-js/aria-hidden@0.14.0
+  - @zag-js/dismissable@0.14.0
+  - @zag-js/remove-scroll@0.14.0
+  - @zag-js/anatomy@0.14.0
+  - @zag-js/core@0.14.0
+  - @zag-js/types@0.14.0
+  - @zag-js/utils@0.14.0
+
+## 0.13.0
+
+### Patch Changes
+
+- Updated dependencies [[`4a2d8b77`](https://github.com/chakra-ui/zag/commit/4a2d8b77d1e71ad6b6c10134bc4186db6e6c0414)]:
+  - @zag-js/core@0.13.0
+  - @zag-js/anatomy@0.13.0
+  - @zag-js/types@0.13.0
+  - @zag-js/aria-hidden@0.13.0
+  - @zag-js/utils@0.13.0
+  - @zag-js/dismissable@0.13.0
+  - @zag-js/dom-query@0.13.0
+  - @zag-js/remove-scroll@0.13.0
+
+## 0.12.0
+
+### Minor Changes
+
+- [`72946ada`](https://github.com/chakra-ui/zag/commit/72946ada6d247fcd3442ca3b76b9f3db2d985e38) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Add `data-state` attribute to allow styling the open/closed state
+  or checked/unchecked states
+
+  **Potential breaking change:**
+
+  We replaced `data-expanded` or `data-checked` to `data-state` attribute
+
+  - `data-expanded` maps to `data-state="open"` or `data-state="closed"`
+  - `data-checked` maps to `data-state="checked"` or `data-state="unchecked"`
+  - `data-indeterminate` maps to `data-state="indeterminate"`
+  - `data-open` maps to `data-state="open"`
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.12.0
+  - @zag-js/core@0.12.0
+  - @zag-js/types@0.12.0
+  - @zag-js/aria-hidden@0.12.0
+  - @zag-js/utils@0.12.0
+  - @zag-js/dismissable@0.12.0
+  - @zag-js/dom-query@0.12.0
+  - @zag-js/remove-scroll@0.12.0
+
+## 0.11.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.11.2
+  - @zag-js/core@0.11.2
+  - @zag-js/types@0.11.2
+  - @zag-js/aria-hidden@0.11.2
+  - @zag-js/utils@0.11.2
+  - @zag-js/dismissable@0.11.2
+  - @zag-js/dom-query@0.11.2
+  - @zag-js/remove-scroll@0.11.2
+
+## 0.11.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.11.1
+  - @zag-js/core@0.11.1
+  - @zag-js/types@0.11.1
+  - @zag-js/aria-hidden@0.11.1
+  - @zag-js/utils@0.11.1
+  - @zag-js/dismissable@0.11.1
+  - @zag-js/dom-query@0.11.1
+  - @zag-js/remove-scroll@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- [`4f371874`](https://github.com/chakra-ui/zag/commit/4f3718742dc88a2cd8726bdd889c9bbde94f5bce) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Rebuild all packages using tsup
+
+- Updated dependencies [[`4f371874`](https://github.com/chakra-ui/zag/commit/4f3718742dc88a2cd8726bdd889c9bbde94f5bce)]:
+  - @zag-js/remove-scroll@0.11.0
+  - @zag-js/aria-hidden@0.11.0
+  - @zag-js/dismissable@0.11.0
+  - @zag-js/dom-query@0.11.0
+  - @zag-js/utils@0.11.0
+  - @zag-js/anatomy@0.11.0
+  - @zag-js/types@0.11.0
+  - @zag-js/core@0.11.0
+
+## 0.10.5
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.10.5
+  - @zag-js/core@0.10.5
+  - @zag-js/types@0.10.5
+  - @zag-js/aria-hidden@0.10.5
+  - @zag-js/utils@0.10.5
+  - @zag-js/dismissable@0.10.5
+  - @zag-js/dom-query@0.10.5
+  - @zag-js/remove-scroll@0.10.5
+
+## 0.10.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.10.4
+  - @zag-js/core@0.10.4
+  - @zag-js/types@0.10.4
+  - @zag-js/aria-hidden@0.10.4
+  - @zag-js/utils@0.10.4
+  - @zag-js/dismissable@0.10.4
+  - @zag-js/dom-query@0.10.4
+  - @zag-js/remove-scroll@0.10.4
+
+## 0.10.3
+
+### Patch Changes
+
+- [`c59a8dec`](https://github.com/chakra-ui/zag/commit/c59a8dec15ab57d218823bfe7af6d723972be6c7) Thanks
+  [@cschroeter](https://github.com/cschroeter)! - Use vite to build packages
+
+- Updated dependencies [[`c59a8dec`](https://github.com/chakra-ui/zag/commit/c59a8dec15ab57d218823bfe7af6d723972be6c7),
+  [`775f11c9`](https://github.com/chakra-ui/zag/commit/775f11c96759197fcbad14b5b8a0fbde095efc55)]:
+  - @zag-js/anatomy@0.10.3
+  - @zag-js/core@0.10.3
+  - @zag-js/types@0.10.3
+  - @zag-js/aria-hidden@0.10.3
+  - @zag-js/utils@0.10.3
+  - @zag-js/dismissable@0.10.3
+  - @zag-js/dom-query@0.10.3
+  - @zag-js/remove-scroll@0.10.3
+
+## 0.10.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.10.2
+  - @zag-js/core@0.10.2
+  - @zag-js/types@0.10.2
+  - @zag-js/aria-hidden@0.10.2
+  - @zag-js/utils@0.10.2
+  - @zag-js/dismissable@0.10.2
+  - @zag-js/dom-query@0.10.2
+  - @zag-js/remove-scroll@0.10.2
+
+## 0.10.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/anatomy@0.10.1
+  - @zag-js/core@0.10.1
+  - @zag-js/types@0.10.1
+  - @zag-js/aria-hidden@0.10.1
+  - @zag-js/utils@0.10.1
+  - @zag-js/dismissable@0.10.1
+  - @zag-js/dom-query@0.10.1
+  - @zag-js/remove-scroll@0.10.1
+
+## 0.10.0
+
+### Patch Changes
+
+- [`cca48d7a`](https://github.com/chakra-ui/zag/commit/cca48d7a9e0d87e85669fc2c2788b4b630d62774) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Upgrade `focus-trap` package to ensure that trap works when the
+  active element within the content is removed
+
+- [`b54e658d`](https://github.com/chakra-ui/zag/commit/b54e658d1eb007479deb8a34b48672b92507d0ba) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix scroll hijacking issue during initial and return focus
+
+- Updated dependencies [[`e8ac03ef`](https://github.com/chakra-ui/zag/commit/e8ac03ef4b820773a5875db861735e2aac8f29da),
+  [`d2838286`](https://github.com/chakra-ui/zag/commit/d2838286fc13acae3f0818653d5feee982703f23),
+  [`2a1fb4a0`](https://github.com/chakra-ui/zag/commit/2a1fb4a0740e6ad8e2902265e14597f087007675),
+  [`a30258e8`](https://github.com/chakra-ui/zag/commit/a30258e8137bfba5811471919e463b79039848b6)]:
+  - @zag-js/dom-query@0.10.0
+  - @zag-js/anatomy@0.10.0
+  - @zag-js/types@0.10.0
+  - @zag-js/dismissable@0.10.0
+  - @zag-js/aria-hidden@0.10.0
+  - @zag-js/remove-scroll@0.10.0
+  - @zag-js/core@0.10.0
+  - @zag-js/utils@0.10.0
+
+## 0.9.2
+
+### Patch Changes
+
+- [`f9053c6f`](https://github.com/chakra-ui/zag/commit/f9053c6f138a1614e002b93cb8a817534eaf31e6) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix issue where `setReturnFocus` used in `focus-trap` throws a
+  console error
+
+- Updated dependencies []:
+  - @zag-js/dismissable@0.9.2
+  - @zag-js/anatomy@0.9.2
+  - @zag-js/core@0.9.2
+  - @zag-js/types@0.9.2
+  - @zag-js/aria-hidden@0.9.2
+  - @zag-js/utils@0.9.2
+  - @zag-js/dom-query@0.9.2
+  - @zag-js/remove-scroll@0.9.2
+
+## 0.9.1
+
+### Patch Changes
+
+- [`8469daa1`](https://github.com/chakra-ui/zag/commit/8469daa15fd7f2c0a80869a8715b0342bd3c355f) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Force release every package to fix regression
+
+- Updated dependencies [[`8469daa1`](https://github.com/chakra-ui/zag/commit/8469daa15fd7f2c0a80869a8715b0342bd3c355f)]:
+  - @zag-js/anatomy@0.9.1
+  - @zag-js/core@0.9.1
+  - @zag-js/types@0.9.1
+  - @zag-js/aria-hidden@0.9.1
+  - @zag-js/utils@0.9.1
+  - @zag-js/dismissable@0.9.1
+  - @zag-js/dom-query@0.9.1
+  - @zag-js/remove-scroll@0.9.1
+
+## 0.9.0
+
+### Patch Changes
+
+- Updated dependencies [[`6274ed5e`](https://github.com/chakra-ui/zag/commit/6274ed5e460400ef7038d2b3b6c1f0ce679ca649)]:
+  - @zag-js/anatomy@0.9.0
+
+## 0.8.0
+
+### Patch Changes
+
+- [`8e317083`](https://github.com/chakra-ui/zag/commit/8e3170830a54a7e51854b08c319325598c7bb566) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Refactor machines to use new defer option
+
+- Updated dependencies [[`fb4fb42d`](https://github.com/chakra-ui/zag/commit/fb4fb42d8aacc5844945dd7b1bd27b94c978ca4e)]:
+  - @zag-js/aria-hidden@0.8.0
+  - @zag-js/dismissable@0.8.0
+
+## 0.7.0
+
+### Patch Changes
+
+- Updated dependencies [[`413cdf18`](https://github.com/chakra-ui/zag/commit/413cdf180f718469c9c8b879a43aa4501d1ae59c)]:
+  - @zag-js/core@0.7.0
+
+## 0.6.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/dismissable@0.6.0
+
+## 0.5.0
+
+### Minor Changes
+
+- [`4603295e`](https://github.com/chakra-ui/zag/commit/4603295e9e57115240cdd97de04e105836908c54) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Remove the `defaultOpen` property in favor of the `open` property
+  that can now be controlled.
+
+  ```jsx
+  // this is will open the dialog initially
+  const [state, send] = useMachine(dialog.machine({ id: "1", open: true }))
+
+  // this will open the dialog when the `open` value changes
+  const [state, send] = useMachine(dialog.machine({ id: "1" }), {
+    context: {
+      // when this value changes, the dialog will open/close
+      open: true,
+    },
+  })
+  ```
+
+### Patch Changes
+
+- Updated dependencies [[`ec07ff35`](https://github.com/chakra-ui/zag/commit/ec07ff3590916ebcb4450b64207370ee2af9d3d1),
+  [`54377b1c`](https://github.com/chakra-ui/zag/commit/54377b1c4ed85deb06453a00648b7c2c1f0c72df)]:
+  - @zag-js/core@0.5.0
+  - @zag-js/types@0.5.0
+  - @zag-js/dismissable@0.5.0
+
+## 0.2.15
+
+### Patch Changes
+
+- Updated dependencies [[`30dbeb28`](https://github.com/chakra-ui/zag/commit/30dbeb282f7901c33518097a0e1dd9a857f7efb0)]:
+  - @zag-js/utils@0.3.4
+  - @zag-js/core@0.2.12
+  - @zag-js/dismissable@0.2.6
+
+## 0.2.14
+
+### Patch Changes
+
+- [`5fbb3e80`](https://github.com/chakra-ui/zag/commit/5fbb3e8048280537da1ffdc822753f6bcb01d292) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Bump `focus-trap` package to latest
+
+- Updated dependencies [[`1e10b1f4`](https://github.com/chakra-ui/zag/commit/1e10b1f40016f5c9bdf0924a3470b9383c0dbce2),
+  [`9d4db09e`](https://github.com/chakra-ui/zag/commit/9d4db09e1b31b4f5bd85a04622359b3312171741)]:
+  - @zag-js/core@0.2.11
+  - @zag-js/dismissable@0.2.5
+
+## 0.2.13
+
+### Patch Changes
+
+- Updated dependencies [[`1446d88b`](https://github.com/chakra-ui/zag/commit/1446d88bff3848f2a2ec0a793ee83281cda966e8)]:
+  - @zag-js/dom-query@0.1.4
+  - @zag-js/dismissable@0.2.4
+  - @zag-js/remove-scroll@0.2.4
+
+## 0.2.12
+
+### Patch Changes
+
+- [#536](https://github.com/chakra-ui/zag/pull/536)
+  [`aabc9aed`](https://github.com/chakra-ui/zag/commit/aabc9aed93ae3f49e2cec8d8b28edd23a337ce99) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Refactor all packages to have proper dependency structure and
+  bundle size.
+
+- Updated dependencies [[`aabc9aed`](https://github.com/chakra-ui/zag/commit/aabc9aed93ae3f49e2cec8d8b28edd23a337ce99)]:
+  - @zag-js/remove-scroll@0.2.3
+  - @zag-js/dismissable@0.2.3
+  - @zag-js/dom-query@0.1.3
+  - @zag-js/core@0.2.10
+
+## 0.2.11
+
+### Patch Changes
+
+- Updated dependencies [[`df27f257`](https://github.com/chakra-ui/zag/commit/df27f257f53d194013b528342d3d9aef994d0d5c)]:
+  - @zag-js/core@0.2.9
+
+## 0.2.10
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.2.8
+
+## 0.2.9
+
+### Patch Changes
+
+- [`6957678d`](https://github.com/chakra-ui/zag/commit/6957678d2f00f4d219e791dffed91446e64211e7) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Switch to `es2020` to support `import.meta.env`
+
+- Updated dependencies [[`f7bb988a`](https://github.com/chakra-ui/zag/commit/f7bb988aaeda6c6caebe95823f4cd44baa0d5e78),
+  [`6957678d`](https://github.com/chakra-ui/zag/commit/6957678d2f00f4d219e791dffed91446e64211e7),
+  [`fef822b9`](https://github.com/chakra-ui/zag/commit/fef822b91a4a9dbfc3c1e8f88a89727a3231326a)]:
+  - @zag-js/core@0.2.7
+  - @zag-js/anatomy@0.1.4
+  - @zag-js/types@0.3.4
+  - @zag-js/aria-hidden@0.2.2
+  - @zag-js/dismissable@0.2.2
+  - @zag-js/remove-scroll@0.2.2
+
+## 0.2.8
+
+### Patch Changes
+
+- Updated dependencies [[`80de0b7c`](https://github.com/chakra-ui/zag/commit/80de0b7c7f888a254a3e1fec2da5338e235bc699)]:
+  - @zag-js/core@0.2.6
+
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies [[`c1f609df`](https://github.com/chakra-ui/zag/commit/c1f609dfabbc31c296ebdc1e89480313130f832b),
+  [`c7e85e20`](https://github.com/chakra-ui/zag/commit/c7e85e20d4d08b56852768becf2fc5f7f4275dcc)]:
+  - @zag-js/types@0.3.3
+  - @zag-js/core@0.2.5
+  - @zag-js/dismissable@0.2.1
+  - @zag-js/remove-scroll@0.2.1
+
+## 0.2.6
+
+### Patch Changes
+
+- [#462](https://github.com/chakra-ui/zag/pull/462)
+  [`f8c47a2b`](https://github.com/chakra-ui/zag/commit/f8c47a2b4442bfadc4d98315a8c1ac4aa4020822) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Update packages to use explicit `exports` field in `package.json`
+
+- Updated dependencies [[`4c98f016`](https://github.com/chakra-ui/zag/commit/4c98f016ae3d48b1b74f4dc8c302ef9a1c664260),
+  [`ec776276`](https://github.com/chakra-ui/zag/commit/ec77627603f310ca34a659bc250cdcf819a17b91),
+  [`f8c47a2b`](https://github.com/chakra-ui/zag/commit/f8c47a2b4442bfadc4d98315a8c1ac4aa4020822),
+  [`5799fcb5`](https://github.com/chakra-ui/zag/commit/5799fcb520a7956dc7ef1a9bc7aaa8dff85fa592)]:
+  - @zag-js/core@0.2.4
+  - @zag-js/anatomy@0.1.3
+  - @zag-js/types@0.3.2
+  - @zag-js/aria-hidden@0.2.1
+  - @zag-js/dismissable@0.2.1
+  - @zag-js/remove-scroll@0.2.1
+
+## 0.2.5
+
+### Patch Changes
+
+- Updated dependencies [[`5bd24f02`](https://github.com/chakra-ui/zag/commit/5bd24f02fcab355f7df8a2d5cea3b155155380f8)]:
+  - @zag-js/anatomy@0.1.2
+
+## 0.2.4
+
+### Patch Changes
+
+- [`4d9c2bcd`](https://github.com/chakra-ui/zag/commit/4d9c2bcdc429b751943e123130d7a1f3c6855105) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix issue where `hidden` property is not applied to the dialog and
+  backdrop
+
+- [#401](https://github.com/chakra-ui/zag/pull/401)
+  [`c5c5c15d`](https://github.com/chakra-ui/zag/commit/c5c5c15d2a8a45e51a8832f2da31cc653e7aa1d8) Thanks
+  [@anubra266](https://github.com/anubra266)! - Rename "dialog underlay" to "dialog container"
+
+- [`af4ab9bb`](https://github.com/chakra-ui/zag/commit/af4ab9bb7cd599c53e47ca7ed2ea90a4ff742499) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Update anatomy of components
+
+- Updated dependencies [[`9d936614`](https://github.com/chakra-ui/zag/commit/9d93661439f10a550c154e9f290905d32e8f509b)]:
+  - @zag-js/core@0.2.3
+
+## 0.2.3
+
+### Patch Changes
+
+- [#416](https://github.com/chakra-ui/zag/pull/416)
+  [`5e0e0ff5`](https://github.com/chakra-ui/zag/commit/5e0e0ff57c15c173bbf5f38e4e0dac117b47739b) Thanks
+  [@cschroeter](https://github.com/cschroeter)! - Describe the anatomy of a machine and use it to generate data-scope
+  and data-part
+
+- Updated dependencies [[`5e0e0ff5`](https://github.com/chakra-ui/zag/commit/5e0e0ff57c15c173bbf5f38e4e0dac117b47739b)]:
+  - @zag-js/anatomy@0.1.1
+
 ## 0.2.2
 
 ### Patch Changes

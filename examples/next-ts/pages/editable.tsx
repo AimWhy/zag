@@ -12,6 +12,7 @@ export default function Page() {
   const [state, send] = useMachine(
     editable.machine({
       id: useId(),
+      value: "Hello World",
     }),
     {
       context: controls.context,
@@ -23,23 +24,23 @@ export default function Page() {
   return (
     <>
       <main className="editable">
-        <div {...api.rootProps}>
-          <div {...api.areaProps}>
-            <input data-testid="input" {...api.inputProps} />
-            <span data-testid="preview" {...api.previewProps} />
+        <div {...api.getRootProps()}>
+          <div {...api.getAreaProps()}>
+            <input data-testid="input" {...api.getInputProps()} />
+            <span data-testid="preview" {...api.getPreviewProps()} />
           </div>
-          <div {...api.controlGroupProps}>
-            {!api.isEditing && (
-              <button data-testid="edit-button" {...api.editButtonProps}>
+          <div {...api.getControlProps()}>
+            {!api.editing && (
+              <button data-testid="edit-button" {...api.getEditTriggerProps()}>
                 Edit
               </button>
             )}
-            {api.isEditing && (
+            {api.editing && (
               <>
-                <button data-testid="save-button" {...api.submitButtonProps}>
+                <button data-testid="save-button" {...api.getSubmitTriggerProps()}>
                   Save
                 </button>
-                <button data-testid="cancel-button" {...api.cancelButtonProps}>
+                <button data-testid="cancel-button" {...api.getCancelTriggerProps()}>
                   Cancel
                 </button>
               </>

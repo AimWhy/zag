@@ -1,0 +1,483 @@
+---
+title: Select
+description: Using the select machine in your project.
+package: "@zag-js/select"
+---
+
+# Select
+
+A Select component allows users pick a value from predefined options.
+
+<Resources pkg="@zag-js/select" />
+
+<Showcase id="Select" />
+
+**Features**
+
+- Support for selecting a single or multiple option
+- Keyboard support for opening the listbox using the arrow keys, including
+  automatically focusing the first or last item.
+- Support for looping keyboard navigation.
+- Support for selecting an item on blur.
+- Typeahead to allow selecting options by typing text, even without opening the
+  listbox
+- Support for Right to Left direction.
+
+## Installation
+
+To use the select machine in your project, run the following command in your
+command line:
+
+<CodeSnippet id="select/installation.mdx" />
+
+This command will install the framework agnostic menu logic and the reactive
+utilities for your framework of choice.
+
+## Anatomy
+
+To set up the select correctly, you'll need to understand its anatomy and how we
+name its parts.
+
+> Each part includes a `data-part` attribute to help identify them in the DOM.
+
+<Anatomy id="select" />
+
+## Usage
+
+First, import the select package into your project
+
+```jsx
+import * as select from "@zag-js/select"
+```
+
+The select package exports these functions:
+
+- `machine` — The state machine logic for the select.
+- `connect` — The function that translates the machine's state to JSX attributes
+  and event handlers.
+- `collection` - The function that creates a
+  [collection interface](/overview/collection) from an array of items.
+
+> You'll need to provide a unique `id` to the `useMachine` hook. This is used to
+> ensure that every part has a unique identifier.
+
+Next, import the required hooks and functions for your framework and use the
+select machine in your project 🔥
+
+<CodeSnippet id="select/usage.mdx" />
+
+## Setting the initial value
+
+To set the initial value of the select, pass the `value` property to the select
+machine's context.
+
+> The `value` property must be an array of strings. If selecting a single value,
+> pass an array with a single string.
+
+```jsx {14}
+const collection = select.collection({
+  items: [
+    { label: "Nigeria", value: "ng" },
+    { label: "Ghana", value: "gh" },
+    { label: "Kenya", value: "ke" },
+    //...
+  ],
+})
+
+const [state, send] = useMachine(
+  select.machine({
+    id: useId(),
+    collection,
+    value: ["ng"],
+  }),
+)
+```
+
+## Selecting multiple values
+
+To allow selecting multiple values, set the `multiple` property in the machine's
+context to `true`.
+
+```jsx {5}
+const [state, send] = useMachine(
+  select.machine({
+    id: useId(),
+    collection,
+    multiple: true,
+  }),
+)
+```
+
+## Using a custom object format
+
+By default, the select collection expects an array of items with `label` and
+`value` properties. To use a custom object format, pass the `itemToString` and
+`itemToValue` properties to the collection function.
+
+- `itemToString` — A function that returns the string representation of an item.
+  Used to compare items when filtering.
+- `itemToValue` — A function that returns the unique value of an item.
+- `itemToDisabled` — A function that returns the disabled state of an item.
+
+```jsx
+const collection = select.collection({
+  // custom object format
+  items: [
+    { id: 1, fruit: "Banana", available: true, quantity: 10 },
+    { id: 2, fruit: "Apple", available: false, quantity: 5 },
+    { id: 3, fruit: "Orange", available: true, quantity: 3 },
+    //...
+  ],
+  // convert item to string
+  itemToString(item) {
+    return item.fruit
+  },
+  // convert item to value
+  itemToValue(item) {
+    return item.id
+  },
+  // convert item to disabled state
+  itemToDisabled(item) {
+    return !item.available || item.quantity === 0
+  },
+})
+
+// use the collection
+const [state, send] = useMachine(
+  select.machine({
+    id: useId(),
+    collection,
+  }),
+)
+```
+
+## Usage within a form
+
+To use select within a form, you'll need to:
+
+- Pass the `name` property to the select machine's context
+- Render a hidden `select` element using `api.getSelectProps()`
+
+<CodeSnippet id="select/usage-with-form.mdx" />
+
+## Disabling the select
+
+To disable the select, set the `disabled` property in the machine's context to
+`true`.
+
+```jsx {5}
+const [state, send] = useMachine(
+  select.machine({
+    id: useId(),
+    collection,
+    disabled: true,
+  }),
+)
+```
+
+## Disabling an item
+
+To make a combobox option disabled, pass the `isItemDisabled` property to the
+collection function.
+
+```jsx {3-5}
+const collection = select.collection({
+  items: countries,
+  isItemDisabled(item) {
+    return item.disabled
+  },
+})
+
+const [state, send] = useMachine(
+  select.machine({
+    id: useId(),
+    collection,
+  }),
+)
+```
+
+## Close on select
+
+This behaviour ensures that the menu is closed when an item is selected and is
+`true` by default. It's only concerned with when an item is selected with
+pointer, space key or enter key. To disable the behaviour, set the
+`closeOnSelect` property in the machine's context to `false`.
+
+```jsx {5}
+const [state, send] = useMachine(
+  select.machine({
+    id: useId(),
+    collection,
+    closeOnSelect: false,
+  }),
+)
+```
+
+## Looping the keyboard navigation
+
+When navigating with the select using the arrow down and up keys, the select
+stops at the first and last options. If you need want the navigation to loop
+back to the first or last option, set the `loop: true` in the machine's context.
+
+```jsx {5}
+const [state, send] = useMachine(
+  select.machine({
+    id: useId(),
+    collection,
+    loop: true,
+  }),
+)
+```
+
+## Listening for highlight changes
+
+When an item is highlighted with the pointer or keyboard, use the
+`onHighlightChange` to listen for the change and do something with it.
+
+```jsx {4-7}
+const [state, send] = useMachine(
+  select.machine({
+    id: useId(),
+    onHighlightChange(details) {
+      // details => { highlightedValue: string | null, highlightedItem: CollectionItem | null }
+      console.log(details)
+    },
+  }),
+)
+```
+
+## Listening for selection changes
+
+When an item is selected, use the `onValueChange` property to listen for the
+change and do something with it.
+
+```jsx {5-7}
+const [state, send] = useMachine(
+  select.machine({
+    id: useId(),
+    collection,
+    onValueChange(details) {
+      // details => { value: string[], items: Item[] }
+      console.log(details)
+    },
+  }),
+)
+```
+
+## Listening for open and close events
+
+When the select is opened or closed, the `onOpenChange` callback is called. You
+can listen for these events and do something with it.
+
+```jsx {5-8}
+const [state, send] = useMachine(
+  select.machine({
+    id: useId(),
+    collection,
+    onOpenChange(details) {
+      // details => { open: boolean }
+      console.log("Select opened")
+    },
+  }),
+)
+```
+
+## Usage with large data
+
+Combine the select machine with the virtualization library like `react-window`
+or `@tanstack/react-virtual` to handle large data.
+
+Here's an example using `@tanstack/react-virtual`:
+
+```jsx
+function Demo() {
+  const selectData = []
+
+  const contentRef = useRef(null)
+
+  const rowVirtualizer = useVirtualizer({
+    count: selectData.length,
+    getScrollElement: () => contentRef.current,
+    estimateSize: () => 32,
+  })
+
+  const [state, send] = useMachine(
+    select.machine({
+      id: useId(),
+      collection,
+      scrollToIndexFn(details) {
+        rowVirtualizer.scrollToIndex(details.index, {
+          align: "center",
+          behavior: "auto",
+        })
+      },
+    }),
+  )
+
+  const api = select.connect(state, send, normalizeProps)
+
+  return (
+    <div {...api.getRootProps()}>
+      {/* ... */}
+      <Portal>
+        <div {...api.getPositionerProps()}>
+          <div ref={contentRef} {...api.getContentProps()}>
+            <div
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+                width: "100%",
+                position: "relative",
+              }}
+            >
+              {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                const item = selectData[virtualItem.index]
+                return (
+                  <div
+                    key={item.value}
+                    {...api.getItemProps({ item })}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: `${virtualItem.size}px`,
+                      transform: `translateY(${virtualItem.start}px)`,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    <span>{item.label}</span>
+                    <span {...api.getItemIndicatorProps({ item })}>✓</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </Portal>
+    </div>
+  )
+}
+```
+
+## Usage within dialog
+
+When using the select within a dialog, avoid rendering the select in a `Portal`
+or `Teleport`. This is because the dialog will trap focus within it, and the
+select will be rendered outside the dialog.
+
+## Styling guide
+
+Earlier, we mentioned that each select part has a `data-part` attribute added to
+them to select and style them in the DOM.
+
+### Open and closed state
+
+When the select is open, the trigger and content is given a `data-state`
+attribute.
+
+```css
+[data-part="trigger"][data-state="open|closed"] {
+  /* styles for open or closed state */
+}
+
+[data-part="content"][data-state="open|closed"] {
+  /* styles for open or closed state */
+}
+```
+
+### Selected state
+
+Items are given a `data-state` attribute, indicating whether they are selected.
+
+```css
+[data-part="item"][data-state="checked|unchecked"] {
+  /* styles for selected or unselected state */
+}
+```
+
+### Highlighted state
+
+When an item is highlighted, via keyboard navigation or pointer, it is given a
+`data-highlighted` attribute.
+
+```css
+[data-part="item"][data-highlighted] {
+  /* styles for highlighted state */
+}
+```
+
+### Invalid state
+
+When the select is invalid, the label and trigger is given a `data-invalid`
+attribute.
+
+```css
+[data-part="label"][data-invalid] {
+  /* styles for invalid state */
+}
+
+[data-part="trigger"][data-invalid] {
+  /* styles for invalid state */
+}
+```
+
+### Disabled state
+
+When the select is disabled, the trigger and label is given a `data-disabled`
+attribute.
+
+```css
+[data-part="trigger"][data-disabled] {
+  /* styles for disabled select state */
+}
+
+[data-part="label"][data-disabled] {
+  /* styles for disabled label state */
+}
+
+[data-part="item"][data-disabled] {
+  /* styles for disabled option state */
+}
+```
+
+> Optionally, when an item is disabled, it is given a `data-disabled` attribute.
+
+### Empty state
+
+When no option is selected, the trigger is given a `data-placeholder-shown`
+attribute.
+
+```css
+[data-part="trigger"][data-placeholder-shown] {
+  /* styles for empty select state */
+}
+```
+
+## Methods and Properties
+
+### Machine Context
+
+The select machine exposes the following context properties:
+
+<ContextTable name="select" />
+
+### Machine API
+
+The select `api` exposes the following methods:
+
+<ApiTable name="select" />
+
+### Data Attributes
+
+<DataAttrTable name="select" />
+
+## Accessibility
+
+Adheres to the
+[ListBox WAI-ARIA design pattern](https://www.w3.org/WAI/ARIA/apg/patterns/listbox).
+
+### Keyboard Interactions
+
+<KeyboardTable name="select" />

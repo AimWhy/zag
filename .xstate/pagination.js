@@ -11,7 +11,7 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "pagination",
-  initial: "unknown",
+  initial: "idle",
   context: {
     "isValidCount": false,
     "isValidPage": false,
@@ -32,6 +32,12 @@ const fetchMachine = createMachine({
     SET_PAGE_SIZE: {
       actions: "setPageSize"
     },
+    FIRST_PAGE: {
+      actions: "goToFirstPage"
+    },
+    LAST_PAGE: {
+      actions: "goToLastPage"
+    },
     PREVIOUS_PAGE: {
       cond: "canGoToPrevPage",
       actions: "goToPrevPage"
@@ -47,11 +53,6 @@ const fetchMachine = createMachine({
     }
   },
   states: {
-    unknown: {
-      on: {
-        SETUP: "idle"
-      }
-    },
     idle: {}
   }
 }, {

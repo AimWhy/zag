@@ -1,356 +1,444 @@
 import { mergeProps } from "@zag-js/core"
 import {
   dataAttr,
-  EventKeyMap,
   getEventKey,
   getEventPoint,
-  getNativeEvent,
+  getEventTarget,
+  isAnchorElement,
   isContextMenuEvent,
-  isElementEditable,
-  isLeftClick,
-  isModifiedEvent,
-  isSelfEvent,
-} from "@zag-js/dom-utils"
+  isDownloadingEvent,
+  isEditableElement,
+  isModifierKey,
+  isOpeningInNewTab,
+  isPrintableKey,
+  isSelfTarget,
+  isValidTabEvent,
+} from "@zag-js/dom-query"
 import { getPlacementStyles } from "@zag-js/popper"
-import type { NormalizeProps, PropTypes } from "@zag-js/types"
+import type { EventKeyMap, NormalizeProps, PropTypes } from "@zag-js/types"
+import { parts } from "./menu.anatomy"
 import { dom } from "./menu.dom"
-import type { Api, GroupProps, ItemProps, LabelProps, OptionItemProps, Send, Service, State } from "./menu.types"
+import type { ItemProps, ItemState, MachineApi, OptionItemProps, OptionItemState, Send, State } from "./menu.types"
 
-export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>) {
+export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>): MachineApi<T> {
   const isSubmenu = state.context.isSubmenu
-  const values = state.context.value
   const isTypingAhead = state.context.isTypingAhead
+  const composite = state.context.composite
 
-  const isOpen = state.hasTag("visible")
+  const open = state.hasTag("open")
 
   const popperStyles = getPlacementStyles({
-    measured: !!state.context.anchorPoint || !!state.context.currentPlacement,
-    placement: state.context.currentPlacement,
+    ...state.context.positioning,
+    placement: state.context.anchorPoint ? "bottom" : state.context.currentPlacement,
   })
 
-  const api = {
-    isOpen,
-    open() {
-      send("OPEN")
-    },
-    close() {
-      send("CLOSE")
-    },
-    activeId: state.context.activeId,
-    setActiveId(id: string) {
-      send({ type: "SET_ACTIVE_ID", id })
-    },
-    setParent(parent: Service) {
-      send({ type: "SET_PARENT", value: parent, id: parent.state.context.id })
-    },
-    setChild(child: Service) {
-      send({ type: "SET_CHILD", value: child, id: child.state.context.id })
-    },
-    value: values,
-    setValue(name: string, value: any) {
-      send({ type: "SET_VALUE", name, value })
-    },
-    isOptionChecked(opts: OptionItemProps) {
-      return opts.type === "radio" ? values?.[opts.name] === opts.value : values?.[opts.name].includes(opts.value)
-    },
+  function getItemState(props: ItemProps): ItemState {
+    return {
+      disabled: !!props.disabled,
+      highlighted: state.context.highlightedValue === props.value,
+    }
+  }
 
-    contextTriggerProps: normalize.element({
-      "data-part": "trigger",
-      id: dom.getContextTriggerId(state.context),
-      onPointerDown(event) {
-        if (event.pointerType === "mouse") return
-        const evt = getNativeEvent(event)
-        send({ type: "CONTEXT_MENU_START", point: getEventPoint(evt) })
-      },
-      onPointerCancel(event) {
-        if (event.pointerType === "mouse") return
-        send("CONTEXT_MENU_CANCEL")
+  function getOptionItemProps(props: OptionItemProps) {
+    const valueText = props.valueText ?? props.value
+    return { ...props, id: props.value, valueText }
+  }
+
+  function getOptionItemState(props: OptionItemProps): OptionItemState {
+    const itemState = getItemState(getOptionItemProps(props))
+    return {
+      ...itemState,
+      checked: !!props.checked,
+    }
+  }
+
+  function getItemProps(props: ItemProps) {
+    const { value: id, closeOnSelect, valueText } = props
+    const itemState = getItemState(props)
+    return normalize.element({
+      ...parts.item.attrs,
+      id,
+      role: "menuitem",
+      "aria-disabled": itemState.disabled,
+      "data-disabled": dataAttr(itemState.disabled),
+      "data-ownedby": dom.getContentId(state.context),
+      "data-highlighted": dataAttr(itemState.highlighted),
+      "data-valuetext": valueText,
+      onDragStart(event) {
+        const isLink = event.currentTarget.matches("a[href]")
+        if (isLink) event.preventDefault()
       },
       onPointerMove(event) {
-        if (event.pointerType === "mouse") return
-        send("CONTEXT_MENU_CANCEL")
-      },
-      onPointerUp(event) {
-        if (event.pointerType === "mouse") return
-        send("CONTEXT_MENU_CANCEL")
-      },
-      onContextMenu(event) {
-        const evt = getNativeEvent(event)
-        send({ type: "CONTEXT_MENU", point: getEventPoint(evt) })
-        event.preventDefault()
-      },
-      style: {
-        WebkitTouchCallout: "none",
-        userSelect: "none",
-      },
-    }),
-
-    getTriggerItemProps<A extends Api>(childApi: A) {
-      return mergeProps(api.getItemProps({ id: childApi.triggerProps.id }), childApi.triggerProps) as T["element"]
-    },
-
-    triggerProps: normalize.button({
-      "data-part": isSubmenu ? "trigger-item" : "trigger",
-      "data-placement": state.context.currentPlacement,
-      type: "button",
-      dir: state.context.dir,
-      id: dom.getTriggerId(state.context),
-      "data-uid": state.context.id,
-      "aria-haspopup": "menu",
-      "aria-controls": dom.getContentId(state.context),
-      "aria-expanded": isOpen || undefined,
-      "data-expanded": dataAttr(isOpen),
-      onPointerMove(event) {
+        if (itemState.disabled) return
         if (event.pointerType !== "mouse") return
-        const disabled = dom.isTargetDisabled(event.currentTarget)
-        if (disabled || !isSubmenu) return
-        send({
-          type: "TRIGGER_POINTERMOVE",
-          target: event.currentTarget,
-        })
+        const target = event.currentTarget
+        if (itemState.highlighted) return
+        send({ type: "ITEM_POINTERMOVE", id, target, closeOnSelect })
       },
       onPointerLeave(event) {
+        if (itemState.disabled) return
         if (event.pointerType !== "mouse") return
-        const evt = getNativeEvent(event)
-        const disabled = dom.isTargetDisabled(event.currentTarget)
-        if (disabled || !isSubmenu) return
-        send({
-          type: "TRIGGER_POINTERLEAVE",
-          target: event.currentTarget,
-          point: getEventPoint(evt),
-        })
-      },
-      onClick(event) {
-        if (dom.isTriggerItem(event.currentTarget)) {
-          send({ type: "TRIGGER_CLICK", target: event.currentTarget })
-        }
+
+        const pointerMoved = state.previousEvent.type.includes("POINTER")
+        if (!pointerMoved) return
+
+        const target = event.currentTarget
+        send({ type: "ITEM_POINTERLEAVE", id, target, closeOnSelect })
       },
       onPointerDown(event) {
-        const disabled = dom.isTargetDisabled(event.currentTarget)
-        const evt = getNativeEvent(event)
-        if (!isLeftClick(evt) || disabled || isContextMenuEvent(event)) return
-        event.preventDefault()
-        if (!dom.isTriggerItem(event.currentTarget)) {
-          send({ type: "TRIGGER_CLICK", target: event.currentTarget })
-        }
+        if (itemState.disabled) return
+        const target = event.currentTarget
+        send({ type: "ITEM_POINTERDOWN", target, id, closeOnSelect })
       },
-      onBlur() {
-        send("TRIGGER_BLUR")
-      },
-      onFocus() {
-        send("TRIGGER_FOCUS")
-      },
-      onKeyDown(event) {
-        const keyMap: EventKeyMap = {
-          ArrowDown() {
-            send("ARROW_DOWN")
-          },
-          ArrowUp() {
-            send("ARROW_UP")
-          },
-          Enter() {
-            send({ type: "ARROW_DOWN" })
-          },
-          Space() {
-            send({ type: "ARROW_DOWN" })
-          },
-        }
+      onClick(event) {
+        if (isDownloadingEvent(event)) return
+        if (isOpeningInNewTab(event)) return
+        if (itemState.disabled) return
 
-        const key = getEventKey(event, state.context)
-        const exec = keyMap[key]
+        const target = event.currentTarget
+        send({ type: "ITEM_CLICK", target, id, closeOnSelect })
+      },
+    })
+  }
 
-        if (exec) {
+  return {
+    highlightedValue: state.context.highlightedValue,
+    open: open,
+    setOpen(nextOpen) {
+      if (nextOpen === open) return
+      send(nextOpen ? "OPEN" : "CLOSE")
+    },
+    setHighlightedValue(value) {
+      send({ type: "HIGHLIGHTED.SET", id: value })
+    },
+    setParent(parent) {
+      send({ type: "PARENT.SET", value: parent, id: parent.state.context.id })
+    },
+    setChild(child) {
+      send({ type: "CHILD.SET", value: child, id: child.state.context.id })
+    },
+    reposition(options = {}) {
+      send({ type: "POSITIONING.SET", options })
+    },
+
+    getContextTriggerProps() {
+      return normalize.element({
+        ...parts.contextTrigger.attrs,
+        dir: state.context.dir,
+        id: dom.getContextTriggerId(state.context),
+        onPointerDown(event) {
+          if (event.pointerType === "mouse") return
+          const point = getEventPoint(event)
+          send({ type: "CONTEXT_MENU_START", point })
+        },
+        onPointerCancel(event) {
+          if (event.pointerType === "mouse") return
+          send("CONTEXT_MENU_CANCEL")
+        },
+        onPointerMove(event) {
+          if (event.pointerType === "mouse") return
+          send("CONTEXT_MENU_CANCEL")
+        },
+        onPointerUp(event) {
+          if (event.pointerType === "mouse") return
+          send("CONTEXT_MENU_CANCEL")
+        },
+        onContextMenu(event) {
+          const point = getEventPoint(event)
+          send({ type: "CONTEXT_MENU", point })
           event.preventDefault()
-          exec(event)
-        }
-      },
-    }),
+        },
+        style: {
+          WebkitTouchCallout: "none",
+          WebkitUserSelect: "none",
+          userSelect: "none",
+        },
+      })
+    },
 
-    positionerProps: normalize.element({
-      "data-part": "positioner",
-      id: dom.getPositionerId(state.context),
-      style: popperStyles.floating,
-    }),
+    getTriggerItemProps(childApi) {
+      return mergeProps(
+        getItemProps({ value: childApi.getTriggerProps().id }),
+        childApi.getTriggerProps(),
+      ) as T["element"]
+    },
 
-    arrowProps: normalize.element({
-      id: dom.getArrowId(state.context),
-      "data-part": "arrow",
-      style: popperStyles.arrow,
-    }),
+    getTriggerProps() {
+      return normalize.button({
+        ...(isSubmenu ? parts.triggerItem.attrs : parts.trigger.attrs),
+        "data-placement": state.context.currentPlacement,
+        type: "button",
+        dir: state.context.dir,
+        id: dom.getTriggerId(state.context),
+        "data-uid": state.context.id,
+        "aria-haspopup": composite ? "menu" : "dialog",
+        "aria-controls": dom.getContentId(state.context),
+        "aria-expanded": open || undefined,
+        "data-state": open ? "open" : "closed",
+        onPointerMove(event) {
+          if (event.pointerType !== "mouse") return
+          const disabled = dom.isTargetDisabled(event.currentTarget)
+          if (disabled || !isSubmenu) return
+          send({ type: "TRIGGER_POINTERMOVE", target: event.currentTarget })
+        },
+        onPointerLeave(event) {
+          if (dom.isTargetDisabled(event.currentTarget)) return
+          if (event.pointerType !== "mouse") return
+          if (!isSubmenu) return
+          const point = getEventPoint(event)
+          send({ type: "TRIGGER_POINTERLEAVE", target: event.currentTarget, point })
+        },
+        onPointerDown(event) {
+          if (dom.isTargetDisabled(event.currentTarget)) return
+          if (isContextMenuEvent(event)) return
+          event.preventDefault()
+        },
+        onClick(event) {
+          if (event.defaultPrevented) return
+          if (dom.isTargetDisabled(event.currentTarget)) return
+          send({ type: "TRIGGER_CLICK", target: event.currentTarget })
+        },
+        onBlur() {
+          send("TRIGGER_BLUR")
+        },
+        onFocus() {
+          send("TRIGGER_FOCUS")
+        },
+        onKeyDown(event) {
+          if (event.defaultPrevented) return
+          const keyMap: EventKeyMap = {
+            ArrowDown() {
+              send("ARROW_DOWN")
+            },
+            ArrowUp() {
+              send("ARROW_UP")
+            },
+            Enter() {
+              send({ type: "ARROW_DOWN", src: "enter" })
+            },
+            Space() {
+              send({ type: "ARROW_DOWN", src: "space" })
+            },
+          }
 
-    innerArrowProps: normalize.element({
-      "data-part": "arrow-inner",
-      style: popperStyles.innerArrow,
-    }),
+          const key = getEventKey(event, state.context)
+          const exec = keyMap[key]
 
-    contentProps: normalize.element({
-      "data-part": "content",
-      id: dom.getContentId(state.context),
-      "aria-label": state.context["aria-label"],
-      hidden: !isOpen,
-      role: "menu",
-      tabIndex: 0,
-      dir: state.context.dir,
-      "aria-activedescendant": state.context.activeId ?? undefined,
-      "aria-labelledby": dom.getTriggerId(state.context),
-      "data-placement": state.context.currentPlacement,
-      onPointerEnter(event) {
-        if (event.pointerType !== "mouse") return
-        send("MENU_POINTERENTER")
-      },
-      onKeyDown(event) {
-        if (!isSelfEvent(event)) return
+          if (exec) {
+            event.preventDefault()
+            exec(event)
+          }
+        },
+      })
+    },
 
-        const item = dom.getFocusedItem(state.context)
-        const isLink = !!item?.matches("a[href]")
+    getIndicatorProps() {
+      return normalize.element({
+        ...parts.indicator.attrs,
+        dir: state.context.dir,
+        "data-state": open ? "open" : "closed",
+      })
+    },
 
-        const keyMap: EventKeyMap = {
-          ArrowDown() {
-            send("ARROW_DOWN")
-          },
-          ArrowUp() {
-            send("ARROW_UP")
-          },
-          ArrowLeft() {
-            send("ARROW_LEFT")
-          },
-          ArrowRight() {
-            send("ARROW_RIGHT")
-          },
-          Enter() {
-            if (isLink) item?.click()
-            send("ENTER")
-          },
-          Space(event) {
-            if (isTypingAhead) {
-              send({ type: "TYPEAHEAD", key: event.key })
-            } else {
-              keyMap.Enter?.(event)
+    getPositionerProps() {
+      return normalize.element({
+        ...parts.positioner.attrs,
+        dir: state.context.dir,
+        id: dom.getPositionerId(state.context),
+        style: popperStyles.floating,
+      })
+    },
+
+    getArrowProps() {
+      return normalize.element({
+        id: dom.getArrowId(state.context),
+        ...parts.arrow.attrs,
+        dir: state.context.dir,
+        style: popperStyles.arrow,
+      })
+    },
+
+    getArrowTipProps() {
+      return normalize.element({
+        ...parts.arrowTip.attrs,
+        dir: state.context.dir,
+        style: popperStyles.arrowTip,
+      })
+    },
+
+    getContentProps() {
+      return normalize.element({
+        ...parts.content.attrs,
+        id: dom.getContentId(state.context),
+        "aria-label": state.context["aria-label"],
+        hidden: !open,
+        "data-state": open ? "open" : "closed",
+        role: composite ? "menu" : "dialog",
+        tabIndex: 0,
+        dir: state.context.dir,
+        "aria-activedescendant": state.context.highlightedValue ?? undefined,
+        "aria-labelledby": dom.getTriggerId(state.context),
+        "data-placement": state.context.currentPlacement,
+        onPointerEnter(event) {
+          if (event.pointerType !== "mouse") return
+          send("MENU_POINTERENTER")
+        },
+        onKeyDown(event) {
+          if (event.defaultPrevented) return
+          if (!isSelfTarget(event)) return
+
+          const target = getEventTarget<Element>(event)
+
+          const sameMenu = target?.closest("[role=menu]") === event.currentTarget || target === event.currentTarget
+          if (!sameMenu) return
+
+          if (event.key === "Tab") {
+            const valid = isValidTabEvent(event)
+            if (!valid) {
+              event.preventDefault()
+              return
             }
-          },
-          Home() {
-            send("HOME")
-          },
-          End() {
-            send("END")
-          },
-          Tab() {},
-        }
+          }
 
-        const key = getEventKey(event, { dir: state.context.dir })
-        const exec = keyMap[key]
+          const item = dom.getHighlightedItemEl(state.context)
+          const keyMap: EventKeyMap = {
+            ArrowDown() {
+              send("ARROW_DOWN")
+            },
+            ArrowUp() {
+              send("ARROW_UP")
+            },
+            ArrowLeft() {
+              send("ARROW_LEFT")
+            },
+            ArrowRight() {
+              send("ARROW_RIGHT")
+            },
+            Enter() {
+              send("ENTER")
+              if (isAnchorElement(item)) {
+                state.context.navigate({ value: state.context.highlightedValue, node: item })
+              }
+            },
+            Space(event) {
+              if (isTypingAhead) {
+                send({ type: "TYPEAHEAD", key: event.key })
+              } else {
+                keyMap.Enter?.(event)
+              }
+            },
+            Home() {
+              send("HOME")
+            },
+            End() {
+              send("END")
+            },
+          }
 
-        if (exec) {
-          const allow = isLink && key === "Enter"
-          exec(event)
-          if (!allow) event.preventDefault()
-          //
-        } else {
-          //
-          const isSingleKey = event.key.length === 1
-          const isValidTypeahead = isSingleKey && !isModifiedEvent(event) && !isElementEditable(item)
+          const key = getEventKey(event, { dir: state.context.dir })
+          const exec = keyMap[key]
 
-          if (!isValidTypeahead) return
+          if (exec) {
+            exec(event)
+            event.stopPropagation()
+            event.preventDefault()
+            return
+          }
+
+          // typeahead
+          if (!state.context.typeahead) return
+          if (!isPrintableKey(event)) return
+          if (isModifierKey(event)) return
+          if (isEditableElement(target)) return
 
           send({ type: "TYPEAHEAD", key: event.key })
           event.preventDefault()
-        }
-      },
-    }),
-
-    separatorProps: normalize.element({
-      "data-part": "separator",
-      role: "separator",
-      "aria-orientation": "horizontal",
-    }),
-
-    getItemProps(options: ItemProps) {
-      const { id, disabled, valueText } = options
-      return normalize.element({
-        "data-part": "item",
-        id,
-        role: "menuitem",
-        "aria-disabled": disabled,
-        "data-disabled": dataAttr(disabled),
-        "data-ownedby": dom.getContentId(state.context),
-        "data-focus": dataAttr(state.context.activeId === id),
-        "data-valuetext": valueText,
-        onClick(event) {
-          if (disabled) return
-          send({ type: "ITEM_CLICK", target: event.currentTarget, id })
-        },
-        onPointerDown(event) {
-          if (disabled) return
-          send({ type: "ITEM_POINTERDOWN", target: event.currentTarget, id })
-        },
-        onPointerUp(event) {
-          const evt = getNativeEvent(event)
-          if (!isLeftClick(evt) || disabled || state.context.pointerdownNode === event.currentTarget) return
-          event.currentTarget.click()
-        },
-        onPointerLeave(event) {
-          if (disabled || event.pointerType !== "mouse") return
-          send({ type: "ITEM_POINTERLEAVE", target: event.currentTarget })
-        },
-        onPointerMove(event) {
-          if (disabled || event.pointerType !== "mouse") return
-          send({ type: "ITEM_POINTERMOVE", id, target: event.currentTarget })
-        },
-        onDragStart(event) {
-          const isLink = event.currentTarget.matches("a[href]")
-          if (isLink) event.preventDefault()
-        },
-        onAuxClick(event) {
-          if (disabled) return
-          event.preventDefault()
-          event.currentTarget.click()
         },
       })
     },
 
-    getOptionItemProps(option: OptionItemProps) {
-      const { name, type, disabled, onCheckedChange } = option
+    getSeparatorProps() {
+      return normalize.element({
+        ...parts.separator.attrs,
+        role: "separator",
+        dir: state.context.dir,
+        "aria-orientation": "horizontal",
+      })
+    },
 
-      option.id ??= option.value
-      option.valueText ??= option.value
+    getItemState,
 
-      const checked = api.isOptionChecked(option)
+    getItemProps,
 
-      return Object.assign(
-        api.getItemProps(option as ItemProps),
-        normalize.element({
+    getOptionItemState,
+
+    getOptionItemProps(props) {
+      const { type, disabled, onCheckedChange, closeOnSelect } = props
+
+      const option = getOptionItemProps(props)
+      const itemState = getOptionItemState(props)
+
+      return {
+        ...getItemProps(option),
+        ...normalize.element({
           "data-type": type,
-          "data-name": name,
-          "data-part": "option-item",
+          ...parts.item.attrs,
+          dir: state.context.dir,
           "data-value": option.value,
           role: `menuitem${type}`,
-          "aria-checked": !!checked,
-          "data-checked": dataAttr(checked),
+          "aria-checked": !!itemState.checked,
+          "data-state": itemState.checked ? "checked" : "unchecked",
           onClick(event) {
             if (disabled) return
-            send({ type: "ITEM_CLICK", target: event.currentTarget, option })
-            onCheckedChange?.(!checked)
+            if (isDownloadingEvent(event)) return
+            if (isOpeningInNewTab(event)) return
+            const target = event.currentTarget
+            send({ type: "ITEM_CLICK", target, option, closeOnSelect })
+            onCheckedChange?.(!itemState.checked)
           },
         }),
-      )
+      }
     },
 
-    getLabelProps(options: LabelProps) {
+    getItemIndicatorProps(props) {
+      const itemState = getOptionItemState(props)
       return normalize.element({
-        id: dom.getLabelId(state.context, options.htmlFor),
-        "data-part": "label",
+        ...parts.itemIndicator.attrs,
+        dir: state.context.dir,
+        "data-disabled": dataAttr(itemState.disabled),
+        "data-highlighted": dataAttr(itemState.highlighted),
+        "data-state": itemState.checked ? "checked" : "unchecked",
+        hidden: !itemState.checked,
       })
     },
 
-    getGroupProps(options: GroupProps) {
+    getItemTextProps(props) {
+      const itemState = getOptionItemState(props)
       return normalize.element({
-        id: dom.getGroupId(state.context, options.id),
-        "data-part": "group",
-        "aria-labelledby": options.id,
+        ...parts.itemText.attrs,
+        dir: state.context.dir,
+        "data-disabled": dataAttr(itemState.disabled),
+        "data-highlighted": dataAttr(itemState.highlighted),
+        "data-state": itemState.checked ? "checked" : "unchecked",
+      })
+    },
+
+    getItemGroupLabelProps(props) {
+      return normalize.element({
+        id: dom.getGroupLabelId(state.context, props.htmlFor),
+        dir: state.context.dir,
+        ...parts.itemGroupLabel.attrs,
+      })
+    },
+
+    getItemGroupProps(props) {
+      return normalize.element({
+        id: dom.getGroupId(state.context, props.id),
+        ...parts.itemGroup.attrs,
+        dir: state.context.dir,
+        "aria-labelledby": dom.getGroupLabelId(state.context, props.id),
         role: "group",
       })
     },
   }
-
-  return api
 }

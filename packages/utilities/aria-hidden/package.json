@@ -1,10 +1,7 @@
 {
   "name": "@zag-js/aria-hidden",
-  "version": "0.2.0",
+  "version": "0.81.2",
   "description": "Hide targets from screen readers",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
   "keywords": [
     "js",
     "utils",
@@ -16,21 +13,26 @@
   "repository": "https://github.com/chakra-ui/zag/tree/main/packages/utilities/aria-hidden",
   "sideEffects": false,
   "files": [
-    "dist/**/*"
+    "dist"
   ],
   "scripts": {
-    "build-fast": "tsup src/index.ts --format=esm,cjs",
-    "start": "pnpm build --watch",
-    "build": "tsup src/index.ts --format=esm,cjs --dts",
-    "test": "jest --config ../../../jest.config.js --rootDir tests",
-    "lint": "eslint src --ext .ts,.tsx",
+    "build": "tsup",
+    "test": "vitest",
+    "lint": "eslint src",
     "test-ci": "pnpm test --ci --runInBand -u",
-    "test-watch": "pnpm test --watchAll"
+    "test-watch": "pnpm test --watchAll",
+    "prepack": "clean-package",
+    "postpack": "clean-package restore"
   },
   "publishConfig": {
     "access": "public"
   },
   "bugs": {
     "url": "https://github.com/chakra-ui/zag/issues"
+  },
+  "clean-package": "../../../clean-package.config.json",
+  "main": "src/index.ts",
+  "devDependencies": {
+    "clean-package": "2.2.0"
   }
 }

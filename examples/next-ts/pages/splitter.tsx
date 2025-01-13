@@ -12,6 +12,10 @@ export default function Page() {
   const [state, send] = useMachine(
     splitter.machine({
       id: useId(),
+      size: [
+        { id: "a", size: 50 },
+        { id: "b", size: 50 },
+      ],
     }),
     {
       context: controls.context,
@@ -23,21 +27,19 @@ export default function Page() {
   return (
     <>
       <main className="splitter">
-        <div {...api.rootProps}>
-          <div {...api.primaryPaneProps}>
-            <div>
-              <small {...api.labelProps}>Table of Contents</small>
-              <p>Primary Pane</p>
-            </div>
+        <div {...api.getRootProps()}>
+          <div {...api.getPanelProps({ id: "a" })}>
+            <p>A</p>
           </div>
-          <div {...api.splitterProps}>
-            <div className="splitter-bar" />
+          <div {...api.getResizeTriggerProps({ id: "a:b" })} />
+          <div {...api.getPanelProps({ id: "b" })}>
+            <p>B</p>
           </div>
-          <div {...api.secondaryPaneProps}>Secondary Pane</div>
         </div>
       </main>
+
       <Toolbar controls={controls.ui}>
-        <StateVisualizer state={state} />
+        <StateVisualizer state={state} omit={["previousPanels", "initialSize"]} />
       </Toolbar>
     </>
   )

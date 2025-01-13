@@ -1,0 +1,34 @@
+```jsx
+import * as slider from "@zag-js/slider"
+import { normalizeProps, useMachine } from "@zag-js/solid"
+import { createMemo, For, createUniqueId } from "solid-js"
+
+export function RangeSlider() {
+  const [state, send] = useMachine(
+    slider.machine({
+      id: createUniqueId(),
+      name: "quantity",
+      value: [10, 60],
+    }),
+  )
+
+  const api = createMemo(() => slider.connect(state, send, normalizeProps))
+
+  return (
+    <div {...api().getRootProps()}>
+      <div {...api().getControlProps()}>
+        <div {...api().getTrackProps()}>
+          <div {...api().getRangeProps()} />
+        </div>
+        <For each={api().value}>
+          {(_, index) => (
+            <div {...api().getThumbProps({ index: index() })}>
+              <input {...api().getHiddenInputProps({ index: index() })} />
+            </div>
+          )}
+        </For>
+      </div>
+    </div>
+  )
+}
+```

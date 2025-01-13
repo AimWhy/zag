@@ -71,6 +71,8 @@ export declare namespace StateMachine {
     guards: Dict
     send: Send<TEvent>
     self: Self<TContext, TState, TEvent>
+    initialContext: TContext
+    initialState: string
     getState: () => State<TContext, TState, TEvent>
     getAction: (key: string) => ExpressionWithMeta<TContext, TState, TEvent, void>
     getGuard: (key: string) => GuardExpression<TContext, TState, TEvent>
@@ -123,10 +125,10 @@ export declare namespace StateMachine {
    * -----------------------------------------------------------------------------*/
 
   export type TransitionDefinition<TContext extends Dict, TState extends StateSchema, TEvent extends EventObject> = {
-    target?: TState["value"]
-    actions?: Actions<TContext, TState, TEvent>
-    guard?: Guard<TContext, TState, TEvent>
-    internal?: boolean
+    target?: TState["value"] | undefined
+    actions?: Actions<TContext, TState, TEvent> | undefined
+    guard?: Guard<TContext, TState, TEvent> | undefined
+    internal?: boolean | undefined
   }
 
   export type DelayExpression<TContext extends Dict, TEvent extends EventObject> = Expression<TContext, TEvent, number>
@@ -149,7 +151,7 @@ export declare namespace StateMachine {
     /**
      * The time to delay the event, in milliseconds.
      */
-    delay?: Delay<TContext, TEvent>
+    delay?: Delay<TContext, TEvent> | undefined
   }
 
   export type DelayedTransitions<TContext extends Dict, TState extends StateSchema, TEvent extends EventObject> =
@@ -176,6 +178,7 @@ export declare namespace StateMachine {
     [K in TEvent["type"]]?:
       | TState["value"]
       | MaybeArray<TransitionDefinition<TContext, TState, ExtractEvent<TEvent, K>>>
+      | undefined
   }
 
   /* -----------------------------------------------------------------------------
@@ -186,37 +189,37 @@ export declare namespace StateMachine {
     /**
      * The type of this state node.
      */
-    type?: "final"
+    type?: "final" | undefined
     /**
      * The tags for the state node.
      */
-    tags?: MaybeArray<TState["tags"] extends string ? TState["tags"] : string>
+    tags?: MaybeArray<TState["tags"] extends string ? TState["tags"] : string> | undefined
     /**
      * The activities to be started upon entering the state node,
      * and stopped upon exiting the state node.
      */
-    activities?: Activities<TContext, TState, TEvent>
+    activities?: Activities<TContext, TState, TEvent> | undefined
     /**
      * The mapping of event types to their potential transition(s).
      */
-    on?: TransitionDefinitionMap<TContext, TState, TEvent>
+    on?: TransitionDefinitionMap<TContext, TState, TEvent> | undefined
     /**
      * The action(s) to be executed upon entering the state node.
      */
-    entry?: Actions<TContext, TState, TEvent>
+    entry?: Actions<TContext, TState, TEvent> | undefined
     /**
      * The action(s) to be executed upon exiting the state node.
      */
-    exit?: Actions<TContext, TState, TEvent>
+    exit?: Actions<TContext, TState, TEvent> | undefined
     /**
      * The meta data associated with this state node.
      */
-    meta?: string | Dict
+    meta?: string | Dict | undefined
     /**
      * The mapping (or array) of delays (in `ms`) to their potential transition(s) to run after
      * the specified delay. Uses `setTimeout` under the hood.
      */
-    after?: DelayedTransitions<TContext, TState, TEvent>
+    after?: DelayedTransitions<TContext, TState, TEvent> | undefined
     /**
      * The mapping (or array) of intervals (in `ms`) to their potential actions(s) to run at interval.
      *  Uses `setInterval` under the hood.
@@ -228,6 +231,7 @@ export declare namespace StateMachine {
           actions: Actions<TContext, TState, TEvent>
           guard?: Guard<TContext, TState, TEvent>
         }>
+      | undefined
   }
 
   /* -----------------------------------------------------------------------------
@@ -270,15 +274,16 @@ export declare namespace StateMachine {
 
   export type StateSchema = {
     value: string
-    tags?: string
+    tags?: string | undefined
   }
 
   export type StateInitObject<TContext, TState extends StateSchema> = {
-    context: TContext
-    value: TState["value"]
+    context?: TContext | undefined
+    value: TState["value"] | null
+    tags?: TState["tags"][] | undefined
   }
 
-  export type StateInit<TContext, TState extends StateSchema> = TState["value"] | StateInitObject<TContext, TState>
+  export type StateInit<TContext, TState extends StateSchema> = StateInitObject<TContext, TState>
 
   export type StateListener<
     TContext extends Dict,
@@ -300,62 +305,58 @@ export declare namespace StateMachine {
 
   export interface MachineConfig<TContext extends Dict, TState extends StateSchema, TEvent extends EventObject> {
     /**
-     * Function called whenever the state receives an event through its send method
-     */
-    onEvent?: Actions<TContext, TState, TEvent>
-    /**
      * Function called synchronously after the machine has been instantiated,
      * before it is started.
      */
-    created?: Actions<TContext, TState, TEvent>
+    created?: Actions<TContext, TState, TEvent> | undefined
     /**
      * The actions to run when the machine has started. This is usually
      * called in the `beforeMount`, `onMount` or `useLayoutEffect` lifecycle methods.
      */
-    entry?: Actions<TContext, TState, TEvent>
+    entry?: Actions<TContext, TState, TEvent> | undefined
     /**
      * The actions to run when the machine has stopped. This is usually
      * called in the `onUnmount` or `useLayoutEffect` cleanup lifecycle methods.
      */
-    exit?: Actions<TContext, TState, TEvent>
+    exit?: Actions<TContext, TState, TEvent> | undefined
     /**
      * The root level activities to run when the machine is started
      */
-    activities?: Activities<TContext, TState, TEvent>
+    activities?: Activities<TContext, TState, TEvent> | undefined
     /**
      * The unique identifier for the invoked machine.
      */
-    id?: string
+    id?: string | undefined
     /**
      * The extended state used to store `data` for your machine
      */
-    context?: Writable<TContext>
+    context?: Writable<TContext> | undefined
     /**
      * A generic way to react to context value changes
      */
-    watch?: { [K in keyof TContext]?: PureActions<TContext, TState, TEvent> }
+    watch?: { [K in keyof TContext]?: Actions<TContext, TState, TEvent> } | undefined
     /**
      * The computed properties based on the state
      */
-    computed?: Partial<TComputedContext<TContext>>
+    computed?: Partial<TComputedContext<TContext>> | undefined
     /**
      * The initial state to start with
      */
-    initial?: TState["value"]
+    initial?: TState["value"] | undefined
     /**
      * The mapping of state node keys to their state node configurations (recursive).
      */
-    states?: Partial<Record<TState["value"], StateNode<TContext, TState, TEvent>>>
+    states?: Partial<Record<TState["value"], StateNode<TContext, TState, TEvent>>> | undefined
     /**
      * Mapping events to transitions
      */
-    on?: TransitionDefinitionMap<TContext, TState, TEvent>
+    on?: TransitionDefinitionMap<TContext, TState, TEvent> | undefined
   }
 
   export interface State<
     TContext extends Dict,
     TState extends StateSchema = StateSchema,
-    TEvent extends EventObject = EventObject,
+    TEvent extends EventObject = AnyEventObject,
   > {
     value: TState["value"] | null
     previousValue: TState["value"] | null
@@ -376,18 +377,20 @@ export declare namespace StateMachine {
    * -----------------------------------------------------------------------------*/
 
   export interface MachineOptions<TContext extends Dict, TState extends StateSchema, TEvent extends EventObject> {
-    debug?: boolean
-    guards?: GuardMap<TContext, TState, TEvent>
-    actions?: ActionMap<TContext, TState, TEvent>
-    delays?: DelayMap<TContext, TEvent>
-    activities?: ActivityMap<TContext, TState, TEvent>
-    sync?: boolean
+    debug?: boolean | undefined
+    guards?: GuardMap<TContext, TState, TEvent> | undefined
+    actions?: ActionMap<TContext, TState, TEvent> | undefined
+    delays?: DelayMap<TContext, TEvent> | undefined
+    activities?: ActivityMap<TContext, TState, TEvent> | undefined
+    sync?: boolean | undefined
+    compareFns?: { [K in keyof TContext]?: CompareFn<TContext[K]> } | undefined
   }
 
   export type HookOptions<TContext extends Dict, TState extends StateSchema, TEvent extends EventObject> = {
-    actions?: ActionMap<TContext, TState, TEvent>
-    state?: StateInit<TContext, TState>
-    context?: UserContext<TContext>
+    sync?: boolean
+    actions?: ActionMap<TContext, TState, TEvent> | undefined
+    state?: StateInit<TContext, TState> | undefined
+    context?: UserContext<TContext> | undefined
   }
 
   export type Self<TContext extends Dict, TState extends StateSchema, TEvent extends EventObject> = {
@@ -397,8 +400,11 @@ export declare namespace StateMachine {
     sendChild: (evt: Event<TEvent>, to: string | ((ctx: TContext) => string)) => void
     stop: VoidFunction
     stopChild: (id: string) => void
+    stopActivity: (id: string) => void
     spawn<T>(src: T | (() => T), id?: string): T
     state: State<TContext, TState, TEvent>
+    initialContext: TContext
+    initialState: string
   }
 }
 
@@ -412,9 +418,6 @@ export enum ActionTypes {
   Start = "machine.start",
   Stop = "machine.stop",
   Created = "machine.created",
-  SendParent = "machine.send-parent",
-  After = "machine.after",
-  Every = "machine.every",
   Init = "machine.init",
 }
 
@@ -422,3 +425,5 @@ export enum MachineType {
   Machine = "machine",
   Actor = "machine.actor",
 }
+
+export type CompareFn<T = any> = (prev: T, next: T) => boolean

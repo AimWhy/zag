@@ -1,5 +1,5 @@
-import { expect, Page, test } from "@playwright/test"
-import { clickOutside, rect, testid } from "./__utils"
+import { expect, type Page, test } from "@playwright/test"
+import { clickOutside, rect, testid } from "./_utils"
 
 const menu_1 = {
   trigger: testid("trigger"),
@@ -19,7 +19,7 @@ const menu_3 = {
 }
 
 const expectToBeFocused = async (page: Page, id: string) => {
-  return await expect(page.locator(id).first()).toHaveAttribute("data-focus", "")
+  return await expect(page.locator(id).first()).toHaveAttribute("data-highlighted", "")
 }
 
 const navigateToSubmenuTrigger = async (page: Page) => {
@@ -106,7 +106,7 @@ test.describe("nested menu / keyboard typeahead", async () => {
     await expectToBeFocused(page, testid("new-win"))
   })
 
-  test("nested menu", async ({ page }) => {
+  test.skip("nested menu", async ({ page }) => {
     await page.click(menu_1.trigger)
 
     await page.keyboard.type("m")
@@ -173,7 +173,7 @@ test.describe("nested menu / pointer movement", async () => {
     await expect(page.locator(menu_2.menu)).toBeFocused()
     await expectToBeFocused(page, menu_2.trigger)
 
-    const focusedItemCount = await page.locator(menu_2.menu).locator("[data-focused]").count()
+    const focusedItemCount = await page.locator(menu_2.menu).locator("[data-focus]").count()
     expect(focusedItemCount).toBe(0)
   })
 

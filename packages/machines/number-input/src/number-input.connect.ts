@@ -1,218 +1,277 @@
 import {
   ariaAttr,
   dataAttr,
-  EventKeyMap,
-  getEventStep,
-  getNativeEvent,
   getEventPoint,
+  getEventStep,
+  getWindow,
+  isComposingEvent,
   isLeftClick,
-} from "@zag-js/dom-utils"
-import { roundToDevicePixel } from "@zag-js/number-utils"
-import type { NormalizeProps, PropTypes } from "@zag-js/types"
-
+  isModifierKey,
+} from "@zag-js/dom-query"
+import type { EventKeyMap, NormalizeProps, PropTypes } from "@zag-js/types"
+import { roundToDpr } from "@zag-js/utils"
+import { parts } from "./number-input.anatomy"
 import { dom } from "./number-input.dom"
-import type { Send, State } from "./number-input.types"
-import { utils } from "./number-input.utils"
+import type { MachineApi, Send, State } from "./number-input.types"
 
-export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>) {
-  const isFocused = state.hasTag("focus")
-  const isInvalid = state.context.isOutOfRange || !!state.context.invalid
+export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>): MachineApi<T> {
+  const focused = state.hasTag("focus")
+  const disabled = state.context.isDisabled
+  const readOnly = state.context.readOnly
 
-  const isDisabled = !!state.context.disabled
-  const isValueEmpty = state.context.isValueEmpty
-  const isIncrementDisabled = isDisabled || !state.context.canIncrement
-  const isDecrementDisabled = isDisabled || !state.context.canDecrement
+  const empty = state.context.isValueEmpty
+  const invalid = state.context.isOutOfRange || !!state.context.invalid
+
+  const isIncrementDisabled = disabled || !state.context.canIncrement || readOnly
+  const isDecrementDisabled = disabled || !state.context.canDecrement || readOnly
 
   const translations = state.context.translations
 
   return {
-    isFocused,
-    isInvalid,
-    isValueEmpty,
+    focused: focused,
+    invalid: invalid,
+    empty: empty,
     value: state.context.formattedValue,
     valueAsNumber: state.context.valueAsNumber,
-    setValue(value: string | number) {
-      send({ type: "SET_VALUE", value: value.toString() })
+    setValue(value) {
+      send({ type: "VALUE.SET", value })
     },
     clearValue() {
-      send("CLEAR_VALUE")
+      send("VALUE.CLEAR")
     },
     increment() {
-      send("INCREMENT")
+      send("VALUE.INCREMENT")
     },
     decrement() {
-      send("DECREMENT")
+      send("VALUE.DECREMENT")
     },
     setToMax() {
-      send({ type: "SET_VALUE", value: state.context.max })
+      send({ type: "VALUE.SET", value: state.context.max })
     },
     setToMin() {
-      send({ type: "SET_VALUE", value: state.context.min })
+      send({ type: "VALUE.SET", value: state.context.min })
     },
     focus() {
       dom.getInputEl(state.context)?.focus()
     },
-    blur() {
-      dom.getInputEl(state.context)?.blur()
+
+    getRootProps() {
+      return normalize.element({
+        id: dom.getRootId(state.context),
+        ...parts.root.attrs,
+        dir: state.context.dir,
+        "data-disabled": dataAttr(disabled),
+        "data-focus": dataAttr(focused),
+        "data-invalid": dataAttr(invalid),
+      })
     },
 
-    rootProps: normalize.element({
-      id: dom.getRootId(state.context),
-      "data-part": "root",
-      "data-disabled": dataAttr(isDisabled),
-    }),
+    getLabelProps() {
+      return normalize.label({
+        ...parts.label.attrs,
+        dir: state.context.dir,
+        "data-disabled": dataAttr(disabled),
+        "data-focus": dataAttr(focused),
+        "data-invalid": dataAttr(invalid),
+        id: dom.getLabelId(state.context),
+        htmlFor: dom.getInputId(state.context),
+      })
+    },
 
-    labelProps: normalize.label({
-      "data-part": "label",
-      "data-disabled": dataAttr(isDisabled),
-      "data-invalid": dataAttr(isInvalid),
-      id: dom.getLabelId(state.context),
-      htmlFor: dom.getInputId(state.context),
-    }),
+    getControlProps() {
+      return normalize.element({
+        ...parts.control.attrs,
+        dir: state.context.dir,
+        role: "group",
+        "aria-disabled": disabled,
+        "data-focus": dataAttr(focused),
+        "data-disabled": dataAttr(disabled),
+        "data-invalid": dataAttr(invalid),
+        "aria-invalid": ariaAttr(state.context.invalid),
+      })
+    },
 
-    groupProps: normalize.element({
-      "data-part": "group",
-      role: "group",
-      "aria-disabled": isDisabled,
-      "data-disabled": dataAttr(isDisabled),
-      "data-invalid": dataAttr(isInvalid),
-      "aria-invalid": ariaAttr(state.context.invalid),
-    }),
+    getValueTextProps() {
+      return normalize.element({
+        ...parts.valueText.attrs,
+        dir: state.context.dir,
+        "data-disabled": dataAttr(disabled),
+        "data-invalid": dataAttr(invalid),
+        "data-focus": dataAttr(focused),
+      })
+    },
 
-    inputProps: normalize.input({
-      "data-part": "input",
-      name: state.context.name,
-      form: state.context.form,
-      id: dom.getInputId(state.context),
-      role: "spinbutton",
-      defaultValue: state.context.formattedValue,
-      pattern: state.context.pattern,
-      inputMode: state.context.inputMode,
-      "aria-invalid": isInvalid || undefined,
-      "data-invalid": dataAttr(isInvalid),
-      disabled: isDisabled,
-      "data-disabled": dataAttr(isDisabled),
-      readOnly: !!state.context.readOnly,
-      autoComplete: "off",
-      autoCorrect: "off",
-      spellCheck: "false",
-      type: "text",
-      "aria-roledescription": "numberfield",
-      "aria-valuemin": state.context.min,
-      "aria-valuemax": state.context.max,
-      "aria-valuenow": isNaN(state.context.valueAsNumber) ? undefined : state.context.valueAsNumber,
-      "aria-valuetext": state.context.valueText,
-      onFocus() {
-        send("FOCUS")
-      },
-      onBlur() {
-        send("BLUR")
-      },
-      onChange(event) {
-        const evt = getNativeEvent(event)
-        if (evt.isComposing) return
-        send({ type: "CHANGE", target: event.currentTarget, hint: "set" })
-      },
-      onKeyDown(event) {
-        const evt = getNativeEvent(event)
-        if (evt.isComposing) return
+    getInputProps() {
+      return normalize.input({
+        ...parts.input.attrs,
+        dir: state.context.dir,
+        name: state.context.name,
+        form: state.context.form,
+        id: dom.getInputId(state.context),
+        role: "spinbutton",
+        defaultValue: state.context.formattedValue,
+        pattern: state.context.pattern,
+        inputMode: state.context.inputMode,
+        "aria-invalid": ariaAttr(invalid),
+        "data-invalid": dataAttr(invalid),
+        disabled,
+        "data-disabled": dataAttr(disabled),
+        readOnly: state.context.readOnly,
+        required: state.context.required,
+        autoComplete: "off",
+        autoCorrect: "off",
+        spellCheck: "false",
+        type: "text",
+        "aria-roledescription": "numberfield",
+        "aria-valuemin": state.context.min,
+        "aria-valuemax": state.context.max,
+        "aria-valuenow": Number.isNaN(state.context.valueAsNumber) ? undefined : state.context.valueAsNumber,
+        "aria-valuetext": state.context.valueText,
+        onFocus() {
+          send("INPUT.FOCUS")
+        },
+        onBlur() {
+          send("INPUT.BLUR")
+        },
+        onInput(event) {
+          send({ type: "INPUT.CHANGE", target: event.currentTarget, hint: "set" })
+        },
+        onBeforeInput(event) {
+          try {
+            const { selectionStart, selectionEnd, value } = event.currentTarget
 
-        if (!utils.isValidNumericEvent(state.context, event)) {
+            const nextValue = value.slice(0, selectionStart!) + ((event as any).data ?? "") + value.slice(selectionEnd!)
+            const isValid = state.context.parser.isValidPartialNumber(nextValue)
+
+            if (!isValid) {
+              event.preventDefault()
+            }
+          } catch {
+            // noop
+          }
+        },
+        onKeyDown(event) {
+          if (event.defaultPrevented) return
+          if (readOnly) return
+          if (isComposingEvent(event)) return
+
+          const step = getEventStep(event) * state.context.step
+
+          const keyMap: EventKeyMap = {
+            ArrowUp() {
+              send({ type: "INPUT.ARROW_UP", step })
+              event.preventDefault()
+            },
+            ArrowDown() {
+              send({ type: "INPUT.ARROW_DOWN", step })
+              event.preventDefault()
+            },
+            Home() {
+              if (isModifierKey(event)) return
+              send("INPUT.HOME")
+              event.preventDefault()
+            },
+            End() {
+              if (isModifierKey(event)) return
+              send("INPUT.END")
+              event.preventDefault()
+            },
+            Enter() {
+              send("INPUT.ENTER")
+            },
+          }
+
+          const exec = keyMap[event.key]
+          exec?.(event)
+        },
+      })
+    },
+
+    getDecrementTriggerProps() {
+      return normalize.button({
+        ...parts.decrementTrigger.attrs,
+        dir: state.context.dir,
+        id: dom.getDecrementTriggerId(state.context),
+        disabled: isDecrementDisabled,
+        "data-disabled": dataAttr(isDecrementDisabled),
+        "aria-label": translations.decrementLabel,
+        type: "button",
+        tabIndex: -1,
+        "aria-controls": dom.getInputId(state.context),
+        onPointerDown(event) {
+          if (isDecrementDisabled || !isLeftClick(event)) return
+          send({ type: "TRIGGER.PRESS_DOWN", hint: "decrement", pointerType: event.pointerType })
+          if (event.pointerType === "mouse") {
+            event.preventDefault()
+          }
+          if (event.pointerType === "touch") {
+            event.currentTarget?.focus({ preventScroll: true })
+          }
+        },
+        onPointerUp(event) {
+          send({ type: "TRIGGER.PRESS_UP", hint: "decrement", pointerType: event.pointerType })
+        },
+        onPointerLeave() {
+          if (isDecrementDisabled) return
+          send({ type: "TRIGGER.PRESS_UP", hint: "decrement" })
+        },
+      })
+    },
+
+    getIncrementTriggerProps() {
+      return normalize.button({
+        ...parts.incrementTrigger.attrs,
+        dir: state.context.dir,
+        id: dom.getIncrementTriggerId(state.context),
+        disabled: isIncrementDisabled,
+        "data-disabled": dataAttr(isIncrementDisabled),
+        "aria-label": translations.incrementLabel,
+        type: "button",
+        tabIndex: -1,
+        "aria-controls": dom.getInputId(state.context),
+        onPointerDown(event) {
+          if (isIncrementDisabled || !isLeftClick(event)) return
+          send({ type: "TRIGGER.PRESS_DOWN", hint: "increment", pointerType: event.pointerType })
+          if (event.pointerType === "mouse") {
+            event.preventDefault()
+          }
+          if (event.pointerType === "touch") {
+            event.currentTarget?.focus({ preventScroll: true })
+          }
+        },
+        onPointerUp(event) {
+          send({ type: "TRIGGER.PRESS_UP", hint: "increment", pointerType: event.pointerType })
+        },
+        onPointerLeave(event) {
+          send({ type: "TRIGGER.PRESS_UP", hint: "increment", pointerType: event.pointerType })
+        },
+      })
+    },
+
+    getScrubberProps() {
+      return normalize.element({
+        ...parts.scrubber.attrs,
+        dir: state.context.dir,
+        "data-disabled": dataAttr(disabled),
+        id: dom.getScrubberId(state.context),
+        role: "presentation",
+        onMouseDown(event) {
+          if (disabled) return
+
+          const point = getEventPoint(event)
+          const win = getWindow(event.currentTarget)
+
+          const dpr = win.devicePixelRatio
+          point.x = point.x - roundToDpr(7.5, dpr)
+          point.y = point.y - roundToDpr(7.5, dpr)
+
+          send({ type: "SCRUBBER.PRESS_DOWN", point })
           event.preventDefault()
-        }
-
-        const step = getEventStep(event) * state.context.step
-
-        const keyMap: EventKeyMap = {
-          ArrowUp() {
-            send({ type: "ARROW_UP", step })
-          },
-          ArrowDown() {
-            send({ type: "ARROW_DOWN", step })
-          },
-          Home() {
-            send("HOME")
-          },
-          End() {
-            send("END")
-          },
-        }
-
-        const exec = keyMap[event.key]
-
-        if (exec) {
-          exec(event)
-          event.preventDefault()
-        }
-      },
-    }),
-
-    decrementButtonProps: normalize.button({
-      "data-part": "spin-button",
-      "data-type": "decrement",
-      id: dom.getDecButtonId(state.context),
-      disabled: isDecrementDisabled,
-      "data-disabled": dataAttr(isDecrementDisabled),
-      "aria-label": translations.decrementLabel,
-      type: "button",
-      tabIndex: -1,
-      "aria-controls": dom.getInputId(state.context),
-      onPointerDown(event) {
-        if (isDecrementDisabled) return
-        send(isLeftClick(event) ? { type: "PRESS_DOWN", hint: "decrement" } : { type: "FOCUS" })
-        event.preventDefault()
-      },
-      onPointerUp() {
-        send({ type: "PRESS_UP", hint: "decrement" })
-      },
-      onPointerLeave() {
-        if (isDecrementDisabled) return
-        send({ type: "PRESS_UP", hint: "decrement" })
-      },
-    }),
-
-    incrementButtonProps: normalize.button({
-      "data-part": "spin-button",
-      "data-type": "increment",
-      id: dom.getIncButtonId(state.context),
-      disabled: isIncrementDisabled,
-      "data-disabled": dataAttr(isIncrementDisabled),
-      "aria-label": translations.incrementLabel,
-      type: "button",
-      tabIndex: -1,
-      "aria-controls": dom.getInputId(state.context),
-      onPointerDown(event) {
-        if (isIncrementDisabled) return
-        send(isLeftClick(event) ? { type: "PRESS_DOWN", hint: "increment" } : { type: "FOCUS" })
-        event.preventDefault()
-      },
-      onPointerUp() {
-        send({ type: "PRESS_UP", hint: "increment" })
-      },
-      onPointerLeave() {
-        send({ type: "PRESS_UP", hint: "increment" })
-      },
-    }),
-
-    scrubberProps: normalize.element({
-      "data-disabled": dataAttr(isDisabled),
-      "data-part": "scrubber",
-      id: dom.getScrubberId(state.context),
-      role: "presentation",
-      onMouseDown(event) {
-        if (isDisabled) return
-        const evt = getNativeEvent(event)
-        event.preventDefault()
-        const point = getEventPoint(evt)
-
-        point.x = point.x - roundToDevicePixel(7.5)
-        point.y = point.y - roundToDevicePixel(7.5)
-
-        send({ type: "PRESS_DOWN_SCRUBBER", point })
-      },
-      style: {
-        cursor: isDisabled ? undefined : "ew-resize",
-      },
-    }),
+        },
+        style: {
+          cursor: disabled ? undefined : "ew-resize",
+        },
+      })
+    },
   }
 }

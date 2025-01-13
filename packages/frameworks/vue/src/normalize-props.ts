@@ -8,8 +8,9 @@ type ReservedProps = {
 
 type Attrs<T> = T & ReservedProps
 
-type PropTypes = JSX.IntrinsicElements & {
+export type PropTypes = Vue.NativeElements & {
   element: Attrs<Vue.HTMLAttributes>
+  style: Vue.CSSProperties
 }
 
 type Dict = Record<string, string>
@@ -18,32 +19,37 @@ function toCase(txt: string) {
   return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
 }
 
-const eventMap = {
+const propMap: Record<string, string> = {
   htmlFor: "for",
   className: "class",
   onDoubleClick: "onDblclick",
   onChange: "onInput",
   onFocus: "onFocusin",
   onBlur: "onFocusout",
+  defaultValue: "value",
+  defaultChecked: "checked",
 }
 
+const preserveKeys =
+  "viewBox,className,preserveAspectRatio,fillRule,clipPath,clipRule,strokeWidth,strokeLinecap,strokeLinejoin,strokeDasharray,strokeDashoffset,strokeMiterlimit".split(
+    ",",
+  )
+
 function toVueProp(prop: string) {
-  if (prop in eventMap) return eventMap[prop]
-
-  if (prop.startsWith("on")) {
-    return `on${toCase(prop.substr(2))}`
-  }
-
+  if (prop in propMap) return propMap[prop]
+  if (prop.startsWith("on")) return `on${toCase(prop.substr(2))}`
+  if (preserveKeys.includes(prop)) return prop
   return prop.toLowerCase()
 }
 
 export const normalizeProps = createNormalizer<PropTypes>((props: Dict) => {
   const normalized: Dict = {}
   for (const key in props) {
+    const value = props[key]
     if (key === "children") {
-      if (typeof props[key] === "string") {
-        normalized["innerHTML"] = props[key]
-      } else if (process.env.NODE_ENV !== "production") {
+      if (typeof value === "string") {
+        normalized["innerHTML"] = value
+      } else if (process.env.NODE_ENV !== "production" && value != null) {
         console.warn("[Vue Normalize Prop] : avoid passing non-primitive value as `children`")
       }
     } else {

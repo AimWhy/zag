@@ -1,93 +1,143 @@
-import { dataAttr, EventKeyMap, getEventKey, isSafari } from "@zag-js/dom-utils"
-import type { NormalizeProps, PropTypes } from "@zag-js/types"
+import { dataAttr, getEventKey, isComposingEvent, isSafari, isSelfTarget } from "@zag-js/dom-query"
+import type { EventKeyMap, NormalizeProps, PropTypes } from "@zag-js/types"
+import { parts } from "./tabs.anatomy"
 import { dom } from "./tabs.dom"
-import type { Send, State, TabProps } from "./tabs.types"
+import type { MachineApi, Send, State, TriggerProps, TriggerState } from "./tabs.types"
 
-export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>) {
+export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>): MachineApi<T> {
   const translations = state.context.translations
-  const isFocused = state.matches("focused")
+  const focused = state.matches("focused")
+
+  const isVertical = state.context.orientation === "vertical"
+  const isHorizontal = state.context.orientation === "horizontal"
+  const composite = state.context.composite
+  const indicator = state.context.indicatorState
+
+  function getTriggerState(props: TriggerProps): TriggerState {
+    return {
+      selected: state.context.value === props.value,
+      focused: state.context.focusedValue === props.value,
+      disabled: !!props.disabled,
+    }
+  }
 
   return {
     value: state.context.value,
     focusedValue: state.context.focusedValue,
-    previousValues: Array.from(state.context.previousValues),
-    setValue(value: string) {
+    setValue(value) {
       send({ type: "SET_VALUE", value })
     },
     clearValue() {
       send({ type: "CLEAR_VALUE" })
     },
+    setIndicatorRect(value) {
+      const id = dom.getTriggerId(state.context, value)
+      send({ type: "SET_INDICATOR_RECT", id })
+    },
+    syncTabIndex() {
+      send("SYNC_TAB_INDEX")
+    },
+    selectNext(fromValue) {
+      send({ type: "TAB_FOCUS", value: fromValue, src: "selectNext" })
+      send({ type: "ARROW_NEXT", src: "selectNext" })
+    },
+    selectPrev(fromValue) {
+      send({ type: "TAB_FOCUS", value: fromValue, src: "selectPrev" })
+      send({ type: "ARROW_PREV", src: "selectPrev" })
+    },
+    focus() {
+      dom.getSelectedTriggerEl(state.context)?.focus()
+    },
 
-    rootProps: normalize.element({
-      "data-part": "root",
-      id: dom.getRootId(state.context),
-      "data-orientation": state.context.orientation,
-      "data-focus": dataAttr(isFocused),
-      dir: state.context.dir,
-    }),
+    getRootProps() {
+      return normalize.element({
+        ...parts.root.attrs,
+        id: dom.getRootId(state.context),
+        "data-orientation": state.context.orientation,
+        "data-focus": dataAttr(focused),
+        dir: state.context.dir,
+      })
+    },
 
-    triggerGroupProps: normalize.element({
-      "data-part": "trigger-group",
-      id: dom.getTriggerGroupId(state.context),
-      role: "tablist",
-      "data-focus": dataAttr(isFocused),
-      "aria-orientation": state.context.orientation,
-      "data-orientation": state.context.orientation,
-      "aria-label": translations.tablistLabel,
-      onKeyDown(event) {
-        const keyMap: EventKeyMap = {
-          ArrowDown() {
-            send("ARROW_DOWN")
-          },
-          ArrowUp() {
-            send("ARROW_UP")
-          },
-          ArrowLeft() {
-            send("ARROW_LEFT")
-          },
-          ArrowRight() {
-            send("ARROW_RIGHT")
-          },
-          Home() {
-            send("HOME")
-          },
-          End() {
-            send("END")
-          },
-          Enter() {
-            send({ type: "ENTER", value: state.context.focusedValue })
-          },
-        }
+    getListProps() {
+      return normalize.element({
+        ...parts.list.attrs,
+        id: dom.getListId(state.context),
+        role: "tablist",
+        dir: state.context.dir,
+        "data-focus": dataAttr(focused),
+        "aria-orientation": state.context.orientation,
+        "data-orientation": state.context.orientation,
+        "aria-label": translations?.listLabel,
+        onKeyDown(event) {
+          if (event.defaultPrevented) return
 
-        let key = getEventKey(event, state.context)
-        const exec = keyMap[key]
+          if (!isSelfTarget(event)) return
+          if (isComposingEvent(event)) return
 
-        if (exec) {
-          event.preventDefault()
-          exec(event)
-        }
-      },
-    }),
+          const keyMap: EventKeyMap = {
+            ArrowDown() {
+              if (isHorizontal) return
+              send({ type: "ARROW_NEXT", key: "ArrowDown" })
+            },
+            ArrowUp() {
+              if (isHorizontal) return
+              send({ type: "ARROW_PREV", key: "ArrowUp" })
+            },
+            ArrowLeft() {
+              if (isVertical) return
+              send({ type: "ARROW_PREV", key: "ArrowLeft" })
+            },
+            ArrowRight() {
+              if (isVertical) return
+              send({ type: "ARROW_NEXT", key: "ArrowRight" })
+            },
+            Home() {
+              send("HOME")
+            },
+            End() {
+              send("END")
+            },
+            Enter() {
+              send({ type: "ENTER" })
+            },
+          }
 
-    getTriggerProps(props: TabProps) {
+          let key = getEventKey(event, state.context)
+          const exec = keyMap[key]
+
+          if (exec) {
+            event.preventDefault()
+            exec(event)
+          }
+        },
+      })
+    },
+
+    getTriggerState,
+
+    getTriggerProps(props) {
       const { value, disabled } = props
-      const selected = state.context.value === value
+      const triggerState = getTriggerState(props)
 
       return normalize.button({
-        "data-part": "trigger",
+        ...parts.trigger.attrs,
         role: "tab",
         type: "button",
         disabled,
+        dir: state.context.dir,
         "data-orientation": state.context.orientation,
         "data-disabled": dataAttr(disabled),
         "aria-disabled": disabled,
         "data-value": value,
-        "aria-selected": selected,
-        "data-selected": dataAttr(selected),
-        "aria-controls": dom.getContentId(state.context, value),
-        "data-ownedby": dom.getTriggerGroupId(state.context),
+        "aria-selected": triggerState.selected,
+        "data-selected": dataAttr(triggerState.selected),
+        "data-focus": dataAttr(triggerState.focused),
+        "aria-controls": triggerState.selected ? dom.getContentId(state.context, value) : undefined,
+        "data-ownedby": dom.getListId(state.context),
+        "data-ssr": dataAttr(state.context.ssr),
         id: dom.getTriggerId(state.context, value),
-        tabIndex: selected ? 0 : -1,
+        tabIndex: triggerState.selected && composite ? 0 : -1,
         onFocus() {
           send({ type: "TAB_FOCUS", value })
         },
@@ -98,6 +148,7 @@ export function connect<T extends PropTypes>(state: State, send: Send, normalize
           }
         },
         onClick(event) {
+          if (event.defaultPrevented) return
           if (disabled) return
           if (isSafari()) {
             event.currentTarget.focus()
@@ -107,52 +158,43 @@ export function connect<T extends PropTypes>(state: State, send: Send, normalize
       })
     },
 
-    contentGroupProps: normalize.element({
-      "data-part": "content-group",
-      id: dom.getContentGroupId(state.context),
-      "data-orientation": state.context.orientation,
-    }),
-
-    getContentProps({ value }: { value: string }) {
+    getContentProps(props) {
+      const { value } = props
       const selected = state.context.value === value
       return normalize.element({
-        "data-part": "content",
+        ...parts.content.attrs,
+        dir: state.context.dir,
         id: dom.getContentId(state.context, value),
-        tabIndex: 0,
+        tabIndex: composite ? 0 : -1,
         "aria-labelledby": dom.getTriggerId(state.context, value),
         role: "tabpanel",
-        "data-ownedby": dom.getTriggerGroupId(state.context),
+        "data-ownedby": dom.getListId(state.context),
+        "data-selected": dataAttr(selected),
+        "data-orientation": state.context.orientation,
         hidden: !selected,
       })
     },
 
-    getDeleteButtonProps({ value, disabled }: TabProps) {
-      return normalize.button({
-        "data-part": "delete-button",
-        type: "button",
-        tabIndex: -1,
-        "aria-label": translations.deleteLabel?.(value),
-        disabled,
-        onClick() {
-          send({ type: "DELETE", value })
+    getIndicatorProps() {
+      return normalize.element({
+        id: dom.getIndicatorId(state.context),
+        ...parts.indicator.attrs,
+        dir: state.context.dir,
+        "data-orientation": state.context.orientation,
+        style: {
+          "--transition-property": "left, right, top, bottom, width, height",
+          "--left": indicator.rect?.left,
+          "--top": indicator.rect?.top,
+          "--width": indicator.rect?.width,
+          "--height": indicator.rect?.height,
+          position: "absolute",
+          willChange: "var(--transition-property)",
+          transitionProperty: "var(--transition-property)",
+          transitionDuration: indicator.transition ? "var(--transition-duration, 150ms)" : "0ms",
+          transitionTimingFunction: "var(--transition-timing-function)",
+          [isHorizontal ? "left" : "top"]: isHorizontal ? "var(--left)" : "var(--top)",
         },
       })
     },
-
-    indicatorProps: normalize.element({
-      id: dom.getIndicatorId(state.context),
-      "data-part": "indicator",
-      "data-orientation": state.context.orientation,
-      style: {
-        "--transition-duration": "200ms",
-        "--transition-property": "left, right, top, bottom, width, height",
-        position: "absolute",
-        willChange: "var(--transition-property)",
-        transitionProperty: "var(--transition-property)",
-        transitionDuration: state.context.hasMeasuredRect ? "var(--transition-duration)" : "0ms",
-        transitionTimingFunction: "var(--transition-timing-function)",
-        ...state.context.indicatorRect,
-      },
-    }),
   }
 }

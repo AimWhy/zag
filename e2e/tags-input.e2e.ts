@@ -1,168 +1,219 @@
-import { expect, test, Locator } from "@playwright/test"
-import { clickViz, paste, testid } from "./__utils"
+import { test } from "@playwright/test"
+import { TagsInputModel } from "./models/tags-input.model"
 
-const input = testid("input")
-
-const item = (id: string) => ({
-  text: id,
-  tag: testid(`${id.toLowerCase()}-tag`),
-  close: testid(`${id.toLowerCase()}-close-button`),
-  input: testid(`${id.toLowerCase()}-input`),
-})
-
-const expectToBeSelected = async (el: Locator) => {
-  await expect(el).toHaveAttribute("data-selected", "")
-}
+let I: TagsInputModel
 
 test.describe("tags-input", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/tags-input")
+  test.beforeEach(async ({ page, context }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"])
+    I = new TagsInputModel(page)
+    await I.goto()
   })
 
-  test("should add new tag value", async ({ page }) => {
-    const svelte = item("Svelte")
-    await page.type(input, "Svelte")
-    await page.keyboard.press("Enter")
-    await expect(page.locator(svelte.tag)).toBeVisible()
-    await expect(page.locator(input)).toBeEmpty()
-    await expect(page.locator(input)).toBeFocused()
+  test("should add new tag value", async () => {
+    await I.addTag("Svelte")
+    await I.seeTag("Svelte")
+    await I.seeInputHasValue("")
+    await I.seeInputIsFocused()
   })
 
-  test("deletes tag with backspace when input value is empty", async ({ page }) => {
-    const svelte = item("Svelte")
-    await page.type(input, svelte.text)
-    await page.keyboard.press("Enter")
-    await page.keyboard.press("Backspace")
-
-    await expectToBeSelected(page.locator(svelte.tag))
-
-    await page.keyboard.press("Backspace")
-
-    await expect(page.locator(svelte.tag)).toBeHidden()
-    await expect(page.locator(input)).toBeFocused()
+  test("when input is empty backspace highlights the last tag", async () => {
+    await I.focusInput()
+    await I.pressKey("Backspace")
+    await I.seeTagIsHighlighted("Vue")
   })
 
-  test("should not edit when no tag is focused", async ({ page }) => {
-    await clickViz(page)
-    //Focus input
-    await page.locator(input).focus()
-    //Clear Vue
-    await page.keyboard.press("Backspace")
-    await page.keyboard.press("Delete")
-    //Clear React
-    await page.keyboard.press("Backspace")
-    await page.keyboard.press("Delete")
+  test("deletes tag with backspace when input value is empty", async () => {
+    await I.addTag("Svelte")
 
-    await page.keyboard.press("Enter")
+    await I.pressKey("Backspace")
+    await I.seeTagIsHighlighted("Svelte")
 
-    const svelte = item("Svelte")
-    await page.type(input, "Svelte")
-    await page.keyboard.press("Enter")
-    await expect(page.locator(svelte.tag)).toBeVisible()
-    await expect(page.locator(input)).toBeEmpty()
-    await expect(page.locator(input)).toBeFocused()
+    await I.pressKey("Backspace")
+    await I.dontSeeTag("Svelte")
+
+    await I.seeInputIsFocused()
   })
 
-  test("should navigate tags with arrow keys", async ({ page }) => {
-    const svelte = item("Svelte")
-    await page.type(input, svelte.text)
-    await page.keyboard.press("Enter")
+  test("delete tag by clearing its content and hit enter", async () => {
+    await I.focusInput()
+    await I.pressKey("ArrowLeft")
+    await I.pressKey("Enter")
 
-    const solid = item("Solid")
-    await page.type(input, solid.text)
-    await page.keyboard.press("Enter")
+    await I.pressKey("Backspace")
+    await I.pressKey("Enter")
 
-    await page.keyboard.press("ArrowLeft")
-
-    await expectToBeSelected(page.locator(solid.tag))
-
-    await page.keyboard.press("ArrowLeft")
-    await page.keyboard.press("ArrowLeft")
-
-    const vue = item("Vue")
-    await expectToBeSelected(page.locator(vue.tag))
-
-    await page.keyboard.press("ArrowRight")
-    await expectToBeSelected(page.locator(svelte.tag))
+    await I.seeInputIsFocused()
+    await I.dontSeeTag("Vue")
   })
 
-  test("should clear focused tag on blur", async ({ page }) => {
-    const svelte = item("Svelte")
-    await page.type(input, svelte.text)
-    await page.keyboard.press("Enter")
+  test("delete tag with delete key, show allow keyboard navigation", async () => {
+    await I.focusInput()
+    await I.pressKey("ArrowLeft")
+    await I.pressKey("Delete")
 
-    const solid = item("Solid")
-    await page.type(input, solid.text)
-    await page.keyboard.press("Enter")
+    await I.seeInputIsFocused()
+    await I.dontSeeTag("Vue")
 
-    await page.keyboard.press("ArrowLeft")
-    await page.click("body", { force: true })
-
-    expect(await page.locator("[data-part=tag][data-selected]").count()).toBe(0)
+    await I.pressKey("ArrowLeft")
+    await I.seeTagIsHighlighted("React")
   })
 
-  test("removes tag on close button click", async ({ page }) => {
-    const svelte = item("Svelte")
-    await page.type(input, svelte.text)
-    await page.keyboard.press("Enter")
+  test("delete tag with pointer, show allow keyboard navigation", async () => {
+    await I.clickTagClose("Vue")
 
-    const solid = item("Solid")
-    await page.type(input, solid.text)
-    await page.keyboard.press("Enter")
+    await I.seeInputIsFocused()
+    await I.dontSeeTag("Vue")
 
-    await page.keyboard.press("ArrowLeft")
-    await page.click(svelte.close, { force: true })
-
-    await expect(page.locator(svelte.tag)).toBeHidden()
+    await I.pressKey("ArrowLeft")
+    await I.seeTagIsHighlighted("React")
   })
 
-  test("edit tag with enter key", async ({ page }) => {
-    const svelte = item("Svelte")
-    await page.type(input, svelte.text)
-    await page.keyboard.press("Enter")
+  test("when tag is empty + no visible tags + enter pressed, should not enter editing state", async () => {
+    await I.focusInput()
 
-    const solid = item("Solid")
-    await page.type(input, solid.text)
-    await page.keyboard.press("Enter")
+    await I.deleteLastTag()
+    await I.deleteLastTag()
 
-    await page.keyboard.press("ArrowLeft")
-    await page.keyboard.press("ArrowLeft")
-    await page.keyboard.press("Enter")
+    await I.pressKey("Enter")
 
-    await expect(page.locator(svelte.input)).toBeFocused()
-    await expect(page.locator(svelte.input)).toHaveValue("Svelte")
+    await I.addTag("Svelte")
+    await I.seeTag("Svelte")
 
-    const jenkins = item("Jenkins")
-    await page.keyboard.type(jenkins.text)
-    await page.keyboard.press("Enter")
-
-    await expectToBeSelected(page.locator(jenkins.tag))
-    await expect(page.locator(jenkins.input)).toBeHidden()
-
-    await expect(page.locator(input)).toBeFocused()
+    await I.seeInputHasValue("")
+    await I.seeInputIsFocused()
   })
 
-  test("add tags from paste event", async ({ page }) => {
-    await page.check(testid("addOnPaste"))
-    await page.focus(input)
+  test("should navigate tags with arrow keys", async () => {
+    await I.addTag("Svelte")
+    await I.addTag("Solid")
 
-    await page.$eval(input, paste, "Github, Jenkins")
+    await I.pressKey("ArrowLeft")
+    await I.seeTagIsHighlighted("Solid")
 
-    const github = item("Github")
-    const jenkins = item("Jenkins")
-    await expect(page.locator(github.tag)).toBeVisible()
-    await expect(page.locator(jenkins.tag)).toBeVisible()
+    await I.pressKey("ArrowLeft", 2)
+    await I.seeTagIsHighlighted("Vue")
+
+    await I.pressKey("ArrowRight")
+    await I.seeTagIsHighlighted("Svelte")
   })
 
-  test("clears highlighted tag on escape press", async ({ page }) => {
-    const svelte = item("Svelte")
-    await page.type(input, "Svelte")
+  test("should clear focused tag on blur", async () => {
+    await I.addTag("Svelte")
+    await I.addTag("Solid")
 
-    await page.keyboard.press("Enter")
-    await page.keyboard.press("ArrowLeft")
-    await page.keyboard.press("Escape")
+    await I.pressKey("ArrowLeft")
+    await I.clickOutside()
 
-    const tag = page.locator(svelte.tag)
-    expect(await tag.getAttribute("data-selected")).toBeFalsy()
+    await I.expectNoTagToBeHighlighted()
+  })
+
+  test("removes tag on close button click", async () => {
+    await I.clickTagClose("Vue")
+    await I.dontSeeTag("Vue")
+    await I.seeInputIsFocused()
+  })
+
+  test("edit tag with enter key", async () => {
+    await I.addTag("Svelte")
+    await I.addTag("Solid")
+    await I.pressKey("ArrowLeft", 2)
+
+    await I.pressKey("Enter")
+
+    await I.seeTagInputIsFocused("Svelte")
+    await I.editTag("Jenkins")
+
+    await I.seeTag("Jenkins")
+    await I.dontSeeTagInput("Jenkins")
+
+    await I.seeInputIsFocused()
+  })
+
+  test("edit with double click", async () => {
+    await I.addTag("Svelte")
+    await I.doubleClickTag("Svelte")
+
+    await I.seeTagInputIsFocused("Svelte")
+    await I.editTag("Jenkins")
+
+    await I.seeTag("Jenkins")
+    await I.dontSeeTagInput("Jenkins")
+  })
+
+  test("clears highlighted tag on escape press", async () => {
+    await I.addTag("Svelte")
+    await I.pressKey("ArrowLeft")
+    await I.pressKey("Escape")
+    await I.expectNoTagToBeHighlighted()
+  })
+
+  test("delete + backspace interaction", async () => {
+    await I.addTag("Svelte")
+    await I.addTag("Angular")
+
+    await I.clickTag("Vue")
+
+    await I.pressKey("Delete")
+    await I.seeTagIsHighlighted("Svelte")
+    await I.dontSeeTag("Vue")
+
+    await I.pressKey("Delete")
+    await I.seeTagIsHighlighted("Angular")
+    await I.dontSeeTag("Svelte")
+
+    await I.pressKey("Delete")
+    await I.dontSeeTag("Angular")
+    await I.expectNoTagToBeHighlighted()
+
+    await I.pressKey("Backspace")
+    await I.seeTagIsHighlighted("React")
+
+    await I.pressKey("Backspace")
+    await I.dontSeeTag("React")
+
+    await I.expectNoTagToBeHighlighted()
+  })
+
+  test("[addOnPaste: false] pasting should work every time", async () => {
+    await I.paste("Svelte")
+    await I.seeInputHasValue("Svelte")
+
+    await I.pressKey("Enter")
+    await I.seeTag("Svelte")
+
+    await I.pressKey("Backspace", 2)
+
+    await I.paste("Svelte")
+    await I.seeInputHasValue("Svelte")
+
+    await I.pressKey("Enter")
+    await I.seeTag("Svelte")
+  })
+
+  test("[addOnPaste: false] pasting + enter should work", async () => {
+    await I.paste("Svelte")
+    await I.pressKey("Enter")
+    await I.seeTag("Svelte")
+  })
+
+  test("[addOnPaste: true] pasting should add tags", async () => {
+    await I.controls.bool("addOnPaste", true)
+
+    await I.paste("Github, Jenkins")
+    await I.seeTag("Github")
+    await I.seeTag("Jenkins")
+  })
+
+  test("[addOnPaste: true] when input is empty, should work", async () => {
+    await I.controls.bool("addOnPaste", true)
+
+    // clear input
+    await I.deleteLastTag()
+    await I.deleteLastTag()
+
+    // paste
+    await I.paste("Github")
+    await I.seeTag("Github")
   })
 })

@@ -1,20 +1,15 @@
-import {
-  ariaAttr,
-  dataAttr,
-  EventKeyMap,
-  getEventKey,
-  getNativeEvent,
-  isModifiedEvent,
-  visuallyHiddenStyle,
-} from "@zag-js/dom-utils"
-import type { NormalizeProps, PropTypes } from "@zag-js/types"
+import { getEventKey, getNativeEvent, isModifierKey } from "@zag-js/dom-query"
+import { ariaAttr, dataAttr, getBeforeInputValue, isComposingEvent, visuallyHiddenStyle } from "@zag-js/dom-query"
+import type { EventKeyMap, NormalizeProps, PropTypes } from "@zag-js/types"
 import { invariant } from "@zag-js/utils"
+import { parts } from "./pin-input.anatomy"
 import { dom } from "./pin-input.dom"
-import type { Send, State } from "./pin-input.types"
+import type { MachineApi, Send, State } from "./pin-input.types"
+import { isValidValue } from "./pin-input.utils"
 
-export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>) {
-  const isValueComplete = state.context.isValueComplete
-  const isInvalid = state.context.invalid
+export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>): MachineApi<T> {
+  const complete = state.context.isValueComplete
+  const invalid = state.context.invalid
   const focusedIndex = state.context.focusedIndex
   const translations = state.context.translations
 
@@ -23,128 +18,173 @@ export function connect<T extends PropTypes>(state: State, send: Send, normalize
   }
 
   return {
+    focus,
     value: state.context.value,
     valueAsString: state.context.valueAsString,
-    isValueComplete: isValueComplete,
-    setValue(value: string[]) {
+    complete: complete,
+    setValue(value) {
       if (!Array.isArray(value)) {
         invariant("[pin-input/setValue] value must be an array")
       }
-      send({ type: "SET_VALUE", value })
+      send({ type: "VALUE.SET", value })
     },
     clearValue() {
-      send({ type: "CLEAR_VALUE" })
+      send({ type: "VALUE.CLEAR" })
     },
-    setValueAtIndex(index: number, value: string) {
-      send({ type: "SET_VALUE", value, index })
+    setValueAtIndex(index, value) {
+      send({ type: "VALUE.SET", value, index })
     },
-    focus,
 
-    rootProps: normalize.element({
-      dir: state.context.dir,
-      "data-part": "root",
-      id: dom.getRootId(state.context),
-      "data-invalid": dataAttr(isInvalid),
-      "data-disabled": dataAttr(state.context.disabled),
-      "data-complete": dataAttr(isValueComplete),
-    }),
+    getRootProps() {
+      return normalize.element({
+        dir: state.context.dir,
+        ...parts.root.attrs,
+        id: dom.getRootId(state.context),
+        "data-invalid": dataAttr(invalid),
+        "data-disabled": dataAttr(state.context.disabled),
+        "data-complete": dataAttr(complete),
+        "data-readonly": dataAttr(state.context.readOnly),
+      })
+    },
 
-    labelProps: normalize.label({
-      "data-part": "label",
-      htmlFor: dom.getHiddenInputId(state.context),
-      id: dom.getLabelId(state.context),
-      "data-invalid": dataAttr(isInvalid),
-      "data-disabled": dataAttr(state.context.disabled),
-      "data-complete": dataAttr(isValueComplete),
-      onClick: (event) => {
-        event.preventDefault()
-        focus()
-      },
-    }),
+    getLabelProps() {
+      return normalize.label({
+        ...parts.label.attrs,
+        dir: state.context.dir,
+        htmlFor: dom.getHiddenInputId(state.context),
+        id: dom.getLabelId(state.context),
+        "data-invalid": dataAttr(invalid),
+        "data-disabled": dataAttr(state.context.disabled),
+        "data-complete": dataAttr(complete),
+        "data-readonly": dataAttr(state.context.readOnly),
+        onClick(event) {
+          event.preventDefault()
+          focus()
+        },
+      })
+    },
 
-    hiddenInputProps: normalize.input({
-      "aria-hidden": true,
-      type: "text",
-      tabIndex: -1,
-      id: dom.getHiddenInputId(state.context),
-      name: state.context.name,
-      form: state.context.form,
-      style: visuallyHiddenStyle,
-      maxLength: state.context.valueLength,
-      defaultValue: state.context.valueAsString,
-    }),
+    getHiddenInputProps() {
+      return normalize.input({
+        "aria-hidden": true,
+        type: "text",
+        tabIndex: -1,
+        id: dom.getHiddenInputId(state.context),
+        readOnly: state.context.readOnly,
+        disabled: state.context.disabled,
+        required: state.context.required,
+        name: state.context.name,
+        form: state.context.form,
+        style: visuallyHiddenStyle,
+        maxLength: state.context.valueLength,
+        defaultValue: state.context.valueAsString,
+      })
+    },
 
-    getInputProps({ index }: { index: number }) {
+    getControlProps() {
+      return normalize.element({
+        ...parts.control.attrs,
+        dir: state.context.dir,
+        id: dom.getControlId(state.context),
+      })
+    },
+
+    getInputProps(props) {
+      const { index } = props
       const inputType = state.context.type === "numeric" ? "tel" : "text"
       return normalize.input({
-        "data-part": "input",
+        ...parts.input.attrs,
+        dir: state.context.dir,
         disabled: state.context.disabled,
         "data-disabled": dataAttr(state.context.disabled),
-        "data-complete": dataAttr(isValueComplete),
+        "data-complete": dataAttr(complete),
         id: dom.getInputId(state.context, index.toString()),
         "data-ownedby": dom.getRootId(state.context),
         "aria-label": translations.inputLabel(index, state.context.valueLength),
         inputMode: state.context.otp || state.context.type === "numeric" ? "numeric" : "text",
-        "aria-invalid": ariaAttr(isInvalid),
-        "data-invalid": dataAttr(isInvalid),
+        "aria-invalid": ariaAttr(invalid),
+        "data-invalid": dataAttr(invalid),
         type: state.context.mask ? "password" : inputType,
         defaultValue: state.context.value[index] || "",
+        readOnly: state.context.readOnly,
         autoCapitalize: "none",
         autoComplete: state.context.otp ? "one-time-code" : "off",
         placeholder: focusedIndex === index ? "" : state.context.placeholder,
+        onBeforeInput(event) {
+          try {
+            const value = getBeforeInputValue(event)
+            const isValid = isValidValue(state.context, value)
+            if (!isValid) {
+              send({ type: "VALUE.INVALID", value })
+              event.preventDefault()
+            }
+
+            // select the text so paste always replaces the
+            // current input's value regardless of cursor position
+            if (value.length > 2) {
+              event.currentTarget.setSelectionRange(0, 1, "forward")
+            }
+          } catch {
+            // noop
+          }
+        },
         onChange(event) {
           const evt = getNativeEvent(event)
           const { value } = event.currentTarget
+
           if (evt.inputType === "insertFromPaste" || value.length > 2) {
-            send({ type: "PASTE", value })
+            send({ type: "INPUT.PASTE", value })
+            // prevent multiple characters being pasted
+            // into a single input
+            event.currentTarget.value = value[0]
+
             event.preventDefault()
             return
           }
 
           if (evt.inputType === "deleteContentBackward") {
-            send("BACKSPACE")
+            send("INPUT.BACKSPACE")
             return
           }
-          send({ type: "INPUT", value })
+
+          send({ type: "INPUT.CHANGE", value, index })
         },
         onKeyDown(event) {
-          const evt = getNativeEvent(event)
-          if (evt.isComposing || isModifiedEvent(evt)) return
+          if (event.defaultPrevented) return
+
+          if (isComposingEvent(event)) return
+          if (isModifierKey(event)) return
 
           const keyMap: EventKeyMap = {
             Backspace() {
-              send("BACKSPACE")
+              send("INPUT.BACKSPACE")
             },
             Delete() {
-              send("DELETE")
+              send("INPUT.DELETE")
             },
             ArrowLeft() {
-              send("ARROW_LEFT")
+              send("INPUT.ARROW_LEFT")
             },
             ArrowRight() {
-              send("ARROW_RIGHT")
+              send("INPUT.ARROW_RIGHT")
             },
             Enter() {
-              send("ENTER")
+              send("INPUT.ENTER")
             },
           }
 
-          const key = getEventKey(event, { dir: state.context.dir })
-          const exec = keyMap[key]
+          const exec = keyMap[getEventKey(event, state.context)]
 
           if (exec) {
             exec(event)
             event.preventDefault()
-          } else {
-            if (key === "Tab") return
-            send({ type: "KEY_DOWN", value: key, preventDefault: () => event.preventDefault() })
           }
         },
         onFocus() {
-          send({ type: "FOCUS", index })
+          send({ type: "INPUT.FOCUS", index })
         },
         onBlur() {
-          send({ type: "BLUR", index })
+          send({ type: "INPUT.BLUR", index })
         },
       })
     },

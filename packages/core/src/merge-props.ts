@@ -1,4 +1,4 @@
-import { callAll } from "@zag-js/utils"
+import { callAll, isString } from "@zag-js/utils"
 
 interface Props {
   [key: string]: any
@@ -6,9 +6,33 @@ interface Props {
 
 const clsx = (...args: (string | undefined)[]) =>
   args
-    .map((str) => str?.trim())
+    .map((str) => str?.trim?.())
     .filter(Boolean)
     .join(" ")
+
+const CSS_REGEX = /((?:--)?(?:\w+-?)+)\s*:\s*([^;]*)/g
+
+const serialize = (style: string): Record<string, string> => {
+  const res: Record<string, string> = {}
+  let match: RegExpExecArray | null
+  while ((match = CSS_REGEX.exec(style))) {
+    res[match[1]!] = match[2]!
+  }
+  return res
+}
+
+const css = (
+  a: Record<string, string> | string | undefined,
+  b: Record<string, string> | string | undefined,
+): Record<string, string> | string => {
+  if (isString(a)) {
+    if (isString(b)) return `${a};${b}`
+    a = serialize(a)
+  } else if (isString(b)) {
+    b = serialize(b)
+  }
+  return Object.assign({}, a ?? {}, b ?? {})
+}
 
 type TupleTypes<T extends any[]> = T[number]
 
@@ -19,8 +43,8 @@ export function mergeProps<T extends Props>(...args: T[]): UnionToIntersection<T
 
   for (let props of args) {
     for (let key in result) {
-      if (/^on[A-Z]/.test(key) && typeof result[key] === "function" && typeof props[key] === "function") {
-        result[key] = callAll(result[key], props[key])
+      if (key.startsWith("on") && typeof result[key] === "function" && typeof props[key] === "function") {
+        result[key] = callAll(props[key], result[key])
         continue
       }
 
@@ -30,7 +54,7 @@ export function mergeProps<T extends Props>(...args: T[]): UnionToIntersection<T
       }
 
       if (key === "style") {
-        result[key] = Object.assign({}, result[key] ?? {}, props[key] ?? {})
+        result[key] = css(result[key], props[key])
         continue
       }
 

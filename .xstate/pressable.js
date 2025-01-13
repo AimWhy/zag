@@ -11,11 +11,12 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "pressable",
-  initial: "unknown",
+  initial: "idle",
   context: {
-    "isVirtualPointerEvent": false,
+    "isVirtualPointer": false,
     "wasPressedDown": false,
-    "cancelOnPointerExit": false
+    "cancelOnPointerExit": false,
+    "wasPressedDown": false
   },
   exit: ["restoreTextSelection", "removeDocumentListeners"],
   on: {
@@ -24,16 +25,11 @@ const fetchMachine = createMachine({
     }
   },
   states: {
-    unknown: {
-      on: {
-        SETUP: "idle"
-      }
-    },
     idle: {
-      entry: ["removeDocumentListeners", "resetContext", "restoreTextSelection", "resetIgnoreClick"],
+      entry: ["resetPointerContext", "restoreTextSelection", "removeDocumentListeners"],
       on: {
         POINTER_DOWN: [{
-          cond: "isVirtualPointerEvent",
+          cond: "isVirtualPointer",
           actions: "setPointerType"
         }, {
           target: "pressed:in",
@@ -41,46 +37,51 @@ const fetchMachine = createMachine({
         }],
         KEY_DOWN: {
           target: "pressed:in",
-          actions: ["setTarget", "invokeOnPressStart", "trackDocumentKeyup"]
+          actions: ["setTarget", "setPointerType", "invokeOnPressStart", "trackDocumentKeyup"]
         },
         CLICK: {
-          actions: ["focusIfNeeded", "invokeOnPressStart", "invokeOnPressUp", "invokeOnPressEnd", "resetIgnoreClick"]
+          actions: ["focusIfNeeded", "invokeOnPressStart", "enableClickAfterPress", "invokeOnPressEnd", "invokeOnPress"]
         }
       }
     },
     "pressed:in": {
       tags: "pressed",
-      exit: "clearPressedDown",
       entry: "preventContextMenu",
       after: {
-        500: {
+        LONG_PRESS_DELAY: {
           cond: "wasPressedDown",
-          actions: "invokeOnLongPress"
+          actions: ["clearPressedDown", "invokeOnLongPress"]
         }
       },
       on: {
         POINTER_LEAVE: [{
           cond: "cancelOnPointerExit",
           target: "idle",
-          actions: "invokeOnPressEnd"
+          actions: ["clearPressedDown", "invokeOnPressEnd"]
         }, {
           target: "pressed:out",
-          actions: "invokeOnPressEnd"
+          actions: ["invokeOnPressEnd"]
         }],
-        DOC_POINTER_UP: {
+        DOC_POINTER_UP: [{
+          cond: "wasPressedDown",
           target: "idle",
-          actions: ["invokeOnPressUp", "invokeOnPressEnd", "invokeOnPress"]
-        },
+          actions: ["clearPressedDown", "invokeOnPressUp", "enableClickAfterPress", "invokeOnPressEnd", "invokeOnPress"]
+        }, {
+          target: "idle",
+          actions: ["clearPressedDown", "invokeOnPressUp", "enableClickAfterPress", "invokeOnPressEnd"]
+        }],
         DOC_KEY_UP: {
           target: "idle",
-          actions: ["invokeOnPressEnd", "triggerClick"]
+          actions: ["clearPressedDown", "invokeOnPressUp", "disableClickAfterPress", "invokeOnPressEnd", "invokeOnPress", "triggerClickIfAnchor"]
         },
-        KEY_UP: {
+        DOC_POINTER_CANCEL: {
           target: "idle",
-          actions: "invokeOnPressUp"
+          actions: "clearPressedDown"
         },
-        DOC_POINTER_CANCEL: "idle",
-        DRAG_START: "idle"
+        DRAG_START: {
+          target: "idle",
+          actions: "clearPressedDown"
+        }
       }
     },
     "pressed:out": {
@@ -90,8 +91,7 @@ const fetchMachine = createMachine({
           actions: "invokeOnPressStart"
         },
         DOC_POINTER_UP: {
-          target: "idle",
-          actions: "invokeOnPressEnd"
+          target: "idle"
         },
         DOC_POINTER_CANCEL: "idle",
         DRAG_START: "idle"
@@ -107,7 +107,7 @@ const fetchMachine = createMachine({
     })
   },
   guards: {
-    "isVirtualPointerEvent": ctx => ctx["isVirtualPointerEvent"],
+    "isVirtualPointer": ctx => ctx["isVirtualPointer"],
     "wasPressedDown": ctx => ctx["wasPressedDown"],
     "cancelOnPointerExit": ctx => ctx["cancelOnPointerExit"]
   }

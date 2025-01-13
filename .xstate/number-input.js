@@ -11,31 +11,30 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "number-input",
-  initial: "unknown",
+  initial: "idle",
   context: {
-    "clampOnBlur": false,
-    "isInvalidExponential": false,
-    "clampOnBlur && !isInRange && !isEmptyValue": false,
+    "isTouchPointer": false,
+    "isTouchPointer": false,
+    "clampValueOnBlur && !isInRange": false,
     "isIncrementHint": false,
     "isDecrementHint": false,
     "isInRange && spinOnPress": false,
+    "isTouchPointer": false,
     "isIncrementHint": false,
     "isDecrementHint": false
   },
+  activities: ["trackFormControl"],
   on: {
-    SET_VALUE: [{
-      cond: "clampOnBlur",
-      actions: ["setValue", "clampValue", "setHintToSet"]
-    }, {
-      actions: ["setValue", "setHintToSet"]
-    }],
-    CLEAR_VALUE: {
+    "VALUE.SET": {
+      actions: ["setRawValue", "setHintToSet"]
+    },
+    "VALUE.CLEAR": {
       actions: ["clearValue"]
     },
-    INCREMENT: {
+    "VALUE.INCREMENT": {
       actions: ["increment"]
     },
-    DECREMENT: {
+    "VALUE.DECREMENT": {
       actions: ["decrement"]
     }
   },
@@ -45,68 +44,68 @@ const fetchMachine = createMachine({
     }
   },
   states: {
-    unknown: {
-      on: {
-        SETUP: {
-          target: "idle",
-          actions: "syncInputValue"
-        }
-      }
-    },
     idle: {
-      exit: "invokeOnFocus",
       on: {
-        PRESS_DOWN: {
+        "TRIGGER.PRESS_DOWN": [{
+          cond: "isTouchPointer",
           target: "before:spin",
-          actions: ["focusInput", "setHint"]
-        },
-        PRESS_DOWN_SCRUBBER: {
+          actions: ["setHint"]
+        }, {
+          target: "before:spin",
+          actions: ["focusInput", "invokeOnFocus", "setHint"]
+        }],
+        "SCRUBBER.PRESS_DOWN": {
           target: "scrubbing",
-          actions: ["focusInput", "setHint", "setCursorPoint"]
+          actions: ["focusInput", "invokeOnFocus", "setHint", "setCursorPoint"]
         },
-        FOCUS: "focused"
+        "INPUT.FOCUS": {
+          target: "focused",
+          actions: ["focusInput", "invokeOnFocus"]
+        }
       }
     },
     focused: {
       tags: "focus",
-      entry: "focusInput",
       activities: "attachWheelListener",
       on: {
-        PRESS_DOWN: {
+        "TRIGGER.PRESS_DOWN": [{
+          cond: "isTouchPointer",
+          target: "before:spin",
+          actions: ["setHint"]
+        }, {
           target: "before:spin",
           actions: ["focusInput", "setHint"]
-        },
-        PRESS_DOWN_SCRUBBER: {
+        }],
+        "SCRUBBER.PRESS_DOWN": {
           target: "scrubbing",
           actions: ["focusInput", "setHint", "setCursorPoint"]
         },
-        ARROW_UP: {
+        "INPUT.ARROW_UP": {
           actions: "increment"
         },
-        ARROW_DOWN: {
+        "INPUT.ARROW_DOWN": {
           actions: "decrement"
         },
-        HOME: {
-          actions: "setToMin"
+        "INPUT.HOME": {
+          actions: "decrementToMin"
         },
-        END: {
-          actions: "setToMax"
+        "INPUT.END": {
+          actions: "incrementToMax"
         },
-        CHANGE: {
+        "INPUT.CHANGE": {
           actions: ["setValue", "setHint"]
         },
-        BLUR: [{
-          cond: "isInvalidExponential",
+        "INPUT.BLUR": [{
+          cond: "clampValueOnBlur && !isInRange",
           target: "idle",
-          actions: ["clearValue", "clearHint", "invokeOnBlur"]
-        }, {
-          cond: "clampOnBlur && !isInRange && !isEmptyValue",
-          target: "idle",
-          actions: ["clampValue", "clearHint", "invokeOnBlur"]
+          actions: ["setClampedValue", "clearHint", "invokeOnBlur"]
         }, {
           target: "idle",
-          actions: ["roundValue", "invokeOnBlur"]
-        }]
+          actions: ["setFormattedValue", "clearHint", "invokeOnBlur"]
+        }],
+        "INPUT.ENTER": {
+          actions: ["setFormattedValue", "clearHint", "invokeOnBlur"]
+        }
       }
     },
     "before:spin": {
@@ -126,10 +125,14 @@ const fetchMachine = createMachine({
         }
       },
       on: {
-        PRESS_UP: {
+        "TRIGGER.PRESS_UP": [{
+          cond: "isTouchPointer",
           target: "focused",
           actions: "clearHint"
-        }
+        }, {
+          target: "focused",
+          actions: ["focusInput", "clearHint"]
+        }]
       }
     },
     spinning: {
@@ -140,19 +143,21 @@ const fetchMachine = createMachine({
         id: "interval"
       },
       on: {
-        PRESS_UP: {
+        "TRIGGER.PRESS_UP": {
           target: "focused",
-          actions: "clearHint"
+          actions: ["focusInput", "clearHint"]
         }
       }
     },
     scrubbing: {
       tags: "focus",
-      exit: "clearCursorPoint",
       activities: ["activatePointerLock", "trackMousemove", "setupVirtualCursor", "preventTextSelection"],
       on: {
-        POINTER_UP_SCRUBBER: "focused",
-        POINTER_MOVE_SCRUBBER: [{
+        "SCRUBBER.POINTER_UP": {
+          target: "focused",
+          actions: ["focusInput", "clearCursorPoint"]
+        },
+        "SCRUBBER.POINTER_MOVE": [{
           cond: "isIncrementHint",
           actions: ["increment", "setCursorPoint"]
         }, {
@@ -175,9 +180,8 @@ const fetchMachine = createMachine({
     CHANGE_INTERVAL: 50
   },
   guards: {
-    "clampOnBlur": ctx => ctx["clampOnBlur"],
-    "isInvalidExponential": ctx => ctx["isInvalidExponential"],
-    "clampOnBlur && !isInRange && !isEmptyValue": ctx => ctx["clampOnBlur && !isInRange && !isEmptyValue"],
+    "isTouchPointer": ctx => ctx["isTouchPointer"],
+    "clampValueOnBlur && !isInRange": ctx => ctx["clampValueOnBlur && !isInRange"],
     "isIncrementHint": ctx => ctx["isIncrementHint"],
     "isDecrementHint": ctx => ctx["isDecrementHint"],
     "isInRange && spinOnPress": ctx => ctx["isInRange && spinOnPress"]

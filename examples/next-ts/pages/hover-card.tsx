@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-target-blank */
 import * as hoverCard from "@zag-js/hover-card"
 import { normalizeProps, Portal, useMachine } from "@zag-js/react"
 import { hoverCardControls } from "@zag-js/shared"
@@ -24,16 +25,16 @@ export default function Page() {
     <>
       <main className="hover-card">
         <div style={{ display: "flex", gap: "50px" }}>
-          <a href="https://twitter.com/zag_js" target="_blank" {...api.triggerProps}>
+          <a href="https://twitter.com/zag_js" target="_blank" {...api.getTriggerProps()}>
             Twitter
           </a>
 
-          {api.isOpen && (
+          {api.open && (
             <Portal>
-              <div {...api.positionerProps}>
-                <div className="hover-card-content" {...api.contentProps}>
-                  <div {...api.arrowProps}>
-                    <div {...api.innerArrowProps} />
+              <div {...api.getPositionerProps()}>
+                <div {...api.getContentProps()}>
+                  <div {...api.getArrowProps()}>
+                    <div {...api.getArrowTipProps()} />
                   </div>
                   Twitter Preview
                   <a href="https://twitter.com/zag_js" target="_blank">

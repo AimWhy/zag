@@ -1,183 +1,664 @@
 # @zag-js/svelte
 
-## 0.2.2
+## 0.81.2
 
 ### Patch Changes
 
-- [`44feef0b`](https://github.com/chakra-ui/zag/commit/44feef0bdf312e27d6faf1aa8ab0ecff0281108c) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Provide deep merge utility for nested context values
+- Updated dependencies []:
+  - @zag-js/core@0.81.2
+  - @zag-js/types@0.81.2
 
-- Updated dependencies [[`44feef0b`](https://github.com/chakra-ui/zag/commit/44feef0bdf312e27d6faf1aa8ab0ecff0281108c),
-  [`810e7d85`](https://github.com/chakra-ui/zag/commit/810e7d85274a26e0fe76dbdb2829fd7ab7f982a6),
-  [`e328b306`](https://github.com/chakra-ui/zag/commit/e328b306bf06d151fff4907a7e8e1160f07af855)]:
-  - @zag-js/core@0.2.2
-
-## 0.2.1
+## 0.81.1
 
 ### Patch Changes
 
-- [#384](https://github.com/chakra-ui/zag/pull/384)
-  [`4aa6955f`](https://github.com/chakra-ui/zag/commit/4aa6955fab7ff6fee8545dcf491576640c69c64e) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Improve support for updating the internal machine options.
+- Updated dependencies []:
+  - @zag-js/core@0.81.1
+  - @zag-js/types@0.81.1
 
-  Fix react controlled context.
+## 0.81.0
 
-- Updated dependencies [[`4aa6955f`](https://github.com/chakra-ui/zag/commit/4aa6955fab7ff6fee8545dcf491576640c69c64e)]:
-  - @zag-js/core@0.2.1
+### Patch Changes
 
-## 0.2.0
+- Updated dependencies [[`552e55d`](https://github.com/chakra-ui/zag/commit/552e55db4ec8c0fa86c5b7e5ce3ad08eb350ca68)]:
+  - @zag-js/types@0.81.0
+  - @zag-js/core@0.81.0
+
+## 0.80.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.80.0
+  - @zag-js/types@0.80.0
+
+## 0.79.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.79.3
+  - @zag-js/types@0.79.3
+
+## 0.79.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.79.2
+  - @zag-js/types@0.79.2
+
+## 0.79.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.79.1
+  - @zag-js/types@0.79.1
+
+## 0.79.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.79.0
+  - @zag-js/types@0.79.0
+
+## 0.78.3
+
+### Patch Changes
+
+- Updated dependencies [[`5584a83`](https://github.com/chakra-ui/zag/commit/5584a833151ee9f2c2ef9c07b6d699addfbca18e)]:
+  - @zag-js/core@0.78.3
+  - @zag-js/types@0.78.3
+
+## 0.78.2
+
+### Patch Changes
+
+- [`3e46aa6`](https://github.com/chakra-ui/zag/commit/3e46aa67bca8af25d384861d4627c943cdee89fb) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix prop normalization issue where `viewBox` was incorrectly
+  converted to `viewbox` and renders svg incorrectly.
+
+- Updated dependencies []:
+  - @zag-js/core@0.78.2
+  - @zag-js/types@0.78.2
+
+## 0.78.1
+
+### Patch Changes
+
+- [`224b31a`](https://github.com/chakra-ui/zag/commit/224b31a3aecd3ef18a69783a81218658e06b51a4) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - - Fix issue with useService where machine gets stopped and started
+  at `$effect` time, rather than `onMount` time
+  - Improve reactivity of `useService` when `context` changes
+- Updated dependencies []:
+  - @zag-js/core@0.78.1
+  - @zag-js/types@0.78.1
+
+## 0.78.0
+
+### Patch Changes
+
+- [#2047](https://github.com/chakra-ui/zag/pull/2047)
+  [`44106f6`](https://github.com/chakra-ui/zag/commit/44106f6779b6340d49174035e5abe09b9055baf6) Thanks
+  [@anubra266](https://github.com/anubra266)! - Fix style merging in svelte `mergeProps`
+
+- Updated dependencies []:
+  - @zag-js/core@0.78.0
+  - @zag-js/types@0.78.0
+
+## 0.77.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.77.1
+  - @zag-js/types@0.77.1
+
+## 0.77.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.77.0
+  - @zag-js/types@0.77.0
+
+## 0.76.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.76.0
+  - @zag-js/types@0.76.0
+
+## 0.75.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.75.0
+  - @zag-js/types@0.75.0
+
+## 0.74.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.74.2
+  - @zag-js/types@0.74.2
+
+## 0.74.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.74.1
+  - @zag-js/types@0.74.1
+
+## 0.74.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.74.0
+  - @zag-js/types@0.74.0
+
+## 0.73.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.73.1
+  - @zag-js/types@0.73.1
+
+## 0.73.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.73.0
+  - @zag-js/types@0.73.0
+
+## 0.72.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.72.0
+  - @zag-js/types@0.72.0
+
+## 0.71.0
 
 ### Minor Changes
 
-- [#375](https://github.com/chakra-ui/zag/pull/375)
-  [`9cb4e9de`](https://github.com/chakra-ui/zag/commit/9cb4e9de28a3c6666860bc068c86be67a3b1a2ca) Thanks
-  [@darrylblake](https://github.com/darrylblake)! - Ensures code is transpiled with `es2019` target for environments
-  that don't support `es2020` and up, i.e. Cypress.
+- [`b3a251e`](https://github.com/chakra-ui/zag/commit/b3a251e5e10b9b27af353e0f41117329846b14e9) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - We no longer ship `src` files in the packages.
 
 ### Patch Changes
 
-- Updated dependencies [[`9cb4e9de`](https://github.com/chakra-ui/zag/commit/9cb4e9de28a3c6666860bc068c86be67a3b1a2ca)]:
-  - @zag-js/core@0.2.0
+- Updated dependencies [[`b3a251e`](https://github.com/chakra-ui/zag/commit/b3a251e5e10b9b27af353e0f41117329846b14e9)]:
+  - @zag-js/core@0.71.0
+  - @zag-js/types@0.71.0
 
-## 0.1.15
-
-### Patch Changes
-
-- [`52552156`](https://github.com/chakra-ui/zag/commit/52552156ded1b00f873576f52b11d0414f5dfee7) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Force new release
-
-- Updated dependencies [[`52552156`](https://github.com/chakra-ui/zag/commit/52552156ded1b00f873576f52b11d0414f5dfee7)]:
-  - @zag-js/core@0.1.12
-
-## 0.1.14
+## 0.70.0
 
 ### Patch Changes
 
-- [#325](https://github.com/chakra-ui/zag/pull/325)
-  [`c0cc303e`](https://github.com/chakra-ui/zag/commit/c0cc303e9824ea395c06d9faa699d23e19ef6538) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Switch packages to use ESM and `type=module`
+- Updated dependencies []:
+  - @zag-js/core@0.70.0
+  - @zag-js/types@0.70.0
 
-- Updated dependencies [[`61c11646`](https://github.com/chakra-ui/zag/commit/61c116467c1758bdda7efe1f27d4ed26e7d44624),
-  [`c0cc303e`](https://github.com/chakra-ui/zag/commit/c0cc303e9824ea395c06d9faa699d23e19ef6538)]:
-  - @zag-js/core@0.1.11
-
-## 0.1.13
+## 0.69.0
 
 ### Patch Changes
 
-- [`55e6a55c`](https://github.com/chakra-ui/zag/commit/55e6a55c37a60eea5caa446270cd1f6012d7363d) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Bump all packages
+- Updated dependencies []:
+  - @zag-js/core@0.69.0
+  - @zag-js/types@0.69.0
 
-- Updated dependencies [[`ce97956c`](https://github.com/chakra-ui/zag/commit/ce97956c0586ce842f7b082dd71cc6d68909ad58),
-  [`55e6a55c`](https://github.com/chakra-ui/zag/commit/55e6a55c37a60eea5caa446270cd1f6012d7363d)]:
-  - @zag-js/core@0.1.10
-
-## 0.1.12
+## 0.68.1
 
 ### Patch Changes
 
-- [#224](https://github.com/chakra-ui/zag/pull/224)
-  [`b7eb3f20`](https://github.com/chakra-ui/zag/commit/b7eb3f204cda6ac913b66787c27942294abfb0ee) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Update framework dependencies
+- Updated dependencies []:
+  - @zag-js/core@0.68.1
+  - @zag-js/types@0.68.1
 
-## 0.1.11
-
-### Patch Changes
-
-- [`2a2566b8`](https://github.com/chakra-ui/zag/commit/2a2566b8be1441ae98215bec594e4c996f3b8aaf) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Trigger new version due to changes in build chain
-
-- Updated dependencies [[`2a2566b8`](https://github.com/chakra-ui/zag/commit/2a2566b8be1441ae98215bec594e4c996f3b8aaf)]:
-  - @zag-js/core@0.1.9
-
-## 0.1.10
+## 0.68.0
 
 ### Patch Changes
 
-- Updated dependencies [[`c5872be2`](https://github.com/chakra-ui/zag/commit/c5872be2fe057675fb8c7c64ed2c10b99daf697e)]:
-  - @zag-js/core@0.1.8
+- Updated dependencies []:
+  - @zag-js/core@0.68.0
+  - @zag-js/types@0.68.0
 
-## 0.1.9
-
-### Patch Changes
-
-- [`664e61f9`](https://github.com/chakra-ui/zag/commit/664e61f94844f0405b7e646e4a30b8f0f737f21c) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Pin dependency versions
-
-- Updated dependencies [[`1abed11b`](https://github.com/chakra-ui/zag/commit/1abed11bda7fc56fd3f77c3b842e89a934ee3253),
-  [`3a53a1e9`](https://github.com/chakra-ui/zag/commit/3a53a1e97306a9fedf1706b95f8e38b03750c2f3)]:
-  - @zag-js/core@0.1.7
-
-## 0.1.8
+## 0.67.0
 
 ### Patch Changes
 
-- [#144](https://github.com/chakra-ui/zag/pull/144)
-  [`19faf7eb`](https://github.com/chakra-ui/zag/commit/19faf7eb1c16a825072d232ce39caf7394b247d1) Thanks
-  [@renovate](https://github.com/apps/renovate)! - chore(deps): update dependency svelte to v3.48.0
+- Updated dependencies []:
+  - @zag-js/core@0.67.0
+  - @zag-js/types@0.67.0
 
-## 0.1.7
-
-### Patch Changes
-
-- Updated dependencies [[`5982d826`](https://github.com/chakra-ui/zag/commit/5982d826126a7b83252fcd0b0479079fccb62189)]:
-  - @zag-js/core@0.1.6
-
-## 0.1.6
+## 0.66.1
 
 ### Patch Changes
 
-- [`3e920136`](https://github.com/chakra-ui/zag/commit/3e920136c537445a36cf0d04045de1d8ff037ecf) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Expose type utilities to frameworks
+- Updated dependencies []:
+  - @zag-js/core@0.66.1
+  - @zag-js/types@0.66.1
 
-- Updated dependencies [[`0d3065e9`](https://github.com/chakra-ui/zag/commit/0d3065e94d707d3161d901576421beae66c32aba),
-  [`587cbec9`](https://github.com/chakra-ui/zag/commit/587cbec9b32ee9e8faef5ceeefb779231b152018)]:
-  - @zag-js/core@0.1.5
-
-## 0.1.5
+## 0.66.0
 
 ### Patch Changes
 
-- Updated dependencies [[`bcf247f1`](https://github.com/chakra-ui/zag/commit/bcf247f18afa5413a7b008f5ab5cbd3665350cb9),
-  [`a71d5d2a`](https://github.com/chakra-ui/zag/commit/a71d5d2a984e4293ebeb55944e27df20492ad1c0)]:
-  - @zag-js/core@0.1.4
+- Updated dependencies []:
+  - @zag-js/core@0.66.0
+  - @zag-js/types@0.66.0
 
-## 0.1.4
-
-### Patch Changes
-
-- Updated dependencies [[`46ef565`](https://github.com/chakra-ui/zag/commit/46ef5659a855a382af1e5b0e24d35d03466cfb22)]:
-  - @zag-js/core@0.1.3
-
-## 0.1.3
+## 0.65.1
 
 ### Patch Changes
 
-- Updated dependencies [[`3f715bd`](https://github.com/chakra-ui/zag/commit/3f715bdc4f52cdbf71ce9a22a3fc20d31c5fea89)]:
-  - @zag-js/core@0.1.2
+- [#1785](https://github.com/chakra-ui/zag/pull/1785)
+  [`18371e9`](https://github.com/chakra-ui/zag/commit/18371e9e051a7f5709bc6f693b0530fe75cd2bd9) Thanks
+  [@Hugos68](https://github.com/Hugos68)! - Fix issue where peerDependencies were configured correctly.
 
-## 0.1.2
+- Updated dependencies []:
+  - @zag-js/core@0.65.1
+  - @zag-js/types@0.65.1
 
-### Patch Changes
-
-- Updated dependencies [[`8ef855e`](https://github.com/chakra-ui/zag/commit/8ef855efdf8aaca4355c816cc446bc745e34ec54)]:
-  - @zag-js/core@0.1.1
-
-## 0.1.1
+## 0.65.0
 
 ### Patch Changes
 
-- [`3e145c1`](https://github.com/chakra-ui/zag/commit/3e145c185d598766aae420f724c7759390cb0404) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Export `mergeProps` utility from framework packages
+- Updated dependencies []:
+  - @zag-js/core@0.65.0
+  - @zag-js/types@0.65.0
 
-## 0.1.0
+## 0.64.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.64.0
+  - @zag-js/types@0.64.0
+
+## 0.63.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.63.0
+  - @zag-js/types@0.63.0
+
+## 0.62.1
+
+### Patch Changes
+
+- Updated dependencies [[`5644790`](https://github.com/chakra-ui/zag/commit/564479081d37cd06bc38043fccf9c229379a1531)]:
+  - @zag-js/core@0.62.1
+  - @zag-js/types@0.62.1
+
+## 0.62.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.62.0
+  - @zag-js/types@0.62.0
+
+## 0.61.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.61.1
+  - @zag-js/types@0.61.1
+
+## 0.61.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.61.0
+  - @zag-js/types@0.61.0
+
+## 0.60.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.60.0
+  - @zag-js/types@0.60.0
+
+## 0.59.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.59.0
+  - @zag-js/types@0.59.0
+
+## 0.58.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.58.3
+  - @zag-js/types@0.58.3
+
+## 0.58.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.58.2
+  - @zag-js/types@0.58.2
+
+## 0.58.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.58.1
+  - @zag-js/types@0.58.1
+
+## 0.58.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.58.0
+  - @zag-js/types@0.58.0
+
+## 0.57.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.57.0
+  - @zag-js/types@0.57.0
+
+## 0.56.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.56.1
+  - @zag-js/types@0.56.1
+
+## 0.56.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.56.0
+  - @zag-js/types@0.56.0
+
+## 0.55.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.55.0
+  - @zag-js/types@0.55.0
+
+## 0.54.0
+
+### Patch Changes
+
+- Updated dependencies [[`590c177`](https://github.com/chakra-ui/zag/commit/590c1779f5208fb99114c872175e779508f2f96d)]:
+  - @zag-js/core@0.54.0
+  - @zag-js/types@0.54.0
+
+## 0.53.0
 
 ### Minor Changes
 
-- [`157aadc`](https://github.com/chakra-ui/zag/commit/157aadc3ac572d2289432efe32ae3f15a2be4ad1) Thanks
-  [@segunadebayo](https://github.com/segunadebayo)! - Initial release
+- [`0ab812c`](https://github.com/chakra-ui/zag/commit/0ab812ce0bd4c648ecf838dda38ccf0a9b15a1a5) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - - Fix svelte runes warning for `$state` usage in `useMachine` hook
+  - Add `reflect` utility to help design system maintainers manage `api` reactivity
+  - Add and expose `PropTypes` type to improve type safety in spread props
 
 ### Patch Changes
 
-- Updated dependencies [[`157aadc`](https://github.com/chakra-ui/zag/commit/157aadc3ac572d2289432efe32ae3f15a2be4ad1)]:
-  - @zag-js/core@0.1.0
+- Updated dependencies []:
+  - @zag-js/core@0.53.0
+  - @zag-js/types@0.53.0
+
+## 0.52.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.52.0
+  - @zag-js/types@0.52.0
+
+## 0.51.2
+
+### Patch Changes
+
+- Updated dependencies [[`62eb21b`](https://github.com/chakra-ui/zag/commit/62eb21b60355dd0645936baf4692315134e7488c)]:
+  - @zag-js/core@0.51.2
+  - @zag-js/types@0.51.2
+
+## 0.51.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.51.1
+  - @zag-js/types@0.51.1
+
+## 0.51.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.51.0
+  - @zag-js/types@0.51.0
+
+## 0.50.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.50.0
+  - @zag-js/types@0.50.0
+
+## 0.49.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.49.0
+  - @zag-js/types@0.49.0
+
+## 0.48.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.48.0
+  - @zag-js/types@0.48.0
+
+## 0.47.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.47.0
+  - @zag-js/types@0.47.0
+
+## 0.46.0
+
+### Minor Changes
+
+- [`6523a23`](https://github.com/chakra-ui/zag/commit/6523a23e6991e7a629d905694092a7bf210d33e5) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Add support for `useActor` hook to be consistent with other
+  frameworks
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.46.0
+  - @zag-js/types@0.46.0
+
+## 0.45.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.45.0
+  - @zag-js/types@0.45.0
+
+## 0.44.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.44.0
+  - @zag-js/types@0.44.0
+
+## 0.43.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.43.0
+  - @zag-js/types@0.43.0
+
+## 0.42.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.42.0
+  - @zag-js/types@0.42.0
+
+## 0.41.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.41.0
+  - @zag-js/types@0.41.0
+
+## 0.40.0
+
+### Minor Changes
+
+- [`c68fb4c`](https://github.com/chakra-ui/zag/commit/c68fb4c72c0758c76106b6b8db3718a6bd04256b) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Unify API for `useService` and `useMachine` with other frameworks
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.40.0
+  - @zag-js/types@0.40.0
+
+## 0.39.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.39.0
+  - @zag-js/types@0.39.0
+
+## 0.38.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.38.1
+  - @zag-js/types@0.38.1
+
+## 0.38.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.38.0
+  - @zag-js/types@0.38.0
+
+## 0.37.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.37.3
+  - @zag-js/types@0.37.3
+
+## 0.37.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.37.2
+  - @zag-js/types@0.37.2
+
+## 0.37.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.37.1
+  - @zag-js/types@0.37.1
+
+## 0.37.0
+
+### Patch Changes
+
+- Updated dependencies [[`2a024fb`](https://github.com/chakra-ui/zag/commit/2a024fbd2e98343218d4d658e91f1d8c751e1a4d)]:
+  - @zag-js/types@0.37.0
+  - @zag-js/core@0.37.0
+
+## 0.36.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.36.3
+  - @zag-js/types@0.36.3
+
+## 0.36.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.36.2
+  - @zag-js/types@0.36.2
+
+## 0.36.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.36.1
+  - @zag-js/types@0.36.1
+
+## 0.36.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.36.0
+  - @zag-js/types@0.36.0
+
+## 0.35.0
+
+### Patch Changes
+
+- Updated dependencies [[`0216161`](https://github.com/chakra-ui/zag/commit/0216161fd3d429409abc96941d33a0c333ef8d36)]:
+  - @zag-js/core@0.35.0
+  - @zag-js/types@0.35.0
+
+## 0.34.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/core@0.34.0
+  - @zag-js/types@0.34.0

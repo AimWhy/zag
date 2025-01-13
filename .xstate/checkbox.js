@@ -11,35 +11,27 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "checkbox",
-  initial: ctx.defaultChecked ? "checked" : "unchecked",
+  initial: "ready",
   context: {
-    "shouldCheck && isInteractive": false,
-    "isInteractive": false,
-    "isInteractive": false,
-    "isInteractive": false
+    "!isTrusted": false,
+    "!isTrusted": false
   },
-  activities: ["trackFormControlState"],
+  activities: ["trackFormControlState", "trackPressEvent", "trackFocusVisible"],
   on: {
-    SET_STATE: [{
-      cond: "shouldCheck && isInteractive",
-      target: "checked",
-      actions: "dispatchChangeEvent"
+    "CHECKED.TOGGLE": [{
+      cond: "!isTrusted",
+      actions: ["toggleChecked", "dispatchChangeEvent"]
     }, {
-      cond: "isInteractive",
-      target: "unchecked",
-      actions: "dispatchChangeEvent"
+      actions: ["toggleChecked"]
     }],
-    SET_ACTIVE: {
-      actions: "setActive"
-    },
-    SET_HOVERED: {
-      actions: "setHovered"
-    },
-    SET_FOCUSED: {
-      actions: "setFocused"
-    },
-    SET_INDETERMINATE: {
-      actions: "setIndeterminate"
+    "CHECKED.SET": [{
+      cond: "!isTrusted",
+      actions: ["setChecked", "dispatchChangeEvent"]
+    }, {
+      actions: ["setChecked"]
+    }],
+    "CONTEXT.SET": {
+      actions: ["setContext"]
     }
   },
   on: {
@@ -48,24 +40,7 @@ const fetchMachine = createMachine({
     }
   },
   states: {
-    checked: {
-      on: {
-        TOGGLE: {
-          target: "unchecked",
-          cond: "isInteractive",
-          actions: ["invokeOnChange"]
-        }
-      }
-    },
-    unchecked: {
-      on: {
-        TOGGLE: {
-          target: "checked",
-          cond: "isInteractive",
-          actions: ["invokeOnChange"]
-        }
-      }
-    }
+    ready: {}
   }
 }, {
   actions: {
@@ -76,7 +51,6 @@ const fetchMachine = createMachine({
     })
   },
   guards: {
-    "shouldCheck && isInteractive": ctx => ctx["shouldCheck && isInteractive"],
-    "isInteractive": ctx => ctx["isInteractive"]
+    "!isTrusted": ctx => ctx["!isTrusted"]
   }
 });

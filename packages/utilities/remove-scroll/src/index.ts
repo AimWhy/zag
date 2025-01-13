@@ -1,18 +1,25 @@
-import { isIos } from "@zag-js/dom-utils"
+import { isIos } from "@zag-js/dom-query"
 
 const LOCK_CLASSNAME = "data-scroll-lock"
 
 function assignStyle(el: HTMLElement | null | undefined, style: Partial<CSSStyleDeclaration>) {
-  if (!el) return () => {}
-  const previousStyle = el.style.cssText
+  if (!el) return
+  const previousStyle = Object.keys(style).reduce(
+    (acc, key) => {
+      acc[key] = el.style.getPropertyValue(key)
+      return acc
+    },
+    {} as Record<string, string>,
+  )
+
   Object.assign(el.style, style)
   return () => {
-    el.style.cssText = previousStyle
+    Object.assign(el.style, previousStyle)
   }
 }
 
 function setCSSProperty(el: HTMLElement | null | undefined, property: string, value: string) {
-  if (!el) return () => {}
+  if (!el) return
   const previousValue = el.style.getPropertyValue(property)
   el.style.setProperty(property, value)
   return () => {
@@ -56,7 +63,7 @@ export function preventBodyScroll(_document?: Document) {
   const setIOSStyle = () => {
     const { scrollX, scrollY, visualViewport } = win
 
-    // iOS 12 does not support `visuaViewport`.
+    // iOS 12 does not support `visualViewport`.
     const offsetLeft = visualViewport?.offsetLeft ?? 0
     const offsetTop = visualViewport?.offsetTop ?? 0
 
@@ -70,15 +77,15 @@ export function preventBodyScroll(_document?: Document) {
     })
 
     return () => {
-      restoreStyle()
-      win.scrollTo(scrollX, scrollY)
+      restoreStyle?.()
+      win.scrollTo({ left: scrollX, top: scrollY, behavior: "instant" })
     }
   }
 
   const cleanups = [setScrollbarWidthProperty(), isIos() ? setIOSStyle() : setStyle()]
 
   return () => {
-    cleanups.forEach((cleanup) => cleanup())
+    cleanups.forEach((fn) => fn?.())
     body.removeAttribute(LOCK_CLASSNAME)
   }
 }

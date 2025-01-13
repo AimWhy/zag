@@ -18,19 +18,21 @@ export default function Page() {
     <>
       <main>
         <div>
-          <button data-testid="trigger" {...api.triggerProps}>
-            Actions <span aria-hidden>▾</span>
+          <button {...api.getTriggerProps()}>
+            Actions <span {...api.getIndicatorProps()}>▾</span>
           </button>
-          <Portal>
-            <div {...api.positionerProps}>
-              <ul className="menu-content" data-testid="menu" {...api.contentProps}>
-                <li {...api.getItemProps({ id: "edit" })}>Edit</li>
-                <li {...api.getItemProps({ id: "duplicate" })}>Duplicate</li>
-                <li {...api.getItemProps({ id: "delete" })}>Delete</li>
-                <li {...api.getItemProps({ id: "export" })}>Export...</li>
-              </ul>
-            </div>
-          </Portal>
+          {api.open && (
+            <Portal>
+              <div {...api.getPositionerProps()}>
+                <ul {...api.getContentProps()}>
+                  <li {...api.getItemProps({ value: "edit" })}>Edit</li>
+                  <li {...api.getItemProps({ value: "duplicate" })}>Duplicate</li>
+                  <li {...api.getItemProps({ value: "delete" })}>Delete</li>
+                  <li {...api.getItemProps({ value: "export" })}>Export...</li>
+                </ul>
+              </div>
+            </Portal>
+          )}
         </div>
       </main>
       <Toolbar controls={controls.ui}>

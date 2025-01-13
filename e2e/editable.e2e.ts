@@ -1,78 +1,92 @@
-import { expect, test } from "@playwright/test"
-import { a11y, clickOutside, testid } from "./__utils"
+import { test } from "@playwright/test"
+import { EditableModel } from "./models/editable.model"
 
-const input = testid("input")
-const preview = testid("preview")
-const save = testid("save-button")
-const edit = testid("edit-button")
+let I: EditableModel
 
 test.describe("editable", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/editable")
+    I = new EditableModel(page)
+    await I.goto()
   })
 
-  test("should have no accessibility violation", async ({ page }) => {
-    await a11y(page)
+  test("should have no accessibility violation", async () => {
+    await I.checkAccessibility()
   })
 
-  test.describe("when in edit mode", () => {
-    test("input should be visible", async ({ page }) => {
-      await page.focus(preview)
-      await expect(page.locator(input)).toBeVisible()
-      await expect(page.locator(input)).toBeFocused()
-    })
-
-    test("user can type and commit input value", async ({ page }) => {
-      await page.focus(preview)
-      await page.waitForSelector("input:focus")
-
-      await page.type(input, "Hello World")
-      await page.locator(input).press("Enter")
-
-      await expect(page.locator(input)).toBeHidden()
-      await expect(page.locator(preview)).toBeVisible()
-      await expect(page.locator(preview)).toHaveText("Hello World")
-    })
-
-    test("user can type and revert value", async ({ page }) => {
-      await page.focus(preview)
-      await page.waitForSelector("input:focus")
-
-      await page.type(input, "Hello")
-      await page.keyboard.press("Enter")
-
-      await page.focus(preview)
-      await page.type(input, "Naruto")
-      await page.keyboard.press("Escape")
-
-      await expect(page.locator(preview)).toHaveText("Hello")
-      await expect(page.locator(input)).toBeHidden()
-    })
-
-    test("clicking submit: user can type and submit value", async ({ page }) => {
-      await page.focus(preview)
-      await page.waitForSelector("input:focus")
-
-      await page.type(input, "Naruto")
-      await page.click(save)
-
-      await expect(page.locator(preview)).toHaveText("Naruto")
-    })
-
-    test("blur the input: user can type and submit value", async ({ page }) => {
-      await page.focus(preview)
-      await page.waitForSelector("input:focus")
-
-      await page.type(input, "Naruto")
-      await clickOutside(page)
-
-      await expect(page.locator(preview)).toHaveText("Naruto")
-    })
+  test("on focus, input should be visible and focus", async () => {
+    await I.focusPreview()
+    await I.seeInput()
+    await I.seeInputIsFocused()
   })
 
-  test("[preview mode] clicking edit button should enter edit mode", async ({ page }) => {
-    await page.click(edit)
-    await expect(page.locator(input)).toBeVisible()
-    await expect(page.locator(input)).toBeFocused()
+  test("on focus and blur, should retain current value", async () => {
+    await I.focusPreview()
+    await I.pressKey("Escape")
+    await I.seeInputHasValue("Hello World")
+  })
+
+  test("on type, should commit input value", async () => {
+    await I.focusPreview()
+
+    await I.type("Naruto")
+    await I.pressKey("Enter")
+
+    await I.seePreviewHasText("Naruto")
+    await I.dontSeeInput()
+  })
+
+  test("on type and esc, should revert value", async () => {
+    await I.focusPreview()
+
+    await I.type("Naruto")
+    await I.pressKey("Escape")
+
+    await I.seePreviewHasText("Hello World")
+    await I.dontSeeInput()
+  })
+
+  test("on type and click submit, should commit value", async () => {
+    await I.focusPreview()
+
+    await I.type("Naruto")
+    await I.clickSubmit()
+
+    await I.seePreviewHasText("Naruto")
+  })
+
+  test("on type and click outside, should commit value", async () => {
+    await I.focusPreview()
+
+    await I.type("Naruto")
+    await I.clickOutside()
+
+    await I.seePreviewHasText("Naruto")
+  })
+
+  test("[maxLength=4] should respect maxLength", async () => {
+    await I.controls.num("maxLength", "4")
+    await I.focusPreview()
+
+    await I.typeSequentially("Naruto")
+    // hit maxLength
+    await I.seeInputHasValue("Naru")
+
+    // can still edit the value
+    await I.pressKey("Backspace")
+    await I.type("o")
+    await I.seeInputHasValue("Naro")
+  })
+
+  test("[activationMode=dblclick] on focus and blur, should retain current value", async () => {
+    await I.controls.select("activationMode", "dblclick")
+    await I.dblClickPreview()
+    await I.pressKey("Escape")
+    await I.seePreviewHasText("Hello World")
+  })
+
+  test("on click edit, should enter edit mode", async () => {
+    await I.clickEdit()
+    await I.seeInput()
+    await I.seeInputIsFocused()
   })
 })

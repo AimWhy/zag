@@ -1,60 +1,120 @@
 import type { Machine, StateMachine as S } from "@zag-js/core"
-import type { TypeaheadState } from "@zag-js/dom-utils"
+import type { DismissableElementHandlers } from "@zag-js/dismissable"
+import type { TypeaheadState } from "@zag-js/dom-query"
 import type { Placement, PositioningOptions } from "@zag-js/popper"
 import type { Point } from "@zag-js/rect-utils"
-import type { CommonProperties, Context, DirectionProperty, RequiredBy } from "@zag-js/types"
+import type { CommonProperties, DirectionProperty, PropTypes, RequiredBy } from "@zag-js/types"
+
+/* -----------------------------------------------------------------------------
+ * Callback details
+ * -----------------------------------------------------------------------------*/
+
+export interface OpenChangeDetails {
+  /**
+   * Whether the menu is open
+   */
+  open: boolean
+}
+
+export interface SelectionDetails {
+  /**
+   * The value of the selected menu item
+   */
+  value: string
+}
+
+export interface HighlightChangeDetails {
+  /**
+   * The value of the highlighted menu item
+   */
+  highlightedValue: string | null
+}
+
+export interface NavigateDetails {
+  value: string | null
+  node: HTMLAnchorElement
+}
+
+/* -----------------------------------------------------------------------------
+ * Machine context
+ * -----------------------------------------------------------------------------*/
 
 type ElementIds = Partial<{
   trigger: string
   contextTrigger: string
   content: string
-  label(id: string): string
+  groupLabel(id: string): string
   group(id: string): string
+  positioner: string
+  arrow: string
 }>
 
-type PublicContext = DirectionProperty &
-  CommonProperties & {
-    /**
-     * The ids of the elements in the menu. Useful for composition.
-     */
-    ids?: ElementIds
-    /**
-     * The values of radios and checkboxes in the menu.
-     */
-    value?: Record<string, string | string[]>
-    /**
-     * Callback to be called when the menu values change (for radios and checkboxes).
-     */
-    onValueChange?: (details: { name: string; value: string | string[] }) => void
-    /**
-     * The `id` of the active menu item.
-     */
-    activeId: string | null
-    /**
-     * Function called when a menu item is selected.
-     */
-    onSelect?: (value: string) => void
-    /**
-     * The positioning point for the menu. Can be set by the context menu trigger or the button trigger.
-     */
-    anchorPoint: Point | null
-    /**
-     * Whether to loop the keyboard navigation.
-     */
-    loop: boolean
-    /**
-     * The options used to dynamically position the menu
-     */
-    positioning: PositioningOptions
-    /**
-     * Whether to close the menu when an option is selected
-     */
-    closeOnSelect: boolean
-    /**
-     * The accessibility label for the menu
-     */
-    "aria-label"?: string
-  }
+interface PublicContext extends DirectionProperty, CommonProperties, DismissableElementHandlers {
+  /**
+   * The ids of the elements in the menu. Useful for composition.
+   */
+  ids?: ElementIds | undefined
+  /**
+   * The value of the highlighted menu item.
+   */
+  highlightedValue: string | null
+  /**
+   * Function called when the highlighted menu item changes.
+   */
+  onHighlightChange?: ((details: HighlightChangeDetails) => void) | undefined
+  /**
+   * Function called when a menu item is selected.
+   */
+  onSelect?: ((details: SelectionDetails) => void) | undefined
+  /**
+   * The positioning point for the menu. Can be set by the context menu trigger or the button trigger.
+   */
+  anchorPoint: Point | null
+  /**
+   * Whether to loop the keyboard navigation.
+   * @default false
+   */
+  loopFocus: boolean
+  /**
+   * The options used to dynamically position the menu
+   */
+  positioning: PositioningOptions
+  /**
+   * Whether to close the menu when an option is selected
+   * @default true
+   */
+  closeOnSelect: boolean
+  /**
+   * The accessibility label for the menu
+   */
+  "aria-label"?: string | undefined
+  /**
+   * Whether the menu is open
+   */
+  open?: boolean | undefined
+  /**
+   * Function called when the menu opens or closes
+   */
+  onOpenChange?: ((details: OpenChangeDetails) => void) | undefined
+  /**
+   *  Whether the menu's open state is controlled by the user
+   */
+  "open.controlled"?: boolean | undefined
+  /**
+   * Whether the pressing printable characters should trigger typeahead navigation
+   * @default true
+   */
+  typeahead: boolean
+  /**
+   * Whether the menu is a composed with other composite widgets like a combobox or tabs
+   * @default true
+   */
+  composite: boolean
+  /**
+   * Function to navigate to the selected item if it's an anchor element
+   */
+  navigate: (details: NavigateDetails) => void
+}
 
 export type UserDefinedContext = RequiredBy<PublicContext, "id">
 
@@ -63,20 +123,20 @@ type ComputedContext = Readonly<{
    * @computed
    * Whether the menu is a submenu (has a parent menu)
    */
-  readonly isSubmenu: boolean
+  isSubmenu: boolean
   /**
    * @computed
    * Whether the writing direction is rtl
    */
-  readonly isRtl: boolean
+  isRtl: boolean
   /**
    * @computed
    * Whether a typeahead search is ongoing
    */
-  readonly isTypingAhead: boolean
+  isTypingAhead: boolean
 }>
 
-type PrivateContext = Context<{
+interface PrivateContext {
   /**
    * @internal
    * The menu's parent. Used for submenus.
@@ -100,74 +160,68 @@ type PrivateContext = Context<{
   suspendPointer: boolean
   /**
    * @internal
-   * The `id` of the menu item that is currently being hovered.
+   * The `id` of the menu item that is currently being highlighted.
    */
-  hoverId: string | null
+  lastHighlightedValue: string | null
   /**
    * @internal
    * The computed placement (maybe different from initial placement)
    */
-  currentPlacement?: Placement
-  /**
-   * @internal
-   * Whether the dynamic placement has been computed
-   */
-  isPlacementComplete: boolean
+  currentPlacement?: Placement | undefined
   /**
    * @internal
    * The typeahead state for faster keyboard navigation
    */
-  typeahead: TypeaheadState
-  /**
-   * @internal
-   * Whether to return focus to the trigger when the menu is closed
-   */
-  focusTriggerOnClose?: boolean
-}>
+  typeaheadState: TypeaheadState
+}
 
-export type MachineContext = PublicContext & PrivateContext & ComputedContext
+export interface MachineContext extends PublicContext, PrivateContext, ComputedContext {}
 
-export type MachineState = {
-  value: "unknown" | "idle" | "open" | "closed" | "opening" | "closing" | "opening:contextmenu"
-  tags: "visible"
+export interface MachineState {
+  value: "idle" | "open" | "closed" | "opening" | "closing" | "opening:contextmenu"
+  tags: "open" | "closed"
 }
 
 export type State = S.State<MachineContext, MachineState>
 
 export type Send = S.Send<S.AnyEventObject>
 
-export type Service = Machine<MachineContext, MachineState>
+export type Service = Machine<MachineContext, MachineState, S.AnyEventObject>
 
-export type Api = {
+/* -----------------------------------------------------------------------------
+ * Component API
+ * -----------------------------------------------------------------------------*/
+
+export interface Api {
   getItemProps: (opts: ItemProps) => Record<string, any>
-  triggerProps: Record<string, any>
+  getTriggerProps(): Record<string, any>
 }
 
-export type ItemProps = {
+export interface ItemProps {
   /**
-   * The `id` of the menu item option.
+   * The unique value of the menu item option.
    */
-  id: string
+  value: string
   /**
    * Whether the menu item is disabled
    */
-  disabled?: boolean
+  disabled?: boolean | undefined
   /**
    * The textual value of the option. Used in typeahead navigation of the menu.
    * If not provided, the text content of the menu item will be used.
    */
-  valueText?: string
+  valueText?: string | undefined
   /**
    * Whether the menu should be closed when the option is selected.
    */
-  closeOnSelect?: boolean
+  closeOnSelect?: boolean | undefined
 }
 
-export type OptionItemProps = Partial<ItemProps> & {
+export interface OptionItemProps extends Partial<ItemProps> {
   /**
-   * The option's name as specified in menu's `context.values` object
+   * Whether the option is checked
    */
-  name: string
+  checked: boolean
   /**
    * Whether the option is a radio or a checkbox
    */
@@ -179,19 +233,97 @@ export type OptionItemProps = Partial<ItemProps> & {
   /**
    * Function called when the option state is changed
    */
-  onCheckedChange?: (checked: boolean) => void
+  onCheckedChange?(checked: boolean): void
 }
 
-export type GroupProps = {
+export interface ItemState {
+  /**
+   * Whether the item is disabled
+   */
+  disabled: boolean
+  /**
+   * Whether the item is highlighted
+   */
+  highlighted: boolean
+}
+
+export interface OptionItemState extends ItemState {
+  /**
+   * Whether the option item is checked
+   */
+  checked: boolean
+}
+
+export interface ItemGroupProps {
   /**
    * The `id` of the element that provides accessibility label to the option group
    */
   id: string
 }
 
-export type LabelProps = {
+export interface ItemGroupLabelProps {
   /**
    * The `id` of the group this refers to
    */
   htmlFor: string
 }
+
+export interface MachineApi<T extends PropTypes = PropTypes> {
+  /**
+   * Whether the menu is open
+   */
+  open: boolean
+  /**
+   * Function to open or close the menu
+   */
+  setOpen(open: boolean): void
+  /**
+   * The id of the currently highlighted menuitem
+   */
+  highlightedValue: string | null
+  /**
+   * Function to set the highlighted menuitem
+   */
+  setHighlightedValue(value: string): void
+  /**
+   * Function to register a parent menu. This is used for submenus
+   */
+  setParent(parent: Service): void
+  /**
+   * Function to register a child menu. This is used for submenus
+   */
+  setChild(child: Service): void
+  /**
+   * Function to reposition the popover
+   */
+  reposition(options?: Partial<PositioningOptions>): void
+  /**
+   * Returns the state of the option item
+   */
+  getOptionItemState(props: OptionItemProps): OptionItemState
+  /**
+   * Returns the state of the menu item
+   */
+  getItemState(props: ItemProps): ItemState
+  getContextTriggerProps(): T["element"]
+  getTriggerItemProps<A extends Api>(childApi: A): T["element"]
+  getTriggerProps(): T["button"]
+  getIndicatorProps(): T["element"]
+  getPositionerProps(): T["element"]
+  getArrowProps(): T["element"]
+  getArrowTipProps(): T["element"]
+  getContentProps(): T["element"]
+  getSeparatorProps(): T["element"]
+  getItemProps(options: ItemProps): T["element"]
+  getOptionItemProps(option: OptionItemProps): T["element"]
+  getItemIndicatorProps(option: OptionItemProps): T["element"]
+  getItemTextProps(option: OptionItemProps): T["element"]
+  getItemGroupLabelProps(options: ItemGroupLabelProps): T["element"]
+  getItemGroupProps(options: ItemGroupProps): T["element"]
+}
+
+/* -----------------------------------------------------------------------------
+ * Re-exported types
+ * -----------------------------------------------------------------------------*/
+
+export type { PositioningOptions, Point }

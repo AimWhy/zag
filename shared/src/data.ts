@@ -1,8 +1,9 @@
-import { getData } from "country-list"
+import type { StepDetails } from "@zag-js/tour"
 
+import { countryList } from "./country-list"
 export { paginationData } from "./pagination-data"
 
-export const selectData = getData().map((country) => ({
+export const selectData = countryList.map((country) => ({
   label: `${country.name} (${country.code})`,
   value: country.code,
 }))
@@ -13,18 +14,28 @@ export const accordionData = [
   { id: "contact", label: "Contact" },
 ]
 
+export const avatarData = {
+  full: [
+    "https://static.wikia.nocookie.net/naruto/images/d/d6/Naruto_Part_I.png/revision/latest/top-crop/width/200/height/150?cb=20210223094656",
+    "https://static.wikia.nocookie.net/naruto/images/2/27/Kakashi_Hatake.png/revision/latest/top-crop/width/200/height/150?cb=20170628120149",
+    "https://static.wikia.nocookie.net/naruto/images/4/4a/Obito_Uchiha.png/revision/latest/top-crop/width/200/height/150?cb=20220223045744",
+    "https://static.wikia.nocookie.net/naruto/images/e/e9/Itachi_Child_OL.png/revision/latest/top-crop/width/200/height/150?cb=20210415223303",
+  ],
+  broken:
+    "https://broken.wikia.nocookie.net/naruto/images/e/e9/Itachi_ld_OL.png/revision/latest/top-crop/width/200/height/150?cb=20223303",
+}
+
 export const comboboxData = [
   { label: "Zambia", code: "ZA" },
   { label: "Benin", code: "BN" },
-  { label: "Canada", code: "CA", disabled: true },
+  { label: "Canada", code: "CA" },
   { label: "United States", code: "US" },
   { label: "Japan", code: "JP" },
   { label: "Nigeria", code: "NG" },
   { label: "Albania", code: "AL" },
   { label: "Algeria", code: "DZ" },
   { label: "American Samoa", code: "AS" },
-  { label: "AndorrA", code: "AD" },
-  { label: "Angola", code: "AO" },
+  { label: "Andorra", code: "AD" },
   { label: "Angola", code: "AO" },
   { label: "Anguilla", code: "AI" },
   { label: "Antarctica", code: "AQ" },
@@ -76,38 +87,38 @@ export const tabsData = [
 
 export const menuData = [
   [
-    { label: "New File", id: "new-file" },
-    { label: "New Tab", id: "new-tab" },
-    { label: "New Window", id: "new-win" },
-    { label: "More Tools →", id: "more-tools", trigger: true },
-    { label: "Export", id: "export" },
-    { label: "Go to Google...", id: "google" },
+    { label: "New File", value: "new-file" },
+    { label: "New Tab", value: "new-tab" },
+    { label: "New Window", value: "new-win" },
+    { label: "More Tools →", value: "more-tools", trigger: true },
+    { label: "Export", value: "export" },
+    { label: "Go to Google...", value: "google" },
   ],
   [
-    { label: "Save Page As...", id: "save-page" },
-    { label: "Create Shortcuts", id: "shortcut" },
-    { label: "Name Window...", id: "name-win" },
-    { label: "Open nested →", id: "open-nested", trigger: true },
-    { label: "Switch Window", id: "switch-win" },
-    { label: "New Terminal", id: "new-term" },
+    { label: "Save Page As...", value: "save-page" },
+    { label: "Create Shortcuts", value: "shortcut" },
+    { label: "Name Window...", value: "name-win" },
+    { label: "Open nested →", value: "open-nested", trigger: true },
+    { label: "Switch Window", value: "switch-win" },
+    { label: "New Terminal", value: "new-term" },
   ],
   [
-    { label: "Welcome", id: "welcome" },
-    { label: "Playground", id: "playground" },
-    { label: "Export", id: "export" },
+    { label: "Welcome", value: "welcome" },
+    { label: "Playground", value: "playground" },
+    { label: "Export", value: "export" },
   ],
 ]
 
 export const menuOptionData = {
   order: [
-    { label: "Ascending", id: "asc" },
-    { label: "Descending", id: "desc" },
-    { label: "None", id: "none" },
+    { label: "Ascending", value: "asc" },
+    { label: "Descending", value: "desc" },
+    { label: "None", value: "none" },
   ],
   type: [
-    { label: "Email", id: "email" },
-    { label: "Phone", id: "phone" },
-    { label: "Address", id: "address" },
+    { label: "Email", value: "email" },
+    { label: "Phone", value: "phone" },
+    { label: "Address", value: "address" },
   ],
 }
 
@@ -117,3 +128,197 @@ export const radioData = [
   { id: "mango", label: "Mangoes" },
   { id: "grape", label: "Grapes" },
 ]
+
+export const carouselData = [
+  "https://picsum.photos/seed/a/500/300",
+  "https://picsum.photos/seed/b/500/300",
+  "https://picsum.photos/seed/c/500/300",
+  "https://picsum.photos/seed/d/500/300",
+  "https://picsum.photos/seed/e/500/300",
+  "https://picsum.photos/seed/f/500/300",
+]
+
+export const toggleGroupData = [
+  { value: "bold", label: "B" },
+  { value: "italic", label: "I" },
+  { value: "underline", label: "U" },
+]
+
+export const treeViewData = {
+  name: "",
+  children: [
+    {
+      name: "src",
+      children: [{ name: "index.js" }, { name: "styles.css" }],
+    },
+    {
+      name: "node_modules",
+      children: [
+        {
+          name: "zag-js",
+          children: [{ name: "treeview.mjs" }],
+        },
+        { name: "react", children: [{ name: "bundle.js" }] },
+      ],
+    },
+    {
+      name: ".npmignore",
+    },
+    {
+      name: "package.json",
+    },
+    {
+      name: "panda.config.ts",
+    },
+  ],
+}
+
+export const tourDataWithEffect: StepDetails[] = [
+  {
+    type: "floating",
+    placement: "bottom-end",
+    id: "step-0",
+    title: "Step 1. Controls",
+    description: "Use them to change the context properties",
+    actions: [{ label: "Show me the tour", action: "next" }],
+  },
+  {
+    type: "tooltip",
+    id: "step-1",
+    title: "Step 1. Controls",
+    description: "Use them to change the context properties",
+    target: () => document.querySelector<HTMLElement>(".toolbar nav button:nth-child(1)"),
+    actions: [
+      { label: "Prev", action: "prev" },
+      { label: "Next", action: "next" },
+    ],
+  },
+  {
+    type: "wait",
+    id: "step-xx",
+    title: "Step xx",
+    description: "Wait for 2 seconds",
+    effect({ show, next }) {
+      show()
+      let timer = setTimeout(next, 5000)
+      return () => clearTimeout(timer)
+    },
+  },
+  {
+    type: "tooltip",
+    id: "step-2",
+    title: "Step 2. Visualizer",
+    description: "Use them to see the state of the tour. Click the Visualizer button to proceed.",
+    target: () => document.querySelector<HTMLElement>(".toolbar nav button:nth-child(2)"),
+    actions: [
+      { label: "Prev", action: "prev" },
+      { label: "Next", action: "next" },
+    ],
+  },
+  {
+    type: "tooltip",
+    id: "step-4",
+    title: "Step 4. Close",
+    description: "Here's the context information",
+    target: () => document.querySelector<HTMLElement>(".toolbar [data-content][data-active]"),
+    placement: "left-start",
+    actions: [{ label: "Finish", action: "dismiss" }],
+  },
+]
+
+export const tourData: StepDetails[] = [
+  {
+    type: "dialog",
+    id: "step-0",
+    title: "Centered tour (no target)",
+    description: "This is the center of the world. Ready to start the tour?",
+    actions: [{ label: "Next", action: "next" }],
+  },
+  {
+    type: "tooltip",
+    id: "step-1",
+    title: "Step 1. Welcome",
+    description: "To the new world",
+    target: () => document.querySelector<HTMLElement>("#step-1"),
+    actions: [
+      { label: "Prev", action: "prev" },
+      { label: "Next", action: "next" },
+    ],
+    effect({ show, update }) {
+      const abort = new AbortController()
+
+      fetch("https://api.github.com/users/octocat", { signal: abort.signal })
+        .then((res) => res.json())
+        .then((data) => {
+          update({ title: data.name })
+          show()
+        })
+
+      return () => {
+        abort.abort()
+      }
+    },
+  },
+  {
+    type: "tooltip",
+    id: "step-2",
+    title: "Step 2. Inside a scrollable container",
+    description: "Using scrollIntoView(...) rocks!",
+    target: () => document.querySelector<HTMLElement>("#step-2"),
+    actions: [
+      { label: "Prev", action: "prev" },
+      { label: "Next", action: "next" },
+    ],
+  },
+  {
+    type: "tooltip",
+    id: "step-2a",
+    title: "Step 2a. Inside an Iframe container",
+    description: "It calculates the offset rect correctly. Thanks to floating UI!",
+    target: () => {
+      const [frameEl] = Array.from(frames)
+      return frameEl?.document.querySelector<HTMLElement>("#step-2a")
+    },
+    actions: [
+      { label: "Prev", action: "prev" },
+      { label: "Next", action: "next" },
+    ],
+  },
+  {
+    type: "tooltip",
+    id: "step-3",
+    title: "Step 3. Normal scrolling",
+    description: "The new world is a great place",
+    target: () => document.querySelector<HTMLElement>("#step-3"),
+    actions: [
+      { label: "Prev", action: "prev" },
+      { label: "Next", action: "next" },
+    ],
+  },
+  {
+    type: "tooltip",
+    id: "step-4",
+    title: "Step 4. Close to bottom",
+    description: "So nice to see the scrolling works!",
+    target: () => document.querySelector<HTMLElement>("#step-4"),
+    actions: [
+      { label: "Prev", action: "prev" },
+      { label: "Next", action: "next" },
+    ],
+  },
+  {
+    type: "dialog",
+    id: "step-5",
+    title: "You're all sorted! (no target)",
+    description: "Thanks for trying out the tour. Enjoy the app!",
+    actions: [{ label: "Finish", action: "dismiss" }],
+  },
+]
+
+export const stepsData = [
+  { value: "first", title: "First", description: "Contact Info" },
+  { value: "second", title: "Second", description: "Date & Time" },
+  { value: "third", title: "Third", description: "Select Rooms" },
+]
+
+export * as commandData from "./command"

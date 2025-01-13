@@ -1,3 +1,7 @@
+export type MaybeFunction<T> = T | (() => T)
+
+export type Nullable<T> = T | null | undefined
+
 export const runIfFn = <T>(
   v: T | undefined,
   ...a: T extends (...a: any[]) => void ? Parameters<T> : never
@@ -25,3 +29,30 @@ export const uuid = /*#__PURE__*/ (() => {
     return id.toString(36)
   }
 })()
+
+export function match<V extends string | number = string, R = unknown>(
+  key: V,
+  record: Record<V, R | ((...args: any[]) => R)>,
+  ...args: any[]
+): R {
+  if (key in record) {
+    const fn = record[key]
+    return typeof fn === "function" ? fn(...args) : fn
+  }
+
+  const error = new Error(`No matching key: ${JSON.stringify(key)} in ${JSON.stringify(Object.keys(record))}`)
+  Error.captureStackTrace?.(error, match)
+
+  throw error
+}
+
+export const tryCatch = <R>(fn: () => R, fallback: () => R) => {
+  try {
+    return fn()
+  } catch (error) {
+    if (error instanceof Error) {
+      Error.captureStackTrace?.(error, tryCatch)
+    }
+    return fallback?.()
+  }
+}

@@ -2,20 +2,47 @@ import type { JSX } from "./jsx"
 
 export type RequiredBy<T, K extends keyof T> = Partial<Omit<T, K>> & Required<Pick<T, K>>
 
+export type Nullable<T> = T | null
+
+export type NonNullable<T> = T extends null | undefined ? never : T
+
+export type Required<T> = {
+  [P in keyof T]-?: NonNullable<T[P]>
+}
+
 export type Direction = "ltr" | "rtl"
 
 export type Orientation = "horizontal" | "vertical"
 
-export type MaybeElement<T extends HTMLElement = HTMLElement> = T | null
+export type MaybeFn<T> = T | (() => T)
 
-export type DirectionProperty = {
+export type MaybeElement<T extends HTMLElement = HTMLElement> = Nullable<T>
+
+export interface OrientationProperty {
   /**
-   * The document's text/writing direction.
+   * The orientation of the element.
+   * @default "horizontal"
    */
-  dir?: Direction
+  orientation: Orientation
 }
 
-export type CommonProperties = {
+export interface DirectionProperty {
+  /**
+   * The document's text/writing direction.
+   * @default "ltr"
+   */
+  dir?: "ltr" | "rtl" | undefined
+}
+
+export interface LocaleProperties extends DirectionProperty {
+  /**
+   * The current locale. Based on the BCP 47 definition.
+   * @default "en-US"
+   */
+  locale?: string | undefined
+}
+
+export interface CommonProperties {
   /**
    * The unique identifier of the machine.
    */
@@ -23,28 +50,40 @@ export type CommonProperties = {
   /**
    * A root node to correctly resolve document in custom environments. E.x.: Iframes, Electron.
    */
-  getRootNode?: () => ShadowRoot | Document | Node
+  getRootNode?: (() => ShadowRoot | Document | Node) | undefined
 }
-
-export type RootProperties = {
-  /**
-   * The owner document of the machine.
-   */
-  doc?: Document
-  /**
-   * The root node of the machine. Useful for shadow DOM.
-   */
-  rootNode?: ShadowRoot
-  /**
-   * The related target when the element is blurred.
-   * Used as a polyfill for `e.relatedTarget`
-   */
-  pointerdownNode?: HTMLElement | null
-}
-
-export type Context<T> = T & RootProperties
 
 export type Style = JSX.CSSProperties
 
+export type EventKey =
+  | "ArrowDown"
+  | "ArrowUp"
+  | "ArrowLeft"
+  | "ArrowRight"
+  | "Space"
+  | "Enter"
+  | "Comma"
+  | "Escape"
+  | "Backspace"
+  | "Delete"
+  | "Home"
+  | "End"
+  | "Tab"
+  | "PageUp"
+  | "PageDown"
+  | (string & {})
+
+export type EventKeyMap = {
+  [key in EventKey]?: (event: JSX.KeyboardEvent) => void
+}
+
+export interface Point {
+  x: number
+  y: number
+}
+
 export * from "./prop-types"
+
+export * from "./create-props"
+
 export type { JSX }

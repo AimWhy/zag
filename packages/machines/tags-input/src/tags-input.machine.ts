@@ -1,10 +1,9 @@
 import { autoResizeInput } from "@zag-js/auto-resize"
 import { createMachine, guards } from "@zag-js/core"
-import { contains, raf } from "@zag-js/dom-utils"
-import { trackFormControl } from "@zag-js/form-utils"
+import { contains, raf, trackFormControl } from "@zag-js/dom-query"
 import { trackInteractOutside } from "@zag-js/interact-outside"
 import { createLiveRegion } from "@zag-js/live-region"
-import { compact, warn } from "@zag-js/utils"
+import { compact, isEqual, removeAt, uniq, warn } from "@zag-js/utils"
 import { dom } from "./tags-input.dom"
 import type { MachineContext, MachineState, UserDefinedContext } from "./tags-input.types"
 
@@ -15,28 +14,29 @@ export function machine(userContext: UserDefinedContext) {
   return createMachine<MachineContext, MachineState>(
     {
       id: "tags-input",
-      initial: "unknown",
-
+      initial: ctx.autoFocus ? "focused:input" : "idle",
       context: {
-        log: { current: null, prev: null },
         inputValue: "",
         editedTagValue: "",
-        focusedId: null,
-        editedId: null,
-        initialValue: [],
+        editedTagId: null,
+        highlightedTagId: null,
         value: [],
         dir: "ltr",
         max: Infinity,
-        liveRegion: null,
         blurBehavior: undefined,
         addOnPaste: false,
-        allowEditTag: true,
+        editable: true,
         validate: () => true,
         delimiter: ",",
+        disabled: false,
+        readOnly: false,
         ...ctx,
+        liveRegion: null,
+        log: { current: null, prev: null },
+        fieldsetDisabled: false,
         translations: {
-          clearButtonLabel: "Clear all tags",
-          deleteTagButtonLabel: (value) => `Delete tag ${value}`,
+          clearTriggerLabel: "Clear all tags",
+          deleteTagTriggerLabel: (value) => `Delete tag ${value}`,
           tagAdded: (value) => `Added tag ${value}`,
           tagsPasted: (values) => `Pasted ${values.length} tags`,
           tagEdited: (value) => `Editing tag ${value}. Press enter to save or escape to cancel.`,
@@ -46,41 +46,42 @@ export function machine(userContext: UserDefinedContext) {
           ...ctx.translations,
         },
       },
-
       computed: {
         count: (ctx) => ctx.value.length,
         valueAsString: (ctx) => JSON.stringify(ctx.value),
         trimmedInputValue: (ctx) => ctx.inputValue.trim(),
-        isInteractive: (ctx) => !(ctx.readOnly || ctx.disabled),
+        isDisabled: (ctx) => !!ctx.disabled || ctx.fieldsetDisabled,
+        isInteractive: (ctx) => !(ctx.readOnly || ctx.isDisabled),
         isAtMax: (ctx) => ctx.count === ctx.max,
         isOverflowing: (ctx) => ctx.count > ctx.max,
       },
-
       watch: {
-        focusedId: ["invokeOnHighlight", "logFocused"],
+        highlightedTagId: "logHighlightedTag",
         isOverflowing: "invokeOnInvalid",
-        value: ["invokeOnChange", "dispatchChangeEvent"],
         log: "announceLog",
         inputValue: "syncInputValue",
-        editedTagValue: "syncEditedTagValue",
+        editedTagValue: "syncEditedTagInputValue",
       },
 
-      activities: ["trackFormControlState"],
+      activities: ["trackLiveRegion", "trackFormControlState"],
 
-      exit: ["removeLiveRegion", "clearLog"],
+      exit: ["clearLog"],
 
       on: {
         DOUBLE_CLICK_TAG: {
           internal: true,
-          guard: "allowEditTag",
+          guard: "isTagEditable",
           target: "editing:tag",
           actions: ["setEditedId", "initializeEditedTagValue"],
         },
         POINTER_DOWN_TAG: {
           internal: true,
-          guard: not("isTagFocused"),
           target: "navigating:tag",
-          actions: ["focusTag", "focusInput"],
+          actions: ["highlightTag", "focusInput"],
+        },
+        CLICK_DELETE_TAG: {
+          target: "focused:input",
+          actions: ["deleteTag"],
         },
         SET_INPUT_VALUE: {
           actions: ["setInputValue"],
@@ -88,45 +89,35 @@ export function machine(userContext: UserDefinedContext) {
         SET_VALUE: {
           actions: ["setValue"],
         },
-        DELETE_TAG: {
+        CLEAR_TAG: {
           actions: ["deleteTag"],
         },
         SET_VALUE_AT_INDEX: {
           actions: ["setValueAtIndex"],
         },
-        CLEAR_ALL: {
-          actions: ["clearTags", "focusInput"],
+        CLEAR_VALUE: {
+          actions: ["clearTags", "clearInputValue", "focusInput"],
         },
         ADD_TAG: {
+          actions: ["addTag"],
+        },
+        INSERT_TAG: {
           // (!isAtMax || allowOverflow) && !inputValueIsEmpty
           guard: and(or(not("isAtMax"), "allowOverflow"), not("isInputValueEmpty")),
           actions: ["addTag", "clearInputValue"],
         },
         EXTERNAL_BLUR: [
-          { guard: "addOnBlur", actions: "raiseAddTagEvent" },
+          { guard: "addOnBlur", actions: "raiseInsertTagEvent" },
           { guard: "clearOnBlur", actions: "clearInputValue" },
         ],
       },
 
       states: {
-        unknown: {
-          on: {
-            SETUP: [
-              {
-                guard: "autoFocus",
-                target: "focused:input",
-                actions: ["setupDocument", "checkValue"],
-              },
-              { target: "idle", actions: ["setupDocument", "checkValue"] },
-            ],
-          },
-        },
-
         idle: {
           on: {
             FOCUS: "focused:input",
             POINTER_DOWN: {
-              guard: not("hasFocusedId"),
+              guard: not("hasHighlightedTag"),
               target: "focused:input",
             },
           },
@@ -134,7 +125,7 @@ export function machine(userContext: UserDefinedContext) {
 
         "focused:input": {
           tags: ["focused"],
-          entry: ["focusInput", "clearFocusedId"],
+          entry: ["focusInput", "clearHighlightedId"],
           activities: ["trackInteractOutside"],
           on: {
             TYPE: {
@@ -144,7 +135,7 @@ export function machine(userContext: UserDefinedContext) {
               {
                 guard: "addOnBlur",
                 target: "idle",
-                actions: "raiseAddTagEvent",
+                actions: "raiseInsertTagEvent",
               },
               {
                 guard: "clearOnBlur",
@@ -154,25 +145,34 @@ export function machine(userContext: UserDefinedContext) {
               { target: "idle" },
             ],
             ENTER: {
-              actions: ["raiseAddTagEvent"],
+              actions: ["raiseInsertTagEvent"],
             },
             DELIMITER_KEY: {
-              actions: ["raiseAddTagEvent"],
+              actions: ["raiseInsertTagEvent"],
             },
             ARROW_LEFT: {
               guard: and("hasTags", "isInputCaretAtStart"),
               target: "navigating:tag",
-              actions: "focusLastTag",
+              actions: "highlightLastTag",
             },
             BACKSPACE: {
               target: "navigating:tag",
               guard: and("hasTags", "isInputCaretAtStart"),
-              actions: "focusLastTag",
+              actions: "highlightLastTag",
             },
-            PASTE: {
-              guard: "addOnPaste",
-              actions: ["setInputValue", "addTagFromPaste"],
+            DELETE: {
+              guard: "hasHighlightedTag",
+              actions: ["deleteHighlightedTag", "highlightTagAtIndex"],
             },
+            PASTE: [
+              {
+                guard: "addOnPaste",
+                actions: ["setInputValue", "addTagFromPaste"],
+              },
+              {
+                actions: "setInputValue",
+              },
+            ],
           },
         },
 
@@ -182,20 +182,20 @@ export function machine(userContext: UserDefinedContext) {
           on: {
             ARROW_RIGHT: [
               {
-                guard: and("hasTags", "isInputCaretAtStart", not("isLastTagFocused")),
-                actions: "focusNextTag",
+                guard: and("hasTags", "isInputCaretAtStart", not("isLastTagHighlighted")),
+                actions: "highlightNextTag",
               },
               { target: "focused:input" },
             ],
             ARROW_LEFT: {
-              actions: "focusPrevTag",
+              actions: "highlightPrevTag",
             },
             BLUR: {
               target: "idle",
-              actions: "clearFocusedId",
+              actions: "clearHighlightedId",
             },
             ENTER: {
-              guard: and("allowEditTag", "hasFocusedId"),
+              guard: and("isTagEditable", "hasHighlightedTag"),
               target: "editing:tag",
               actions: ["setEditedId", "initializeEditedTagValue", "focusEditedTagInput"],
             },
@@ -207,16 +207,32 @@ export function machine(userContext: UserDefinedContext) {
             },
             BACKSPACE: [
               {
-                guard: "isFirstTagFocused",
-                actions: ["deleteFocusedTag", "focusFirstTag"],
+                guard: "isFirstTagHighlighted",
+                actions: ["deleteHighlightedTag", "highlightFirstTag"],
               },
               {
-                actions: ["deleteFocusedTag", "focusPrevTag"],
+                guard: "hasHighlightedTag",
+                actions: ["deleteHighlightedTag", "highlightPrevTag"],
+              },
+              {
+                actions: ["highlightLastTag"],
               },
             ],
             DELETE: {
-              actions: ["deleteFocusedTag", "focusTagAtIndex"],
+              target: "focused:input",
+              actions: ["deleteHighlightedTag", "highlightTagAtIndex"],
             },
+            PASTE: [
+              {
+                guard: "addOnPaste",
+                target: "focused:input",
+                actions: ["setInputValue", "addTagFromPaste"],
+              },
+              {
+                target: "focused:input",
+                actions: "setInputValue",
+              },
+            ],
           },
         },
 
@@ -230,23 +246,30 @@ export function machine(userContext: UserDefinedContext) {
             },
             TAG_INPUT_ESCAPE: {
               target: "navigating:tag",
-              actions: ["clearEditedTagValue", "focusInput", "clearEditedId", "focusTagAtIndex"],
+              actions: ["clearEditedTagValue", "focusInput", "clearEditedId", "highlightTagAtIndex"],
             },
             TAG_INPUT_BLUR: [
               {
                 guard: "isInputRelatedTarget",
                 target: "navigating:tag",
-                actions: ["clearEditedTagValue", "clearFocusedId", "clearEditedId"],
+                actions: ["clearEditedTagValue", "clearHighlightedId", "clearEditedId"],
               },
               {
                 target: "idle",
-                actions: ["clearEditedTagValue", "clearFocusedId", "clearEditedId", "raiseExternalBlurEvent"],
+                actions: ["clearEditedTagValue", "clearHighlightedId", "clearEditedId", "raiseExternalBlurEvent"],
               },
             ],
-            TAG_INPUT_ENTER: {
-              target: "navigating:tag",
-              actions: ["submitEditedTagValue", "focusInput", "clearEditedId", "focusTagAtIndex", "invokeOnTagUpdate"],
-            },
+            TAG_INPUT_ENTER: [
+              {
+                guard: "isEditedTagEmpty",
+                target: "navigating:tag",
+                actions: ["deleteHighlightedTag", "focusInput", "clearEditedId", "highlightTagAtIndex"],
+              },
+              {
+                target: "navigating:tag",
+                actions: ["submitEditedTagValue", "focusInput", "clearEditedId", "highlightTagAtIndex"],
+              },
+            ],
           },
         },
       },
@@ -255,10 +278,17 @@ export function machine(userContext: UserDefinedContext) {
       guards: {
         isInputRelatedTarget: (ctx, evt) => evt.relatedTarget === dom.getInputEl(ctx),
         isAtMax: (ctx) => ctx.isAtMax,
-        hasFocusedId: (ctx) => ctx.focusedId !== null,
-        isTagFocused: (ctx, evt) => ctx.focusedId === evt.id,
-        isFirstTagFocused: (ctx) => dom.getFirstEl(ctx)?.id === ctx.focusedId,
-        isLastTagFocused: (ctx) => dom.getLastEl(ctx)?.id === ctx.focusedId,
+        hasHighlightedTag: (ctx) => ctx.highlightedTagId !== null,
+        isFirstTagHighlighted: (ctx) => {
+          const firstItemId = dom.getItemId(ctx, { value: ctx.value[0], index: 0 })
+          return firstItemId === ctx.highlightedTagId
+        },
+        isEditedTagEmpty: (ctx) => ctx.editedTagValue.trim() === "",
+        isLastTagHighlighted: (ctx) => {
+          const lastIndex = ctx.value.length - 1
+          const lastItemId = dom.getItemId(ctx, { value: ctx.value[lastIndex], index: lastIndex })
+          return lastItemId === ctx.highlightedTagId
+        },
         isInputValueEmpty: (ctx) => ctx.trimmedInputValue.length === 0,
         hasTags: (ctx) => ctx.value.length > 0,
         allowOverflow: (ctx) => !!ctx.allowOverflow,
@@ -266,13 +296,13 @@ export function machine(userContext: UserDefinedContext) {
         addOnBlur: (ctx) => ctx.blurBehavior === "add",
         clearOnBlur: (ctx) => ctx.blurBehavior === "clear",
         addOnPaste: (ctx) => !!ctx.addOnPaste,
-        allowEditTag: (ctx) => !!ctx.allowEditTag,
+        isTagEditable: (ctx) => !!ctx.editable,
         isInputCaretAtStart(ctx) {
           const input = dom.getInputEl(ctx)
           if (!input) return false
           try {
             return input.selectionStart === 0 && input.selectionEnd === 0
-          } catch (e) {
+          } catch {
             return input.value === ""
           }
         },
@@ -284,87 +314,81 @@ export function machine(userContext: UserDefinedContext) {
             exclude(target) {
               return contains(dom.getRootEl(ctx), target)
             },
-            onInteractOutside() {
+            onFocusOutside: ctx.onFocusOutside,
+            onPointerDownOutside: ctx.onPointerDownOutside,
+            onInteractOutside(event) {
+              ctx.onInteractOutside?.(event)
+              if (event.defaultPrevented) return
               send({ type: "BLUR", src: "interact-outside" })
             },
           })
         },
-        trackFormControlState(ctx) {
+        trackFormControlState(ctx, _evt, { send, initialContext }) {
           return trackFormControl(dom.getHiddenInputEl(ctx), {
-            onFieldsetDisabled() {
-              ctx.disabled = true
+            onFieldsetDisabledChange(disabled) {
+              ctx.fieldsetDisabled = disabled
             },
             onFormReset() {
-              ctx.value = ctx.initialValue
+              send({ type: "SET_VALUE", value: initialContext.value, src: "form-reset" })
             },
           })
         },
         autoResize(ctx) {
-          if (!ctx.editedTagValue || ctx.idx == null || !ctx.allowEditTag) return
+          if (!ctx.editedTagValue || ctx.idx == null || !ctx.editable) return
           const input = dom.getTagInputEl(ctx, { value: ctx.editedTagValue, index: ctx.idx })
           return autoResizeInput(input)
         },
-      },
-
-      actions: {
-        raiseAddTagEvent(_, __, { self }) {
-          self.send("ADD_TAG")
-        },
-        raiseExternalBlurEvent(_, evt, { self }) {
-          self.send({ type: "EXTERNAL_BLUR", id: evt.id })
-        },
-        invokeOnHighlight(ctx) {
-          const value = dom.getFocusedTagValue(ctx)
-          ctx.onHighlight?.({ value })
-        },
-        invokeOnTagUpdate(ctx) {
-          if (!ctx.idx) return
-          const value = ctx.value[ctx.idx]
-          ctx.onTagUpdate?.({ value, index: ctx.idx })
-        },
-        invokeOnChange(ctx) {
-          ctx.onChange?.({ values: ctx.value })
-        },
-        dispatchChangeEvent(ctx) {
-          dom.dispatchInputEvent(ctx)
-        },
-        setupDocument(ctx) {
+        trackLiveRegion(ctx) {
           ctx.liveRegion = createLiveRegion({
             level: "assertive",
             document: dom.getDoc(ctx),
           })
+          return () => ctx.liveRegion?.destroy()
         },
-        focusNextTag(ctx) {
-          if (!ctx.focusedId) return
-          const next = dom.getNextEl(ctx, ctx.focusedId)
-          if (next) ctx.focusedId = next.id
+      },
+
+      actions: {
+        raiseInsertTagEvent(_, __, { self }) {
+          self.send("INSERT_TAG")
         },
-        focusFirstTag(ctx) {
+        raiseExternalBlurEvent(_, evt, { self }) {
+          self.send({ type: "EXTERNAL_BLUR", id: evt.id })
+        },
+        dispatchChangeEvent(ctx) {
+          dom.dispatchInputEvent(ctx)
+        },
+        highlightNextTag(ctx) {
+          if (ctx.highlightedTagId == null) return
+          const next = dom.getNextEl(ctx, ctx.highlightedTagId)
+          set.highlightedId(ctx, next?.id ?? null)
+        },
+        highlightFirstTag(ctx) {
           raf(() => {
-            const first = dom.getFirstEl(ctx)?.id
-            if (first) ctx.focusedId = first
+            const first = dom.getFirstEl(ctx)
+            set.highlightedId(ctx, first?.id ?? null)
           })
         },
-        focusLastTag(ctx) {
+        highlightLastTag(ctx) {
           const last = dom.getLastEl(ctx)
-          if (last) ctx.focusedId = last.id
+          set.highlightedId(ctx, last?.id ?? null)
         },
-        focusPrevTag(ctx) {
-          if (!ctx.focusedId) return
-          const prev = dom.getPrevEl(ctx, ctx.focusedId)
-          ctx.focusedId = prev?.id || null
+        highlightPrevTag(ctx) {
+          if (ctx.highlightedTagId == null) return
+          const prev = dom.getPrevEl(ctx, ctx.highlightedTagId)
+          set.highlightedId(ctx, prev?.id ?? null)
         },
-        focusTag(ctx, evt) {
-          ctx.focusedId = evt.id
+        highlightTag(ctx, evt) {
+          set.highlightedId(ctx, evt.id)
         },
-        focusTagAtIndex(ctx) {
+        highlightTagAtIndex(ctx) {
           raf(() => {
             if (ctx.idx == null) return
-            const el = dom.getElAtIndex(ctx, ctx.idx)
-            if (el) {
-              ctx.focusedId = el.id
-              ctx.idx = undefined
-            }
+
+            const tagEl = dom.getTagElAtIndex(ctx, ctx.idx)
+            if (tagEl == null) return
+
+            set.highlightedId(ctx, tagEl.id)
+            ctx.idx = undefined
           })
         },
         deleteTag(ctx, evt) {
@@ -375,11 +399,11 @@ export function machine(userContext: UserDefinedContext) {
           ctx.log.prev = ctx.log.current
           ctx.log.current = { type: "delete", value }
 
-          ctx.value.splice(index, 1)
+          set.value(ctx, removeAt(ctx.value, index))
         },
-        deleteFocusedTag(ctx) {
-          if (!ctx.focusedId) return
-          const index = dom.getIndexOfId(ctx, ctx.focusedId)
+        deleteHighlightedTag(ctx) {
+          if (ctx.highlightedTagId == null) return
+          const index = dom.getIndexOfId(ctx, ctx.highlightedTagId)
           ctx.idx = index
           const value = ctx.value[index]
 
@@ -387,14 +411,14 @@ export function machine(userContext: UserDefinedContext) {
           ctx.log.prev = ctx.log.current
           ctx.log.current = { type: "delete", value }
 
-          ctx.value.splice(index, 1)
+          set.value(ctx, removeAt(ctx.value, index))
         },
         setEditedId(ctx, evt) {
-          ctx.editedId = evt.id ?? ctx.focusedId
-          ctx.idx = dom.getIndexOfId(ctx, ctx.editedId!)
+          ctx.editedTagId = evt.id ?? ctx.highlightedTagId
+          ctx.idx = dom.getIndexOfId(ctx, ctx.editedTagId!)
         },
         clearEditedId(ctx) {
-          ctx.editedId = null
+          ctx.editedTagId = null
         },
         clearEditedTagValue(ctx) {
           ctx.editedTagValue = ""
@@ -403,9 +427,11 @@ export function machine(userContext: UserDefinedContext) {
           ctx.editedTagValue = evt.value
         },
         submitEditedTagValue(ctx) {
-          if (!ctx.editedId) return
-          const index = dom.getIndexOfId(ctx, ctx.editedId)
-          ctx.value[index] = ctx.editedTagValue ?? ""
+          if (!ctx.editedTagId) return
+
+          const index = dom.getIndexOfId(ctx, ctx.editedTagId)
+          set.valueAtIndex(ctx, index, ctx.editedTagValue ?? "")
+
           // log
           ctx.log.prev = ctx.log.current
           ctx.log.current = { type: "update", value: ctx.editedTagValue! }
@@ -421,8 +447,8 @@ export function machine(userContext: UserDefinedContext) {
           }
         },
         initializeEditedTagValue(ctx) {
-          if (!ctx.editedId) return
-          const index = dom.getIndexOfId(ctx, ctx.editedId)
+          if (!ctx.editedTagId) return
+          const index = dom.getIndexOfId(ctx, ctx.editedTagId)
           ctx.editedTagValue = ctx.value[index]
         },
         focusEditedTagInput(ctx) {
@@ -431,10 +457,10 @@ export function machine(userContext: UserDefinedContext) {
           })
         },
         setInputValue(ctx, evt) {
-          ctx.inputValue = evt.value
+          set.inputValue(ctx, evt.value)
         },
-        clearFocusedId(ctx) {
-          ctx.focusedId = null
+        clearHighlightedId(ctx) {
+          ctx.highlightedTagId = null
         },
         focusInput(ctx) {
           raf(() => {
@@ -442,74 +468,70 @@ export function machine(userContext: UserDefinedContext) {
           })
         },
         clearInputValue(ctx) {
-          ctx.inputValue = ""
+          raf(() => {
+            set.inputValue(ctx, "")
+          })
         },
         syncInputValue(ctx) {
-          const input = dom.getInputEl(ctx)
-          if (!input) return
-          input.value = ctx.inputValue
+          const inputEl = dom.getInputEl(ctx)
+          dom.setValue(inputEl, ctx.inputValue)
         },
-        syncEditedTagValue(ctx, evt) {
-          const id = ctx.editedId || ctx.focusedId || evt.id
-          if (!id) return
-          const el = dom.getById(ctx, `${id}:input`) as HTMLInputElement | null
-          if (!el) return
-          el.value = ctx.editedTagValue
+        syncEditedTagInputValue(ctx, evt) {
+          const id = ctx.editedTagId || ctx.highlightedTagId || evt.id
+          if (id == null) return
+          const editTagInputEl = dom.getById<HTMLInputElement>(ctx, `${id}:input`)
+          dom.setValue(editTagInputEl, ctx.editedTagValue)
         },
         addTag(ctx, evt) {
           const value = evt.value ?? ctx.trimmedInputValue
-          const guard = ctx.validate?.({ inputValue: value, values: ctx.value })
+          const guard = ctx.validate?.({ inputValue: value, value: Array.from(ctx.value) })
           if (guard) {
-            ctx.value.push(value)
+            const nextValue = uniq(ctx.value.concat(value))
+            set.value(ctx, nextValue)
             // log
             ctx.log.prev = ctx.log.current
             ctx.log.current = { type: "add", value }
           } else {
-            ctx.onInvalid?.({ reason: "invalidTag" })
+            ctx.onValueInvalid?.({ reason: "invalidTag" })
           }
         },
         addTagFromPaste(ctx) {
           raf(() => {
             const value = ctx.trimmedInputValue
-            const guard = ctx.validate?.({ inputValue: value, values: ctx.value })
+            const guard = ctx.validate?.({ inputValue: value, value: Array.from(ctx.value) })
             if (guard) {
               const trimmedValue = ctx.delimiter ? value.split(ctx.delimiter).map((v) => v.trim()) : [value]
-              ctx.value.push(...trimmedValue)
+              const nextValue = uniq(ctx.value.concat(...trimmedValue))
+              set.value(ctx, nextValue)
               // log
               ctx.log.prev = ctx.log.current
               ctx.log.current = { type: "paste", values: trimmedValue }
             } else {
-              ctx.onInvalid?.({ reason: "invalidTag" })
+              ctx.onValueInvalid?.({ reason: "invalidTag" })
             }
-            ctx.inputValue = ""
+            set.inputValue(ctx, "")
           })
         },
         clearTags(ctx) {
-          ctx.value = []
+          set.value(ctx, [])
           // log
           ctx.log.prev = ctx.log.current
           ctx.log.current = { type: "clear" }
         },
-        checkValue(ctx) {
-          ctx.initialValue = ctx.value.slice()
-        },
         setValue(ctx, evt) {
-          ctx.value = evt.value
-        },
-        removeLiveRegion(ctx) {
-          ctx.liveRegion?.destroy()
+          set.value(ctx, evt.value)
         },
         invokeOnInvalid(ctx) {
           if (ctx.isOverflowing) {
-            ctx.onInvalid?.({ reason: "rangeOverflow" })
+            ctx.onValueInvalid?.({ reason: "rangeOverflow" })
           }
         },
         clearLog(ctx) {
           ctx.log = { prev: null, current: null }
         },
-        logFocused(ctx) {
-          if (!ctx.focusedId) return
-          const index = dom.getIndexOfId(ctx, ctx.focusedId)
+        logHighlightedTag(ctx) {
+          if (ctx.highlightedTagId == null) return
+          const index = dom.getIndexOfId(ctx, ctx.highlightedTagId)
 
           // log
           ctx.log.prev = ctx.log.current
@@ -553,4 +575,41 @@ export function machine(userContext: UserDefinedContext) {
       },
     },
   )
+}
+
+const invoke = {
+  change: (ctx: MachineContext) => {
+    ctx.onValueChange?.({ value: Array.from(ctx.value) })
+    dom.dispatchInputEvent(ctx)
+  },
+  highlightChange: (ctx: MachineContext) => {
+    const highlightedValue = dom.getHighlightedTagValue(ctx)
+    ctx.onHighlightChange?.({ highlightedValue })
+  },
+  valueChange: (ctx: MachineContext) => {
+    ctx.onInputValueChange?.({ inputValue: ctx.inputValue })
+  },
+}
+
+const set = {
+  value: (ctx: MachineContext, value: string[]) => {
+    if (isEqual(ctx.value, value)) return
+    ctx.value = value
+    invoke.change(ctx)
+  },
+  valueAtIndex: (ctx: MachineContext, index: number, value: string) => {
+    if (isEqual(ctx.value[index], value)) return
+    ctx.value[index] = value
+    invoke.change(ctx)
+  },
+  highlightedId: (ctx: MachineContext, id: string | null) => {
+    if (isEqual(ctx.highlightedTagId, id)) return
+    ctx.highlightedTagId = id
+    invoke.highlightChange(ctx)
+  },
+  inputValue: (ctx: MachineContext, value: string) => {
+    if (isEqual(ctx.inputValue, value)) return
+    ctx.inputValue = value
+    invoke.valueChange(ctx)
+  },
 }

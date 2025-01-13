@@ -1,35 +1,35 @@
-import { defineDomHelpers, isSafari, MAX_Z_INDEX, supportsPointerEvent } from "@zag-js/dom-utils"
-import { roundToDevicePixel, wrap } from "@zag-js/number-utils"
+import { createScope, isSafari, MAX_Z_INDEX } from "@zag-js/dom-query"
+import { roundToDpr, wrap } from "@zag-js/utils"
 import type { MachineContext as Ctx } from "./number-input.types"
 
-export const dom = defineDomHelpers({
+export const dom = createScope({
   getRootId: (ctx: Ctx) => ctx.ids?.root ?? `number-input:${ctx.id}`,
   getInputId: (ctx: Ctx) => ctx.ids?.input ?? `number-input:${ctx.id}:input`,
-  getIncButtonId: (ctx: Ctx) => ctx.ids?.incBtn ?? `number-input:${ctx.id}:inc-btn`,
-  getDecButtonId: (ctx: Ctx) => ctx.ids?.decBtn ?? `number-input:${ctx.id}:dec-btn`,
+  getIncrementTriggerId: (ctx: Ctx) => ctx.ids?.incrementTrigger ?? `number-input:${ctx.id}:inc`,
+  getDecrementTriggerId: (ctx: Ctx) => ctx.ids?.decrementTrigger ?? `number-input:${ctx.id}:dec`,
   getScrubberId: (ctx: Ctx) => ctx.ids?.scrubber ?? `number-input:${ctx.id}:scrubber`,
   getCursorId: (ctx: Ctx) => `number-input:${ctx.id}:cursor`,
   getLabelId: (ctx: Ctx) => ctx.ids?.label ?? `number-input:${ctx.id}:label`,
 
   getInputEl: (ctx: Ctx) => dom.getById<HTMLInputElement>(ctx, dom.getInputId(ctx)),
-  getIncButtonEl: (ctx: Ctx) => dom.getById<HTMLButtonElement>(ctx, dom.getIncButtonId(ctx)),
-  getDecButtonEl: (ctx: Ctx) => dom.getById<HTMLButtonElement>(ctx, dom.getDecButtonId(ctx)),
+  getIncrementTriggerEl: (ctx: Ctx) => dom.getById<HTMLButtonElement>(ctx, dom.getIncrementTriggerId(ctx)),
+  getDecrementTriggerEl: (ctx: Ctx) => dom.getById<HTMLButtonElement>(ctx, dom.getDecrementTriggerId(ctx)),
   getScrubberEl: (ctx: Ctx) => dom.getById(ctx, dom.getScrubberId(ctx)),
   getCursorEl: (ctx: Ctx) => dom.getDoc(ctx).getElementById(dom.getCursorId(ctx)),
 
-  getActiveButton: (ctx: Ctx, hint = ctx.hint) => {
+  getPressedTriggerEl: (ctx: Ctx, hint = ctx.hint) => {
     let btnEl: HTMLButtonElement | null = null
     if (hint === "increment") {
-      btnEl = dom.getIncButtonEl(ctx)
+      btnEl = dom.getIncrementTriggerEl(ctx)
     }
     if (hint === "decrement") {
-      btnEl = dom.getDecButtonEl(ctx)
+      btnEl = dom.getDecrementTriggerEl(ctx)
     }
     return btnEl
   },
 
   setupVirtualCursor(ctx: Ctx) {
-    if (isSafari() || !supportsPointerEvent()) return
+    if (isSafari()) return
     dom.createVirtualCursor(ctx)
     return () => {
       dom.getCursorEl(ctx)?.remove()
@@ -58,9 +58,10 @@ export const dom = defineDomHelpers({
     }
   },
 
-  getMousementValue(ctx: Ctx, event: MouseEvent) {
-    const x = roundToDevicePixel(event.movementX)
-    const y = roundToDevicePixel(event.movementY)
+  getMousemoveValue(ctx: Ctx, event: MouseEvent) {
+    const win = dom.getWin(ctx)
+    const x = roundToDpr(event.movementX, win.devicePixelRatio)
+    const y = roundToDpr(event.movementY, win.devicePixelRatio)
 
     let hint = x > 0 ? "increment" : x < 0 ? "decrement" : null
 
@@ -72,9 +73,8 @@ export const dom = defineDomHelpers({
       y: ctx.scrubberCursorPoint!.y + y,
     }
 
-    const win = dom.getWin(ctx)
     const width = win.innerWidth
-    const half = roundToDevicePixel(7.5)
+    const half = roundToDpr(7.5, win.devicePixelRatio)
     point.x = wrap(point.x + half, width) - half
 
     return { hint, point }

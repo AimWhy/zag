@@ -11,64 +11,65 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "popover",
-  initial: "unknown",
+  initial: ctx.open ? "open" : "closed",
   context: {
-    "isDefaultOpen": false,
-    "!isRelatedTargetWithinContent": false,
-    "isTriggerFocused && portalled": false,
-    "isLastTabbableElement && closeOnInteractOutside && portalled": false,
-    "(isFirstTabbableElement || isContentFocused) && portalled": false
+    "isOpenControlled": false,
+    "isOpenControlled": false,
+    "isOpenControlled": false,
+    "isOpenControlled": false
   },
+  entry: ["checkRenderedElements"],
   on: {
     UPDATE_CONTEXT: {
       actions: "updateContext"
     }
   },
   states: {
-    unknown: {
+    closed: {
       on: {
-        SETUP: [{
+        "CONTROLLED.OPEN": {
           target: "open",
-          cond: "isDefaultOpen",
-          actions: "checkRenderedElements"
+          actions: ["setInitialFocus"]
+        },
+        TOGGLE: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnOpen"]
         }, {
-          target: "closed",
-          actions: "checkRenderedElements"
+          target: "open",
+          actions: ["invokeOnOpen", "setInitialFocus"]
+        }],
+        OPEN: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnOpen"]
+        }, {
+          target: "open",
+          actions: ["invokeOnOpen", "setInitialFocus"]
         }]
       }
     },
-    closed: {
-      entry: "invokeOnClose",
-      on: {
-        TOGGLE: "open",
-        OPEN: "open"
-      }
-    },
     open: {
-      activities: ["trapFocus", "preventScroll", "hideContentBelow", "computePlacement", "trackInteractionOutside", "trackTabKeyDown"],
-      entry: ["setInitialFocus", "invokeOnOpen"],
+      activities: ["trapFocus", "preventScroll", "hideContentBelow", "trackPositioning", "trackDismissableElement", "proxyTabFocus"],
       on: {
-        CLOSE: "closed",
-        REQUEST_CLOSE: {
+        "CONTROLLED.CLOSE": {
           target: "closed",
-          actions: "focusTriggerIfNeeded"
+          actions: ["setFinalFocus"]
         },
-        TOGGLE: "closed",
-        TRIGGER_BLUR: {
-          cond: "!isRelatedTargetWithinContent",
-          target: "closed"
-        },
-        TAB: [{
-          cond: "isTriggerFocused && portalled",
-          actions: "focusFirstTabbableElement"
+        CLOSE: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnClose"]
         }, {
-          cond: "isLastTabbableElement && closeOnInteractOutside && portalled",
           target: "closed",
-          actions: "focusNextTabbableElementAfterTrigger"
+          actions: ["invokeOnClose", "setFinalFocus"]
         }],
-        SHIFT_TAB: {
-          cond: "(isFirstTabbableElement || isContentFocused) && portalled",
-          actions: "focusTriggerIfNeeded"
+        TOGGLE: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnClose"]
+        }, {
+          target: "closed",
+          actions: ["invokeOnClose"]
+        }],
+        "POSITIONING.SET": {
+          actions: "reposition"
         }
       }
     }
@@ -82,10 +83,6 @@ const fetchMachine = createMachine({
     })
   },
   guards: {
-    "isDefaultOpen": ctx => ctx["isDefaultOpen"],
-    "!isRelatedTargetWithinContent": ctx => ctx["!isRelatedTargetWithinContent"],
-    "isTriggerFocused && portalled": ctx => ctx["isTriggerFocused && portalled"],
-    "isLastTabbableElement && closeOnInteractOutside && portalled": ctx => ctx["isLastTabbableElement && closeOnInteractOutside && portalled"],
-    "(isFirstTabbableElement || isContentFocused) && portalled": ctx => ctx["(isFirstTabbableElement || isContentFocused) && portalled"]
+    "isOpenControlled": ctx => ctx["isOpenControlled"]
   }
 });

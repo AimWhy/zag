@@ -1,4 +1,3 @@
-import { mergeProps } from "@zag-js/core"
 import * as numberInput from "@zag-js/number-input"
 import { normalizeProps, useMachine } from "@zag-js/react"
 import { numberInputControls } from "@zag-js/shared"
@@ -24,27 +23,24 @@ export default function Page() {
   return (
     <>
       <main>
-        <div {...api.rootProps}>
-          <div
-            data-testid="scrubber"
-            {...mergeProps(api.scrubberProps, { style: { width: 32, height: 32, background: "red" } })}
-          />
-          <label data-testid="label" {...api.labelProps}>
+        <div {...api.getRootProps()}>
+          <div data-testid="scrubber" {...api.getScrubberProps()} />
+          <label data-testid="label" {...api.getLabelProps()}>
             Enter number:
           </label>
-          <div>
-            <button data-testid="dec-button" {...api.decrementButtonProps}>
+          <div {...api.getControlProps()}>
+            <button data-testid="dec-button" {...api.getDecrementTriggerProps()}>
               DEC
             </button>
-            <input data-testid="input" {...api.inputProps} />
-            <button data-testid="inc-button" {...api.incrementButtonProps}>
+            <input data-testid="input" {...api.getInputProps()} />
+            <button data-testid="inc-button" {...api.getIncrementTriggerProps()}>
               INC
             </button>
           </div>
         </div>
       </main>
       <Toolbar controls={controls.ui}>
-        <StateVisualizer state={state} />
+        <StateVisualizer state={state} omit={["formatter", "parser"]} />
       </Toolbar>
     </>
   )

@@ -1,26 +1,20 @@
+import { describe, expect, it, vi } from "vitest"
 import { createMachine } from "../src"
 
-const initialMachine = {
-  context: { value: 0 },
-
-  initial: "idle",
-  states: {
-    idle: {
-      on: {
-        START: { target: "running" },
-      },
-    },
-  },
-}
-jest.useFakeTimers()
+vi.useFakeTimers()
 
 describe("should trigger every actions", () => {
   it("with array notation", () => {
     const counter = createMachine(
       {
-        ...initialMachine,
+        context: { value: 0 },
+        initial: "idle",
         states: {
-          ...initialMachine.states,
+          idle: {
+            on: {
+              START: { target: "running" },
+            },
+          },
           running: {
             every: [{ delay: 100, actions: "increment" }],
           },
@@ -37,7 +31,7 @@ describe("should trigger every actions", () => {
     counter.start()
     counter.send("START")
     expect(counter.state.context.value).toBe(0)
-    jest.advanceTimersByTime(1000)
+    vi.advanceTimersByTime(1000)
     expect(counter.state.context.value).toBe(10)
     counter.stop()
   })
@@ -45,9 +39,14 @@ describe("should trigger every actions", () => {
   it("with object notation", () => {
     const counter = createMachine(
       {
-        ...initialMachine,
+        context: { value: 0 },
+        initial: "idle",
         states: {
-          ...initialMachine.states,
+          idle: {
+            on: {
+              START: { target: "running" },
+            },
+          },
           running: {
             every: {
               100: ["increment"],
@@ -66,7 +65,7 @@ describe("should trigger every actions", () => {
     counter.start()
     counter.send("START")
     expect(counter.state.context.value).toBe(0)
-    jest.advanceTimersByTime(1000)
+    vi.advanceTimersByTime(1000)
     expect(counter.state.context.value).toBe(10)
     counter.stop()
   })
@@ -76,9 +75,14 @@ describe("after transition", () => {
   it("with named delay", () => {
     const counter = createMachine(
       {
-        ...initialMachine,
+        context: { value: 0 },
+        initial: "idle",
         states: {
-          ...initialMachine.states,
+          idle: {
+            on: {
+              START: { target: "running" },
+            },
+          },
           running: {
             after: {
               TIMER_DELAY: { target: "initial" },
@@ -96,9 +100,9 @@ describe("after transition", () => {
     counter.start()
     counter.send("START")
     expect(counter.state.context.value).toBe(0)
-    jest.advanceTimersByTime(199)
+    vi.advanceTimersByTime(199)
     expect(counter.state.value).toBe("running")
-    jest.advanceTimersByTime(1)
+    vi.advanceTimersByTime(1)
     expect(counter.state.value).toBe("initial")
   })
 })
@@ -106,9 +110,14 @@ describe("after transition", () => {
 it("does not transition into state after options defined timer delay has passed and guard is false", () => {
   const counter = createMachine(
     {
-      ...initialMachine,
+      context: { value: 0 },
+      initial: "idle",
       states: {
-        ...initialMachine.states,
+        idle: {
+          on: {
+            START: { target: "running" },
+          },
+        },
         running: {
           every: [{ delay: 100, actions: "increment" }],
           after: {
@@ -135,12 +144,12 @@ it("does not transition into state after options defined timer delay has passed 
   counter.start()
   counter.send("START")
   expect(counter.state.context.value).toBe(0)
-  jest.advanceTimersByTime(200)
-  // since guard doesnt approve yet
+  vi.advanceTimersByTime(200)
+  // since guard doesn't approve yet
   expect(counter.state.value).toBe("running")
   expect(counter.state.context.value).toBe(2)
 
-  jest.advanceTimersByTime(300)
+  vi.advanceTimersByTime(300)
   // If TIMER_DELAY has passed with guard = false it won't be reevaluated if guard = true?
   expect(counter.state.value).toBe("running")
   counter.stop()
@@ -149,9 +158,14 @@ it("does not transition into state after options defined timer delay has passed 
 it("does transition into state after options defined timer delay has passed and guard is true", () => {
   const counter = createMachine(
     {
-      ...initialMachine,
+      context: { value: 0 },
+      initial: "idle",
       states: {
-        ...initialMachine.states,
+        idle: {
+          on: {
+            START: { target: "running" },
+          },
+        },
         running: {
           every: [{ delay: 100, actions: "increment" }],
           after: {
@@ -178,7 +192,7 @@ it("does transition into state after options defined timer delay has passed and 
   counter.start()
   counter.send("START")
   expect(counter.state.context.value).toBe(0)
-  jest.advanceTimersByTime(200)
+  vi.advanceTimersByTime(200)
   // guard becomes true and after delay passed
   expect(counter.state.value).toBe("initial")
   expect(counter.state.context.value).toBe(2)
@@ -188,9 +202,14 @@ it("does transition into state after options defined timer delay has passed and 
 it("does transition into state after static defined timer delay has passed and guard is true", () => {
   const counter = createMachine(
     {
-      ...initialMachine,
+      context: { value: 0 },
+      initial: "idle",
       states: {
-        ...initialMachine.states,
+        idle: {
+          on: {
+            START: { target: "running" },
+          },
+        },
         running: {
           every: [{ delay: 100, actions: "increment" }],
           after: {
@@ -214,7 +233,7 @@ it("does transition into state after static defined timer delay has passed and g
   counter.start()
   counter.send("START")
   expect(counter.state.context.value).toBe(0)
-  jest.advanceTimersByTime(200)
+  vi.advanceTimersByTime(200)
   // guard becomes true and after delay passed
   expect(counter.state.value).toBe("initial")
   expect(counter.state.context.value).toBe(2)
@@ -224,9 +243,14 @@ it("does transition into state after static defined timer delay has passed and g
 it("does transition into state after options defined timer delay has passed and guard was true", () => {
   const counter = createMachine(
     {
-      ...initialMachine,
+      context: { value: 0 },
+      initial: "idle",
       states: {
-        ...initialMachine.states,
+        idle: {
+          on: {
+            START: { target: "running" },
+          },
+        },
         running: {
           every: [{ delay: 100, actions: "increment" }],
           after: {
@@ -253,12 +277,12 @@ it("does transition into state after options defined timer delay has passed and 
   counter.start()
   counter.send("START")
   expect(counter.state.context.value).toBe(0)
-  jest.advanceTimersByTime(200)
+  vi.advanceTimersByTime(200)
   // guard becomes true TIMER_DELAY not done
   expect(counter.state.value).toBe("running")
   expect(counter.state.context.value).toBe(2)
 
-  jest.advanceTimersByTime(100)
+  vi.advanceTimersByTime(100)
   // guard true TIMER_DELAY becomes true
   expect(counter.state.value).toBe("initial")
 })

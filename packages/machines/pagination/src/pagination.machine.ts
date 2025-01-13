@@ -1,29 +1,36 @@
 import { createMachine } from "@zag-js/core"
-import { compact } from "@zag-js/utils"
-import { MachineContext, MachineState, UserDefinedContext } from "./pagination.types"
+import { compact, isEqual } from "@zag-js/utils"
+import type { IntlTranslations, MachineContext, MachineState, UserDefinedContext } from "./pagination.types"
+
+const defaultTranslations: IntlTranslations = {
+  rootLabel: "pagination",
+  prevTriggerLabel: "previous page",
+  nextTriggerLabel: "next page",
+  itemLabel({ page, totalPages }) {
+    const isLastPage = totalPages > 1 && page === totalPages
+    return `${isLastPage ? "last page, " : ""}page ${page}`
+  },
+}
 
 export function machine(userContext: UserDefinedContext) {
   const ctx = compact(userContext)
   return createMachine<MachineContext, MachineState>(
     {
       id: "pagination",
-      initial: "unknown",
+      initial: "idle",
       context: {
         pageSize: 10,
         siblingCount: 1,
         page: 1,
+        type: "button",
         translations: {
-          rootLabel: "pagination",
-          itemLabel({ page, totalPages }) {
-            const isLastPage = totalPages > 1 && page === totalPages
-            return `${isLastPage ? "last page, " : ""}page ${page}`
-          },
+          ...defaultTranslations,
+          ...ctx.translations,
         },
         ...ctx,
       },
 
       watch: {
-        page: ["invokeOnChange"],
         pageSize: ["setPageIfNeeded"],
       },
 
@@ -33,7 +40,7 @@ export function machine(userContext: UserDefinedContext) {
         nextPage: (ctx) => (ctx.page === ctx.totalPages ? null : ctx.page + 1),
         pageRange: (ctx) => {
           const start = (ctx.page - 1) * ctx.pageSize
-          const end = start + ctx.pageSize
+          const end = Math.min(start + ctx.pageSize, ctx.count)
           return { start, end }
         },
         isValidPage: (ctx) => ctx.page >= 1 && ctx.page <= ctx.totalPages,
@@ -56,6 +63,12 @@ export function machine(userContext: UserDefinedContext) {
         SET_PAGE_SIZE: {
           actions: "setPageSize",
         },
+        FIRST_PAGE: {
+          actions: "goToFirstPage",
+        },
+        LAST_PAGE: {
+          actions: "goToLastPage",
+        },
         PREVIOUS_PAGE: {
           guard: "canGoToPrevPage",
           actions: "goToPrevPage",
@@ -67,11 +80,6 @@ export function machine(userContext: UserDefinedContext) {
       },
 
       states: {
-        unknown: {
-          on: {
-            SETUP: "idle",
-          },
-        },
         idle: {},
       },
     },
@@ -87,32 +95,43 @@ export function machine(userContext: UserDefinedContext) {
           ctx.count = evt.count
         },
         setPage(ctx, evt) {
-          ctx.page = evt.page
+          set.page(ctx, evt.page)
         },
         setPageSize(ctx, evt) {
-          ctx.pageSize = evt.size
-        },
-        invokeOnChange(ctx, evt) {
-          ctx.onChange?.({
-            page: ctx.page,
-            pageSize: ctx.pageSize,
-            srcElement: evt.srcElement || null,
-          })
+          set.pageSize(ctx, evt.size)
         },
         goToFirstPage(ctx) {
-          ctx.page = 1
+          set.page(ctx, 1)
+        },
+        goToLastPage(ctx) {
+          set.page(ctx, ctx.totalPages)
         },
         goToPrevPage(ctx) {
-          ctx.page = ctx.page - 1
+          set.page(ctx, ctx.page - 1)
         },
         goToNextPage(ctx) {
-          ctx.page = ctx.page + 1
+          set.page(ctx, ctx.page + 1)
         },
         setPageIfNeeded(ctx, _evt) {
           if (ctx.isValidPage) return
-          ctx.page = 1
+          set.page(ctx, 1)
         },
       },
     },
   )
+}
+
+const clampPage = (page: number, totalPages: number) => Math.min(Math.max(page, 1), totalPages)
+
+const set = {
+  pageSize: (ctx: MachineContext, value: number) => {
+    if (isEqual(ctx.pageSize, value)) return
+    ctx.pageSize = value
+    ctx.onPageSizeChange?.({ pageSize: ctx.pageSize })
+  },
+  page: (ctx: MachineContext, value: number) => {
+    if (isEqual(ctx.page, value)) return
+    ctx.page = clampPage(value, ctx.totalPages)
+    ctx.onPageChange?.({ page: ctx.page, pageSize: ctx.pageSize })
+  },
 }

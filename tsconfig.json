@@ -1,8 +1,5 @@
 {
-  "exclude": ["node_modules"],
-  "include": ["packages", "scripts", "shared", "scripts"],
   "compilerOptions": {
-    "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "downlevelIteration": true,
@@ -14,14 +11,17 @@
     "noEmit": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "node",
     "noImplicitReturns": false,
     "resolveJsonModule": true,
+    "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
     "strict": true,
+    "strictNullChecks": true,
     "stripInternal": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "suppressImplicitAnyIndexErrors": true
+    "ignoreDeprecations": "5.0",
+    "types": ["vitest/globals"],
+    "verbatimModuleSyntax": true
   }
 }

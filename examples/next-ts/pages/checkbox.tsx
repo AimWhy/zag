@@ -1,5 +1,5 @@
 import * as checkbox from "@zag-js/checkbox"
-import { mergeProps, normalizeProps, useMachine } from "@zag-js/react"
+import { normalizeProps, useMachine } from "@zag-js/react"
 import { checkboxControls } from "@zag-js/shared"
 import serialize from "form-serialize"
 import { useId } from "react"
@@ -13,6 +13,7 @@ export default function Page() {
   const [state, send] = useMachine(
     checkbox.machine({
       id: useId(),
+      name: "checkbox",
     }),
     {
       context: controls.context,
@@ -21,40 +22,34 @@ export default function Page() {
 
   const api = checkbox.connect(state, send, normalizeProps)
 
-  const inputProps = mergeProps(api.inputProps, {
-    onChange() {
-      if (api.isIndeterminate && !api.isReadOnly) {
-        api.setIndeterminate(false)
-        api.setChecked(true)
-      }
-    },
-  })
-
   return (
     <>
       <main className="checkbox">
         <form
           onChange={(e) => {
-            console.log(serialize(e.currentTarget, { hash: true }))
+            const result = serialize(e.currentTarget, { hash: true })
+            console.log(result)
           }}
         >
           <fieldset>
-            <label {...api.rootProps}>
-              <span {...api.labelProps}>Input {api.isChecked ? "Checked" : "Unchecked"}</span>
-              <input {...inputProps} />
-              <div {...api.controlProps} />
+            <label {...api.getRootProps()}>
+              <div {...api.getControlProps()} />
+              <span {...api.getLabelProps()}>Input {api.checked ? "Checked" : "Unchecked"}</span>
+              <input {...api.getHiddenInputProps()} data-testid="hidden-input" />
+              <div {...api.getIndicatorProps()}>Indicator</div>
             </label>
 
-            <button type="button" disabled={api.isChecked} onClick={() => api.setChecked(true)}>
+            <button type="button" disabled={api.checked} onClick={() => api.setChecked(true)}>
               Check
             </button>
-            <button type="button" disabled={!api.isChecked} onClick={() => api.setChecked(false)}>
-              UnCheck
+            <button type="button" disabled={!api.checked} onClick={() => api.setChecked(false)}>
+              Uncheck
             </button>
             <button type="reset">Reset Form</button>
           </fieldset>
         </form>
       </main>
+
       <Toolbar controls={controls.ui}>
         <StateVisualizer state={state} />
       </Toolbar>

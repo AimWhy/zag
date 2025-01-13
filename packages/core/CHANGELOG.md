@@ -1,5 +1,1054 @@
 # @zag-js/core
 
+## 0.81.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.81.2
+  - @zag-js/utils@0.81.2
+
+## 0.81.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.81.1
+  - @zag-js/utils@0.81.1
+
+## 0.81.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.81.0
+  - @zag-js/utils@0.81.0
+
+## 0.80.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.80.0
+  - @zag-js/utils@0.80.0
+
+## 0.79.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.79.3
+  - @zag-js/utils@0.79.3
+
+## 0.79.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.79.2
+  - @zag-js/utils@0.79.2
+
+## 0.79.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.79.1
+  - @zag-js/utils@0.79.1
+
+## 0.79.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.79.0
+  - @zag-js/utils@0.79.0
+
+## 0.78.3
+
+### Patch Changes
+
+- [`5584a83`](https://github.com/chakra-ui/zag/commit/5584a833151ee9f2c2ef9c07b6d699addfbca18e) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - - Fix issue where react elements could not be passed to tree view.
+  In general, we've improved the entire machine to better support complex objects like react and vue elements.
+
+  - Remove support for promises in store and snapshot. Prefer to use framework-specific hooks to manage async
+    operations.
+
+- Updated dependencies [[`5584a83`](https://github.com/chakra-ui/zag/commit/5584a833151ee9f2c2ef9c07b6d699addfbca18e)]:
+  - @zag-js/store@0.78.3
+  - @zag-js/utils@0.78.3
+
+## 0.78.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.78.2
+  - @zag-js/utils@0.78.2
+
+## 0.78.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.78.1
+  - @zag-js/utils@0.78.1
+
+## 0.78.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.78.0
+  - @zag-js/utils@0.78.0
+
+## 0.77.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.77.1
+  - @zag-js/utils@0.77.1
+
+## 0.77.0
+
+### Patch Changes
+
+- Updated dependencies [[`a2af4ad`](https://github.com/chakra-ui/zag/commit/a2af4adc6a0d9438e025eadd12eb7eb513131a90)]:
+  - @zag-js/utils@0.77.0
+  - @zag-js/store@0.77.0
+
+## 0.76.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.76.0
+  - @zag-js/utils@0.76.0
+
+## 0.75.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.75.0
+  - @zag-js/utils@0.75.0
+
+## 0.74.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.74.2
+  - @zag-js/utils@0.74.2
+
+## 0.74.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.74.1
+  - @zag-js/utils@0.74.1
+
+## 0.74.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.74.0
+  - @zag-js/utils@0.74.0
+
+## 0.73.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.73.1
+  - @zag-js/utils@0.73.1
+
+## 0.73.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.73.0
+  - @zag-js/utils@0.73.0
+
+## 0.72.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.72.0
+  - @zag-js/utils@0.72.0
+
+## 0.71.0
+
+### Minor Changes
+
+- [`b3a251e`](https://github.com/chakra-ui/zag/commit/b3a251e5e10b9b27af353e0f41117329846b14e9) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - We no longer ship `src` files in the packages.
+
+### Patch Changes
+
+- Updated dependencies [[`b3a251e`](https://github.com/chakra-ui/zag/commit/b3a251e5e10b9b27af353e0f41117329846b14e9)]:
+  - @zag-js/store@0.71.0
+  - @zag-js/utils@0.71.0
+
+## 0.70.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.70.0
+
+## 0.69.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.69.0
+
+## 0.68.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.68.1
+
+## 0.68.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.68.0
+
+## 0.67.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.67.0
+
+## 0.66.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.66.1
+
+## 0.66.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.66.0
+
+## 0.65.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.65.1
+
+## 0.65.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.65.0
+
+## 0.64.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.64.0
+
+## 0.63.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.63.0
+
+## 0.62.1
+
+### Patch Changes
+
+- [`5644790`](https://github.com/chakra-ui/zag/commit/564479081d37cd06bc38043fccf9c229379a1531) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - React: Fix regression with `useMachine` where HMR could lead to
+  `Maximum call stack exceeded`
+
+- Updated dependencies []:
+  - @zag-js/store@0.62.1
+
+## 0.62.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.62.0
+
+## 0.61.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.61.1
+
+## 0.61.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.61.0
+
+## 0.60.0
+
+### Patch Changes
+
+- Updated dependencies [[`49bf73b`](https://github.com/chakra-ui/zag/commit/49bf73b7119bdd5dfd40d33119c3543626e201f0)]:
+  - @zag-js/store@0.60.0
+
+## 0.59.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.59.0
+
+## 0.58.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.58.3
+
+## 0.58.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.58.2
+
+## 0.58.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.58.1
+
+## 0.58.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.58.0
+
+## 0.57.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.57.0
+
+## 0.56.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.56.1
+
+## 0.56.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.56.0
+
+## 0.55.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.55.0
+
+## 0.54.0
+
+### Minor Changes
+
+- [#1545](https://github.com/chakra-ui/zag/pull/1545)
+  [`590c177`](https://github.com/chakra-ui/zag/commit/590c1779f5208fb99114c872175e779508f2f96d) Thanks
+  [@anubra266](https://github.com/anubra266)! - Update all machines to use prop getters.
+
+  - Improves render performance due to the lazy evaluation of prop getters
+  - Helps reduce breaking changes in the future
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.54.0
+
+## 0.53.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.53.0
+
+## 0.52.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.52.0
+
+## 0.51.2
+
+### Patch Changes
+
+- [#1514](https://github.com/chakra-ui/zag/pull/1514)
+  [`62eb21b`](https://github.com/chakra-ui/zag/commit/62eb21b60355dd0645936baf4692315134e7488c) Thanks
+  [@anubra266](https://github.com/anubra266)! - Fix events merging in `mergeProps` utility
+
+- Updated dependencies []:
+  - @zag-js/store@0.51.2
+
+## 0.51.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.51.1
+
+## 0.51.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.51.0
+
+## 0.50.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.50.0
+
+## 0.49.0
+
+### Patch Changes
+
+- Updated dependencies [[`c8aeca4`](https://github.com/chakra-ui/zag/commit/c8aeca475b078806c2765659668d843037746ba6)]:
+  - @zag-js/store@0.49.0
+
+## 0.48.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.48.0
+
+## 0.47.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.47.0
+
+## 0.46.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.46.0
+
+## 0.45.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.45.0
+
+## 0.44.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.44.0
+
+## 0.43.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.43.0
+
+## 0.42.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.42.0
+
+## 0.41.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.41.0
+
+## 0.40.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.40.0
+
+## 0.39.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.39.0
+
+## 0.38.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.38.1
+
+## 0.38.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.38.0
+
+## 0.37.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.37.3
+
+## 0.37.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.37.2
+
+## 0.37.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.37.1
+
+## 0.37.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.37.0
+
+## 0.36.3
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.36.3
+
+## 0.36.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.36.2
+
+## 0.36.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.36.1
+
+## 0.36.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.36.0
+
+## 0.35.0
+
+### Patch Changes
+
+- [#1203](https://github.com/chakra-ui/zag/pull/1203)
+  [`0216161`](https://github.com/chakra-ui/zag/commit/0216161fd3d429409abc96941d33a0c333ef8d36) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Improve runtime performance when using watchers by subscribing to
+  context once.
+
+- Updated dependencies [[`0216161`](https://github.com/chakra-ui/zag/commit/0216161fd3d429409abc96941d33a0c333ef8d36)]:
+  - @zag-js/store@0.35.0
+
+## 0.34.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.34.0
+
+## 0.33.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.33.2
+
+## 0.33.1
+
+### Patch Changes
+
+- Updated dependencies [[`80af758`](https://github.com/chakra-ui/zag/commit/80af758900606b43afc5b1e23edbf043a5e085ae)]:
+  - @zag-js/store@0.33.1
+
+## 0.33.0
+
+### Patch Changes
+
+- [#1144](https://github.com/chakra-ui/zag/pull/1144)
+  [`7872cdf`](https://github.com/chakra-ui/zag/commit/7872cdf8aeb28b9a30cd4a016bd12e5366054511) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Improve runtime performance by only creating a machine instance
+  once, and updating the context with `setContext(...)` instead of `withContext(...)`.
+- Updated dependencies []:
+  - @zag-js/store@0.33.0
+
+## 0.32.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.32.1
+
+## 0.32.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.32.0
+
+## 0.31.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.31.1
+
+## 0.31.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.31.0
+
+## 0.30.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.30.0
+
+## 0.29.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.29.0
+
+## 0.28.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.28.1
+
+## 0.28.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.28.0
+
+## 0.27.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.27.1
+
+## 0.27.0
+
+### Patch Changes
+
+- [#967](https://github.com/chakra-ui/zag/pull/967)
+  [`152b0a78`](https://github.com/chakra-ui/zag/commit/152b0a78b6ba18442f38164ce90789bc243f6e00) Thanks
+  [@sholzmayer](https://github.com/sholzmayer)! - Fix issue where mergeProps throws when className str is undefined
+
+- Updated dependencies []:
+  - @zag-js/store@0.27.0
+
+## 0.26.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.26.0
+
+## 0.25.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.25.0
+
+## 0.24.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.23.0
+
+## 0.22.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.22.0
+
+## 0.21.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.21.0
+
+## 0.20.0
+
+### Patch Changes
+
+- [`942db6ca`](https://github.com/chakra-ui/zag/commit/942db6caf9f699d6af56929c835b10ae80cfbc85) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Remove toggle machine
+
+- Updated dependencies [[`942db6ca`](https://github.com/chakra-ui/zag/commit/942db6caf9f699d6af56929c835b10ae80cfbc85)]:
+  - @zag-js/store@0.20.0
+
+## 0.19.1
+
+### Patch Changes
+
+- [`3f0b6a19`](https://github.com/chakra-ui/zag/commit/3f0b6a19dcf9779846efb2bc093235299301bbdb) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - **Internal**: Add support for stopping an activity on demand
+
+- Updated dependencies []:
+  - @zag-js/store@0.19.1
+
+## 0.19.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.19.0
+
+## 0.18.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.18.0
+
+## 0.17.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.17.0
+
+## 0.16.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.16.0
+
+## 0.15.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.15.0
+
+## 0.14.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.14.0
+
+## 0.13.0
+
+### Minor Changes
+
+- [`4a2d8b77`](https://github.com/chakra-ui/zag/commit/4a2d8b77d1e71ad6b6c10134bc4186db6e6c0414) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Add support for transforming context before settings it in the
+  machine's context. This is useful when some values need to passed to `ref` function
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.13.0
+
+## 0.12.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.12.0
+
+## 0.11.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.11.2
+
+## 0.11.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.11.1
+
+## 0.11.0
+
+### Patch Changes
+
+- [`4f371874`](https://github.com/chakra-ui/zag/commit/4f3718742dc88a2cd8726bdd889c9bbde94f5bce) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Rebuild all packages using tsup
+
+- Updated dependencies [[`4f371874`](https://github.com/chakra-ui/zag/commit/4f3718742dc88a2cd8726bdd889c9bbde94f5bce)]:
+  - @zag-js/store@0.11.0
+
+## 0.10.5
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.10.5
+
+## 0.10.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.10.4
+
+## 0.10.3
+
+### Patch Changes
+
+- [`c59a8dec`](https://github.com/chakra-ui/zag/commit/c59a8dec15ab57d218823bfe7af6d723972be6c7) Thanks
+  [@cschroeter](https://github.com/cschroeter)! - Use vite to build packages
+
+- Updated dependencies [[`c59a8dec`](https://github.com/chakra-ui/zag/commit/c59a8dec15ab57d218823bfe7af6d723972be6c7)]:
+  - @zag-js/store@0.10.3
+
+## 0.10.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.10.2
+
+## 0.10.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.10.1
+
+## 0.10.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.10.0
+
+## 0.9.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @zag-js/store@0.9.2
+
+## 0.9.1
+
+### Patch Changes
+
+- [`8469daa1`](https://github.com/chakra-ui/zag/commit/8469daa15fd7f2c0a80869a8715b0342bd3c355f) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Force release every package to fix regression
+
+- Updated dependencies [[`8469daa1`](https://github.com/chakra-ui/zag/commit/8469daa15fd7f2c0a80869a8715b0342bd3c355f)]:
+  - @zag-js/store@0.9.1
+
+## 0.7.0
+
+### Patch Changes
+
+- [`413cdf18`](https://github.com/chakra-ui/zag/commit/413cdf180f718469c9c8b879a43aa4501d1ae59c) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Refactor regex for `mergeProps`
+
+## 0.5.0
+
+### Patch Changes
+
+- [`ec07ff35`](https://github.com/chakra-ui/zag/commit/ec07ff3590916ebcb4450b64207370ee2af9d3d1) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - - Widen `watch` type to support `choose` helper
+  - Add `initialContext` and `initialState` to `meta` options
+
+## 0.2.12
+
+### Patch Changes
+
+- [`30dbeb28`](https://github.com/chakra-ui/zag/commit/30dbeb282f7901c33518097a0e1dd9a857f7efb0) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix issue where `machine.getState` returned a snapshot that is
+  incompatible with Solid.js
+
+## 0.2.11
+
+### Patch Changes
+
+- [#565](https://github.com/chakra-ui/zag/pull/565)
+  [`1e10b1f4`](https://github.com/chakra-ui/zag/commit/1e10b1f40016f5c9bdf0924a3470b9383c0dbce2) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Revert support for watching `*`
+
+## 0.2.10
+
+### Patch Changes
+
+- Updated dependencies [[`5277f653`](https://github.com/chakra-ui/zag/commit/5277f65311c46e5792f605021d58b3b7e7dc3eaa)]:
+  - @zag-js/store@0.2.8
+
+## 0.2.9
+
+### Patch Changes
+
+- [`df27f257`](https://github.com/chakra-ui/zag/commit/df27f257f53d194013b528342d3d9aef994d0d5c) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix issue where react is always required due to direct dependency
+  on `valtio`
+
+- Updated dependencies [[`df27f257`](https://github.com/chakra-ui/zag/commit/df27f257f53d194013b528342d3d9aef994d0d5c)]:
+  - @zag-js/store@0.2.7
+
+## 0.2.8
+
+### Patch Changes
+
+- Updated dependencies [[`28dd7680`](https://github.com/chakra-ui/zag/commit/28dd768067f153e1f142154c8a8ce9bbde3746e2)]:
+  - @zag-js/store@0.2.6
+
+## 0.2.7
+
+### Patch Changes
+
+- [`f7bb988a`](https://github.com/chakra-ui/zag/commit/f7bb988aaeda6c6caebe95823f4cd44baa0d5e78) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix SSR issue with initial state
+
+- [`6957678d`](https://github.com/chakra-ui/zag/commit/6957678d2f00f4d219e791dffed91446e64211e7) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Switch to `es2020` to support `import.meta.env`
+
+- Updated dependencies [[`6957678d`](https://github.com/chakra-ui/zag/commit/6957678d2f00f4d219e791dffed91446e64211e7)]:
+  - @zag-js/store@0.2.5
+
+## 0.2.6
+
+### Patch Changes
+
+- [#490](https://github.com/chakra-ui/zag/pull/490)
+  [`80de0b7c`](https://github.com/chakra-ui/zag/commit/80de0b7c7f888a254a3e1fec2da5338e235bc699) Thanks
+  [@renovate](https://github.com/apps/renovate)! - Update dependency klona to v2.0.6
+
+- Updated dependencies [[`88ccbbed`](https://github.com/chakra-ui/zag/commit/88ccbbed937acf10d4338e2c6d7f1e6b9eb538c8)]:
+  - @zag-js/store@0.2.4
+
+## 0.2.5
+
+### Patch Changes
+
+- [`c7e85e20`](https://github.com/chakra-ui/zag/commit/c7e85e20d4d08b56852768becf2fc5f7f4275dcc) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Added support for watching all context properties via the `*` key.
+
+- Updated dependencies [[`6e6f0f4d`](https://github.com/chakra-ui/zag/commit/6e6f0f4d757b63b045af15639e7ae101c25514da)]:
+  - @zag-js/store@0.2.3
+
+## 0.2.4
+
+### Patch Changes
+
+- [`4c98f016`](https://github.com/chakra-ui/zag/commit/4c98f016ae3d48b1b74f4dc8c302ef9a1c664260) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Add support for custom equality function for `watch` property
+  keys.
+
+  > This is done via the `compareFns` option.
+
+  This is useful for comparing complex objects or dates, to avoid unnecessary context updates.
+
+  ```js
+  const machine = createMachine(
+    {
+      context: {
+        date: new Date(),
+      },
+      watch: {
+        date: ["invokeOnDateChange"],
+      },
+    },
+    {
+      compareFns: {
+        date: (a, b) => a.getTime() === b.getTime(),
+      },
+    },
+  )
+  ```
+
+- [#462](https://github.com/chakra-ui/zag/pull/462)
+  [`f8c47a2b`](https://github.com/chakra-ui/zag/commit/f8c47a2b4442bfadc4d98315a8c1ac4aa4020822) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Update packages to use explicit `exports` field in `package.json`
+
+- Updated dependencies [[`f8c47a2b`](https://github.com/chakra-ui/zag/commit/f8c47a2b4442bfadc4d98315a8c1ac4aa4020822)]:
+  - @zag-js/store@0.2.2
+
+## 0.2.3
+
+### Patch Changes
+
+- [`9d936614`](https://github.com/chakra-ui/zag/commit/9d93661439f10a550c154e9f290905d32e8f509b) Thanks
+  [@segunadebayo](https://github.com/segunadebayo)! - Fix typescript errors
+
+- Updated dependencies [[`9d936614`](https://github.com/chakra-ui/zag/commit/9d93661439f10a550c154e9f290905d32e8f509b)]:
+  - @zag-js/store@0.2.1
+
 ## 0.2.2
 
 ### Patch Changes

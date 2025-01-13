@@ -2,51 +2,68 @@ import type { JSX } from "./jsx"
 
 type Dict<T = any> = Record<string, T>
 
-type Booleanish = boolean | "true" | "false"
-
 type DataAttr = {
-  "data-selected"?: Booleanish
-  "data-expanded"?: Booleanish
-  "data-highlighted"?: Booleanish
-  "data-readonly"?: Booleanish
-  "data-indeterminate"?: Booleanish
-  "data-invalid"?: Booleanish
-  "data-hover"?: Booleanish
-  "data-active"?: Booleanish
-  "data-focus"?: Booleanish
-  "data-disabled"?: Booleanish
-  "data-open"?: Booleanish
-  "data-checked"?: Booleanish
-  "data-pressed"?: Booleanish
-  "data-complete"?: Booleanish
-  "data-empty"?: Booleanish
-  "data-placeholder-shown"?: Booleanish
-  "data-half"?: Booleanish
-
-  "data-uid"?: string
-  "data-name"?: string
-  "data-ownedby"?: string
-  "data-type"?: string
-  "data-valuetext"?: string
-  "data-placement"?: string
-  "data-controls"?: string
-  "data-part"?: string
-  "data-label"?: string
-  "data-state"?: string | null
-  "data-value"?: string | number
-
-  "data-orientation"?: "horizontal" | "vertical"
-
-  "data-count"?: number
-  "data-index"?: number
+  "data-selected"?: any | undefined
+  "data-expanded"?: any | undefined
+  "data-highlighted"?: any | undefined
+  "data-readonly"?: any | undefined
+  "data-indeterminate"?: any | undefined
+  "data-invalid"?: any | undefined
+  "data-hover"?: any | undefined
+  "data-active"?: any | undefined
+  "data-focus"?: any | undefined
+  "data-focus-visible"?: any | undefined
+  "data-disabled"?: any | undefined
+  "data-open"?: any | undefined
+  "data-checked"?: any | undefined
+  "data-pressed"?: any | undefined
+  "data-complete"?: any | undefined
+  "data-side"?: any | undefined
+  "data-align"?: any | undefined
+  "data-empty"?: any | undefined
+  "data-placeholder-shown"?: any | undefined
+  "data-half"?: any | undefined
+  "data-scope"?: string | undefined
+  "data-uid"?: string | undefined
+  "data-name"?: string | undefined
+  "data-ownedby"?: string | undefined
+  "data-type"?: string | undefined
+  "data-valuetext"?: string | undefined
+  "data-placement"?: string | undefined
+  "data-controls"?: string | undefined
+  "data-part"?: string | undefined
+  "data-label"?: string | undefined
+  "data-state"?: string | null | undefined
+  "data-value"?: string | number | undefined
+  "data-orientation"?: "horizontal" | "vertical" | undefined
+  "data-count"?: number | undefined
+  "data-index"?: number | undefined
+} & {
+  [key in `data-${string}`]?: any | undefined
 }
 
-export type PropTypes = Record<"button" | "label" | "input" | "output" | "element" | "select", Dict>
+export type PropTypes<T = Dict> = Record<
+  | "button"
+  | "label"
+  | "input"
+  | "textarea"
+  | "img"
+  | "output"
+  | "element"
+  | "select"
+  | "rect"
+  | "style"
+  | "circle"
+  | "svg"
+  | "path",
+  T
+>
 
 export type NormalizeProps<T extends PropTypes> = {
   [K in keyof T]: (props: K extends keyof JSX.IntrinsicElements ? DataAttr & JSX.IntrinsicElements[K] : never) => T[K]
 } & {
-  element(props: DataAttr & JSX.HTMLAttributes<HTMLElement>): T["element"]
+  element(props: DataAttr & JSX.HTMLAttributes<HTMLElement> & Record<string, any>): T["element"]
+  style: JSX.CSSProperties
 }
 
 export function createNormalizer<T extends PropTypes>(fn: (props: Dict) => Dict): NormalizeProps<T> {

@@ -1,23 +1,60 @@
-import { clamp, decrement, increment, percentToValue, snapToStep } from "@zag-js/number-utils"
+import {
+  clampValue,
+  getClosestValueIndex,
+  getNextStepValue,
+  getPreviousStepValue,
+  getValueRanges,
+  snapValueToStep,
+} from "@zag-js/utils"
 import type { MachineContext as Ctx } from "./slider.types"
 
-export const utils = {
-  fromPercent(ctx: Ctx, percent: number) {
-    percent = clamp(percent, { min: 0, max: 1 })
-    return parseFloat(snapToStep(percentToValue(percent, ctx), ctx.step))
-  },
-  clamp(ctx: Ctx, value: number) {
-    return clamp(value, ctx)
-  },
-  convert(ctx: Ctx, value: number) {
-    return clamp(parseFloat(snapToStep(value, ctx.step)), ctx)
-  },
-  decrement(ctx: Ctx, step?: number) {
-    let value = decrement(ctx.value, step ?? ctx.step)
-    return utils.convert(ctx, value)
-  },
-  increment(ctx: Ctx, step?: number) {
-    let value = increment(ctx.value, step ?? ctx.step)
-    return utils.convert(ctx, value)
-  },
+export function normalizeValues(ctx: Ctx, nextValues: number[]) {
+  return nextValues.map((value, index, values) => {
+    return constrainValue({ ...ctx, value: values }, value, index)
+  })
+}
+
+export function getRangeAtIndex(ctx: Ctx, index: number) {
+  return getValueRanges(ctx.value, ctx.min, ctx.max, ctx.minStepsBetweenThumbs)[index]
+}
+
+export function constrainValue(ctx: Ctx, value: number, index: number) {
+  const range = getRangeAtIndex(ctx, index)
+  const snapValue = snapValueToStep(value, ctx.min, ctx.max, ctx.step)
+  return clampValue(snapValue, range.min, range.max)
+}
+
+export function decrement(ctx: Ctx, index?: number, step?: number) {
+  const idx = index ?? ctx.focusedIndex
+  const range = getRangeAtIndex(ctx, idx)
+  const nextValues = getPreviousStepValue(idx, {
+    ...range,
+    step: step ?? ctx.step,
+    values: ctx.value,
+  })
+  nextValues[idx] = clampValue(nextValues[idx], range.min, range.max)
+  return nextValues
+}
+
+export function increment(ctx: Ctx, index?: number, step?: number) {
+  const idx = index ?? ctx.focusedIndex
+  const range = getRangeAtIndex(ctx, idx)
+  const nextValues = getNextStepValue(idx, {
+    ...range,
+    step: step ?? ctx.step,
+    values: ctx.value,
+  })
+  nextValues[idx] = clampValue(nextValues[idx], range.min, range.max)
+  return nextValues
+}
+
+export function getClosestIndex(ctx: Ctx, pointValue: number) {
+  return getClosestValueIndex(ctx.value, pointValue)
+}
+
+export function assignArray(current: number[], next: number[]) {
+  for (let i = 0; i < next.length; i++) {
+    const value = next[i]
+    current[i] = value
+  }
 }

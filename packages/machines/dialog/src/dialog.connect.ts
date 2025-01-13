@@ -1,72 +1,102 @@
 import type { NormalizeProps, PropTypes } from "@zag-js/types"
+import { parts } from "./dialog.anatomy"
 import { dom } from "./dialog.dom"
-import type { Send, State } from "./dialog.types"
+import type { MachineApi, Send, State } from "./dialog.types"
 
-export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>) {
+export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>): MachineApi<T> {
   const ariaLabel = state.context["aria-label"]
-  const isOpen = state.matches("open")
+  const open = state.matches("open")
   const rendered = state.context.renderedElements
 
   return {
-    isOpen,
-    open() {
-      send("OPEN")
-    },
-    close() {
-      send("CLOSE")
+    open,
+    setOpen(nextOpen) {
+      if (nextOpen === open) return
+      send(nextOpen ? "OPEN" : "CLOSE")
     },
 
-    triggerProps: normalize.button({
-      "data-part": "trigger",
-      id: dom.getTriggerId(state.context),
-      "aria-haspopup": "dialog",
-      type: "button",
-      "aria-expanded": isOpen,
-      "aria-controls": dom.getContentId(state.context),
-      onClick() {
-        send("TOGGLE")
-      },
-    }),
+    getTriggerProps() {
+      return normalize.button({
+        ...parts.trigger.attrs,
+        dir: state.context.dir,
+        id: dom.getTriggerId(state.context),
+        "aria-haspopup": "dialog",
+        type: "button",
+        "aria-expanded": open,
+        "data-state": open ? "open" : "closed",
+        "aria-controls": dom.getContentId(state.context),
+        onClick(event) {
+          if (event.defaultPrevented) return
+          send("TOGGLE")
+        },
+      })
+    },
 
-    backdropProps: normalize.element({
-      "data-part": "backdrop",
-      id: dom.getBackdropId(state.context),
-    }),
+    getBackdropProps() {
+      return normalize.element({
+        ...parts.backdrop.attrs,
+        dir: state.context.dir,
+        hidden: !open,
+        id: dom.getBackdropId(state.context),
+        "data-state": open ? "open" : "closed",
+      })
+    },
 
-    underlayProps: normalize.element({
-      "data-part": "underlay",
-      id: dom.getUnderlayId(state.context),
-    }),
+    getPositionerProps() {
+      return normalize.element({
+        ...parts.positioner.attrs,
+        dir: state.context.dir,
+        id: dom.getPositionerId(state.context),
+        style: {
+          pointerEvents: open ? undefined : "none",
+        },
+      })
+    },
 
-    contentProps: normalize.element({
-      "data-part": "content",
-      role: state.context.role,
-      id: dom.getContentId(state.context),
-      tabIndex: -1,
-      "aria-modal": true,
-      "aria-label": ariaLabel || undefined,
-      "aria-labelledby": ariaLabel || !rendered.title ? undefined : dom.getTitleId(state.context),
-      "aria-describedby": rendered.description ? dom.getDescriptionId(state.context) : undefined,
-    }),
+    getContentProps() {
+      return normalize.element({
+        ...parts.content.attrs,
+        dir: state.context.dir,
+        role: state.context.role,
+        hidden: !open,
+        id: dom.getContentId(state.context),
+        tabIndex: -1,
+        "data-state": open ? "open" : "closed",
+        "aria-modal": true,
+        "aria-label": ariaLabel || undefined,
+        "aria-labelledby": ariaLabel || !rendered.title ? undefined : dom.getTitleId(state.context),
+        "aria-describedby": rendered.description ? dom.getDescriptionId(state.context) : undefined,
+      })
+    },
 
-    titleProps: normalize.element({
-      "data-part": "title",
-      id: dom.getTitleId(state.context),
-    }),
+    getTitleProps() {
+      return normalize.element({
+        ...parts.title.attrs,
+        dir: state.context.dir,
+        id: dom.getTitleId(state.context),
+      })
+    },
 
-    descriptionProps: normalize.element({
-      "data-part": "description",
-      id: dom.getDescriptionId(state.context),
-    }),
+    getDescriptionProps() {
+      return normalize.element({
+        ...parts.description.attrs,
+        dir: state.context.dir,
+        id: dom.getDescriptionId(state.context),
+      })
+    },
 
-    closeButtonProps: normalize.button({
-      "data-part": "close-button",
-      id: dom.getCloseButtonId(state.context),
-      type: "button",
-      onClick(event) {
-        event.stopPropagation()
-        send("CLOSE")
-      },
-    }),
+    getCloseTriggerProps() {
+      return normalize.button({
+        ...parts.closeTrigger.attrs,
+        dir: state.context.dir,
+        id: dom.getCloseTriggerId(state.context),
+        type: "button",
+        onClick(event) {
+          if (event.defaultPrevented) return
+          event.stopPropagation()
+          send("CLOSE")
+        },
+      })
+    },
   }
 }

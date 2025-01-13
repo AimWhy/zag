@@ -1,3 +1,13 @@
-export { getPlacement, getBasePlacement } from "./get-placement"
-export { getPlacementStyles } from "./get-styles"
-export type { Placement, PositioningOptions } from "./types"
+export { getPlacement } from "./get-placement"
+export { getPlacementStyles, type GetPlacementStylesOptions } from "./get-styles"
+export { getPlacementSide, isValidPlacement } from "./placement"
+export type {
+  AnchorRect,
+  AutoUpdateOptions,
+  Boundary,
+  ComputePositionReturn,
+  Placement,
+  PlacementAlign,
+  PlacementSide,
+  PositioningOptions,
+} from "./types"

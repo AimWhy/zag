@@ -1,107 +1,127 @@
-import { dataAttr } from "@zag-js/dom-utils"
+import { dataAttr } from "@zag-js/dom-query"
 import type { NormalizeProps, PropTypes } from "@zag-js/types"
+import { parts } from "./toast.anatomy"
 import { dom } from "./toast.dom"
-import type { Send, State } from "./toast.types"
+import type { MachineApi, Send, State } from "./toast.types"
+import { getGhostAfterStyle, getGhostBeforeStyle, getPlacementStyle } from "./toast.utils"
 
-export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>) {
-  const isVisible = state.hasTag("visible")
-  const isPaused = state.hasTag("paused")
+export function connect<T extends PropTypes, O>(
+  state: State<O>,
+  send: Send,
+  normalize: NormalizeProps<T>,
+): MachineApi<T, O> {
+  const visible = state.hasTag("visible")
+  const paused = state.hasTag("paused")
 
-  const pauseOnInteraction = state.context.pauseOnInteraction
-  const placement = state.context.placement
+  const placement = state.context.placement!
+  const type = state.context.type!
+
+  const [side, align = "center"] = placement.split("-")
 
   return {
-    type: state.context.type,
+    type: type,
     title: state.context.title,
     description: state.context.description,
     placement,
-    isVisible,
-    isPaused,
-    isRtl: state.context.dir === "rtl",
+    visible: visible,
+    paused: paused,
+
     pause() {
       send("PAUSE")
     },
+
     resume() {
       send("RESUME")
     },
+
     dismiss() {
       send("DISMISS")
     },
 
-    rootProps: normalize.element({
-      "data-part": "root",
-      dir: state.context.dir,
-      id: dom.getContainerId(state.context),
-      "data-open": dataAttr(isVisible),
-      "data-type": state.context.type,
-      "data-placement": placement,
-      role: "status",
-      "aria-atomic": "true",
-      tabIndex: 0,
-      style: {
-        position: "relative",
-        pointerEvents: "auto",
-        margin: "calc(var(--toast-gutter) / 2)",
-        "--remove-delay": `${state.context.removeDelay}ms`,
-        "--duration": `${state.context.duration}ms`,
-      },
-      onKeyDown(event) {
-        if (event.key == "Escape") {
+    getRootProps() {
+      return normalize.element({
+        ...parts.root.attrs,
+        dir: state.context.dir,
+        id: dom.getRootId(state.context),
+        "data-state": visible ? "open" : "closed",
+        "data-type": type,
+        "data-placement": placement,
+        "data-align": align,
+        "data-side": side,
+        "data-mounted": dataAttr(state.context.mounted),
+        "data-paused": dataAttr(paused),
+
+        "data-first": dataAttr(state.context.frontmost),
+        "data-sibling": dataAttr(!state.context.frontmost),
+        "data-stack": dataAttr(state.context.stacked),
+        "data-overlap": dataAttr(!state.context.stacked),
+
+        role: "status",
+        "aria-atomic": "true",
+        "aria-describedby": state.context.description ? dom.getDescriptionId(state.context) : undefined,
+        "aria-labelledby": state.context.title ? dom.getTitleId(state.context) : undefined,
+        tabIndex: 0,
+        style: getPlacementStyle(state.context, visible),
+        onKeyDown(event) {
+          if (event.defaultPrevented) return
+          if (event.key == "Escape") {
+            send("DISMISS")
+            event.preventDefault()
+          }
+        },
+      })
+    },
+
+    /* Leave a ghost div to avoid setting hover to false when transitioning out */
+    getGhostBeforeProps() {
+      return normalize.element({
+        "data-ghost": "before",
+        style: getGhostBeforeStyle(state.context, visible),
+      })
+    },
+
+    /* Needed to avoid setting hover to false when in between toasts */
+    getGhostAfterProps() {
+      return normalize.element({
+        "data-ghost": "after",
+        style: getGhostAfterStyle(state.context, visible),
+      })
+    },
+
+    getTitleProps() {
+      return normalize.element({
+        ...parts.title.attrs,
+        id: dom.getTitleId(state.context),
+      })
+    },
+
+    getDescriptionProps() {
+      return normalize.element({
+        ...parts.description.attrs,
+        id: dom.getDescriptionId(state.context),
+      })
+    },
+
+    getActionTriggerProps() {
+      return normalize.button({
+        ...parts.actionTrigger.attrs,
+        type: "button",
+        onClick(event) {
+          if (event.defaultPrevented) return
+          state.context.action?.onClick?.()
           send("DISMISS")
-          event.preventDefault()
-        }
-      },
-      onFocus() {
-        if (pauseOnInteraction) {
-          send("PAUSE")
-        }
-      },
-      onBlur() {
-        if (pauseOnInteraction) {
-          send("RESUME")
-        }
-      },
-      onPointerEnter() {
-        if (pauseOnInteraction) {
-          send("PAUSE")
-        }
-      },
-      onPointerLeave() {
-        if (pauseOnInteraction) {
-          send("RESUME")
-        }
-      },
-    }),
+        },
+      })
+    },
 
-    titleProps: normalize.element({
-      "data-part": "title",
-      id: dom.getTitleId(state.context),
-    }),
-
-    descriptionProps: normalize.element({
-      "data-part": "description",
-      id: dom.getDescriptionId(state.context),
-    }),
-
-    closeButtonProps: normalize.button({
-      id: dom.getCloseButtonId(state.context),
-      "data-part": "close-button",
-      type: "button",
-      "aria-label": "Dismiss notification",
-      onClick() {
-        send("DISMISS")
-      },
-    }),
-
-    render() {
-      return state.context.render?.({
-        id: state.context.id,
-        type: state.context.type,
-        duration: state.context.duration,
-        title: state.context.title,
-        placement: state.context.placement,
-        description: state.context.description,
-        dismiss() {
+    getCloseTriggerProps() {
+      return normalize.button({
+        id: dom.getCloseTriggerId(state.context),
+        ...parts.closeTrigger.attrs,
+        type: "button",
+        "aria-label": "Dismiss notification",
+        onClick(event) {
+          if (event.defaultPrevented) return
           send("DISMISS")
         },
       })

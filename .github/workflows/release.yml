@@ -15,6 +15,7 @@ env:
   FORCE_COLOR: 2
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  HUSKY: 0
 
 jobs:
   release:
@@ -22,9 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.SAGE_PAT }}
 
       - name: Install
         uses: ./.github/composite-actions/install
@@ -42,25 +44,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Release to dev tag
-        if: steps.changesets.outputs.published != 'true'
-        run: |
-          git checkout main
-          pnpm changeset version --snapshot dev
-          pnpm changeset publish --tag dev
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Dispatch update to docs
+      - name: Slack notification
         if: steps.changesets.outputs.published == 'true'
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.SAGE_PAT }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: 'chakra-ui',
-              repo: 'zag-docs',
-              workflow_id: 'deps.yml',
-              ref: 'main'
-            })
+        run: pnpm slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -11,30 +11,18 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "splitter",
-  initial: "unknown",
+  initial: "idle",
   context: {
-    "isCollapsed": false,
-    "!isFixed": false,
     "isHorizontal": false,
     "isHorizontal": false,
     "isVertical": false,
     "isVertical": false,
-    "isCollapsed": false,
-    "isCollapsed": false
+    "isStartPanelAtMax": false
   },
   on: {
-    COLLAPSE: {
-      actions: "setToMin"
-    },
-    EXPAND: {
-      actions: "setToMax"
-    },
-    TOGGLE: [{
-      cond: "isCollapsed",
-      actions: "setToMax"
-    }, {
-      actions: "setToMin"
-    }]
+    SET_PANEL_SIZE: {
+      actions: "setPanelSize"
+    }
   },
   on: {
     UPDATE_CONTEXT: {
@@ -42,19 +30,20 @@ const fetchMachine = createMachine({
     }
   },
   states: {
-    unknown: {
-      on: {
-        SETUP: "idle"
-      }
-    },
     idle: {
+      entry: ["clearActiveHandleId"],
       on: {
         POINTER_OVER: {
-          cond: "!isFixed",
-          target: "hover:temp"
+          target: "hover:temp",
+          actions: ["setActiveHandleId"]
         },
-        POINTER_LEAVE: "idle",
-        FOCUS: "focused"
+        FOCUS: {
+          target: "focused",
+          actions: ["setActiveHandleId"]
+        },
+        DOUBLE_CLICK: {
+          actions: ["resetStartPanel", "setPreviousPanels"]
+        }
       }
     },
     "hover:temp": {
@@ -64,7 +53,7 @@ const fetchMachine = createMachine({
       on: {
         POINTER_DOWN: {
           target: "dragging",
-          actions: ["invokeOnChangeStart"]
+          actions: ["setActiveHandleId"]
         },
         POINTER_LEAVE: "idle"
       }
@@ -72,10 +61,7 @@ const fetchMachine = createMachine({
     hover: {
       tags: ["focus"],
       on: {
-        POINTER_DOWN: {
-          target: "dragging",
-          actions: ["invokeOnChangeStart"]
-        },
+        POINTER_DOWN: "dragging",
         POINTER_LEAVE: "idle"
       }
     },
@@ -85,55 +71,49 @@ const fetchMachine = createMachine({
         BLUR: "idle",
         POINTER_DOWN: {
           target: "dragging",
-          actions: ["invokeOnChangeStart"]
+          actions: ["setActiveHandleId"]
         },
         ARROW_LEFT: {
           cond: "isHorizontal",
-          actions: "decrement"
+          actions: ["shrinkStartPanel", "setPreviousPanels"]
         },
         ARROW_RIGHT: {
           cond: "isHorizontal",
-          actions: "increment"
+          actions: ["expandStartPanel", "setPreviousPanels"]
         },
         ARROW_UP: {
           cond: "isVertical",
-          actions: "increment"
+          actions: ["shrinkStartPanel", "setPreviousPanels"]
         },
         ARROW_DOWN: {
           cond: "isVertical",
-          actions: "decrement"
+          actions: ["expandStartPanel", "setPreviousPanels"]
         },
         ENTER: [{
-          cond: "isCollapsed",
-          actions: "setToMin"
+          cond: "isStartPanelAtMax",
+          actions: ["setStartPanelToMin", "setPreviousPanels"]
         }, {
-          actions: "setToMin"
+          actions: ["setStartPanelToMax", "setPreviousPanels"]
         }],
         HOME: {
-          actions: "setToMin"
+          actions: ["setStartPanelToMin", "setPreviousPanels"]
         },
         END: {
-          actions: "setToMax"
-        },
-        DOUBLE_CLICK: [{
-          cond: "isCollapsed",
-          actions: "setToMax"
-        }, {
-          actions: "setToMin"
-        }]
+          actions: ["setStartPanelToMax", "setPreviousPanels"]
+        }
       }
     },
     dragging: {
       tags: ["focus"],
-      entry: "focusSplitter",
-      activities: "trackPointerMove",
+      entry: "focusResizeHandle",
+      activities: ["trackPointerMove"],
       on: {
+        POINTER_MOVE: {
+          actions: ["setPointerValue", "setGlobalCursor", "invokeOnResize"]
+        },
         POINTER_UP: {
           target: "focused",
-          actions: ["invokeOnChangeEnd"]
-        },
-        POINTER_MOVE: {
-          actions: "setPointerValue"
+          actions: ["setPreviousPanels", "clearGlobalCursor", "blurResizeHandle", "invokeOnResizeEnd"]
         }
       }
     }
@@ -150,9 +130,8 @@ const fetchMachine = createMachine({
     HOVER_DELAY: 250
   },
   guards: {
-    "isCollapsed": ctx => ctx["isCollapsed"],
-    "!isFixed": ctx => ctx["!isFixed"],
     "isHorizontal": ctx => ctx["isHorizontal"],
-    "isVertical": ctx => ctx["isVertical"]
+    "isVertical": ctx => ctx["isVertical"],
+    "isStartPanelAtMax": ctx => ctx["isStartPanelAtMax"]
   }
 });

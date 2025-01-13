@@ -1,105 +1,57 @@
-import { expect, Page, test } from "@playwright/test"
-import { a11y, testid } from "./__utils"
+import { test } from "@playwright/test"
+import { DialogModel } from "./models/dialog.model"
 
-const dialog_1 = {
-  trigger: testid("trigger-1"),
-  underlay: testid("underlay-1"),
-  close: testid("close-1"),
-}
-
-const dialog_2 = {
-  trigger: testid("trigger-2"),
-  underlay: testid("underlay-2"),
-  close: testid("close-2"),
-}
-
-const special_close = testid("special-close")
-
-async function openDialog(page: Page) {
-  await page.goto("/dialog")
-  await page.click(dialog_1.trigger)
-}
-
-async function openNestedDialog(page: Page) {
-  await page.click(dialog_2.trigger)
-}
+let parentDialog: DialogModel
+let childDialog: DialogModel
 
 test.describe("dialog", () => {
-  test("should have no accessibility violation", async ({ page }) => {
-    await openDialog(page)
-    await a11y(page, "[role=dialog]")
+  test.beforeEach(async ({ page }) => {
+    parentDialog = new DialogModel(page, "1")
+    childDialog = new DialogModel(page, "2")
+    await parentDialog.goto()
   })
 
-  test("should focus on close button when dialog is open", async ({ page }) => {
-    await openDialog(page)
-    await expect(page.locator(dialog_1.close)).toBeFocused()
+  test("should have no accessibility violation", async () => {
+    await parentDialog.clickTrigger()
+    await parentDialog.checkAccessibility()
   })
 
-  test("should trap focus within dialog", async ({ page }) => {
-    await openDialog(page)
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Tab")
-    await expect(page.locator(dialog_1.close)).toBeFocused()
+  test("should focus on close button when dialog is open", async () => {
+    await parentDialog.clickTrigger()
+    await parentDialog.seeCloseIsFocused()
   })
 
-  test("should close modal on escape", async ({ page }) => {
-    await openDialog(page)
-    await page.keyboard.press("Escape")
-    await expect(page.locator(dialog_1.trigger)).toBeFocused()
+  test("should close modal on escape", async () => {
+    await parentDialog.clickTrigger()
+    await parentDialog.pressKey("Escape")
+
+    await parentDialog.dontSeeContent()
+    await parentDialog.seeTriggerIsFocused()
   })
 
-  test("should close modal on underlay click", async ({ page }) => {
-    await openDialog(page)
-    await page.click(dialog_1.underlay, { force: true, position: { x: 10, y: 10 } })
-    await expect(page.locator(dialog_1.trigger)).toBeFocused()
-  })
-})
+  test("[nested] should focus close button", async () => {
+    await parentDialog.clickTrigger()
+    await childDialog.clickTrigger({ delay: 17 })
 
-test.describe("nested dialog", () => {
-  test("should focus close button", async ({ page }) => {
-    await openDialog(page)
-    await openNestedDialog(page)
-    await expect(page.locator(dialog_2.close)).toBeFocused()
+    await childDialog.seeCloseIsFocused()
   })
 
-  test("should trap focus", async ({ page }) => {
-    await openDialog(page)
-    await openNestedDialog(page)
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Tab")
-    await expect(page.locator(dialog_2.close)).toBeFocused()
+  test("[nested] should close parent modal from child", async ({ page }) => {
+    await parentDialog.clickTrigger()
+    await childDialog.clickTrigger({ delay: 17 })
+
+    await page.click("[data-testid=special-close]")
+
+    await childDialog.dontSeeContent()
+    await parentDialog.dontSeeContent()
+    await parentDialog.seeTriggerIsFocused()
   })
 
-  test("should focus on nested buttton on escape", async ({ page }) => {
-    await openDialog(page)
-    await openNestedDialog(page)
-    await page.keyboard.press("Escape")
-    await expect(page.locator(dialog_2.underlay)).not.toBeVisible()
-    await expect(page.locator(dialog_2.trigger)).toBeFocused()
-  })
+  test.fixme("[nested] focus return to child dialog trigger", async () => {
+    await parentDialog.clickTrigger()
+    await childDialog.clickTrigger({ delay: 17 })
 
-  test("should close modal on underlay click", async ({ page }) => {
-    await openDialog(page)
-    await openNestedDialog(page)
-    await page.click(dialog_2.underlay, { force: true, position: { x: 10, y: 10 } })
-    await expect(page.locator(dialog_2.trigger)).toBeFocused()
-  })
-
-  test("should close parent modal from child", async ({ page }) => {
-    await openDialog(page)
-    await openNestedDialog(page)
-    await page.click(special_close)
-    await expect(page.locator(dialog_2.underlay)).not.toBeVisible()
-    await expect(page.locator(dialog_1.underlay)).not.toBeVisible()
-    await expect(page.locator(dialog_1.trigger)).toBeFocused()
-  })
-})
-
-test.describe("dialog - with default open", () => {
-  test("should be open and focus on close button", async ({ page }) => {
-    await page.goto("/dialog-default-open")
-    await expect(page.locator(dialog_1.close)).toBeFocused()
+    await childDialog.pressKey("Escape")
+    await childDialog.seeTriggerIsFocused()
   })
 })

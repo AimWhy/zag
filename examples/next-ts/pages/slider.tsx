@@ -14,6 +14,7 @@ export default function Page() {
     slider.machine({
       id: useId(),
       name: "quantity",
+      value: [0],
     }),
     {
       context: controls.context,
@@ -32,25 +33,28 @@ export default function Page() {
             console.log(formData)
           }}
         >
-          <div {...api.rootProps}>
+          <div {...api.getRootProps()}>
             <div>
-              <label data-testid="label" {...api.labelProps}>
+              <label data-testid="label" {...api.getLabelProps()}>
                 Slider Label
               </label>
-              <output data-testid="output" {...api.outputProps}>
+              <output data-testid="output" {...api.getValueTextProps()}>
                 {api.value}
               </output>
             </div>
             <div className="control-area">
-              <div {...api.controlProps}>
-                <div data-testid="track" {...api.trackProps}>
-                  <div {...api.rangeProps} />
+              <div {...api.getControlProps()}>
+                <div data-testid="track" {...api.getTrackProps()}>
+                  <div {...api.getRangeProps()} />
                 </div>
-                <div data-testid="thumb" {...api.thumbProps}>
-                  <input {...api.inputProps} />
-                </div>
+                <span {...api.getDraggingIndicatorProps({ index: 0 })}>{api.getThumbValue(0)}</span>
+                {api.value.map((_, index) => (
+                  <div key={index} {...api.getThumbProps({ index })}>
+                    <input {...api.getHiddenInputProps({ index })} />
+                  </div>
+                ))}
               </div>
-              <div {...api.markerGroupProps}>
+              <div {...api.getMarkerGroupProps()}>
                 <span {...api.getMarkerProps({ value: 10 })}>*</span>
                 <span {...api.getMarkerProps({ value: 30 })}>*</span>
                 <span {...api.getMarkerProps({ value: 90 })}>*</span>

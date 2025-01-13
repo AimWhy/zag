@@ -24,23 +24,21 @@ export default function Page() {
   return (
     <>
       <main className="tabs">
-        <div {...api.rootProps}>
-          <div {...api.indicatorProps} />
-          <div {...api.triggerGroupProps}>
+        <div {...api.getRootProps()}>
+          <div {...api.getIndicatorProps()} />
+          <div {...api.getListProps()}>
             {tabsData.map((data) => (
               <button {...api.getTriggerProps({ value: data.id })} key={data.id} data-testid={`${data.id}-tab`}>
                 {data.label}
               </button>
             ))}
           </div>
-          <div {...api.contentGroupProps}>
-            {tabsData.map((data) => (
-              <div {...api.getContentProps({ value: data.id })} key={data.id} data-testid={`${data.id}-tab-panel`}>
-                <p>{data.content}</p>
-                {data.id === "agnes" ? <input placeholder="Agnes" /> : null}
-              </div>
-            ))}
-          </div>
+          {tabsData.map((data) => (
+            <div {...api.getContentProps({ value: data.id })} key={data.id} data-testid={`${data.id}-tab-panel`}>
+              <p>{data.content}</p>
+              {data.id === "agnes" ? <input placeholder="Agnes" /> : null}
+            </div>
+          ))}
         </div>
       </main>
       <Toolbar controls={controls.ui}>

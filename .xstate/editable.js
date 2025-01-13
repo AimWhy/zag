@@ -11,17 +11,16 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "editable",
-  initial: "unknown",
+  initial: ctx.edit ? "edit" : "preview",
+  entry: ctx.edit ? ["focusInput"] : undefined,
   context: {
-    "startWithEditView": false,
-    "activateOnDblClick": false,
-    "activateOnFocus": false,
-    "!isAtMaxLength": false,
-    "submitOnBlur": false,
-    "submitOnEnter": false
+    "isEditControlled": false,
+    "isSubmitEvent": false,
+    "isEditControlled": false,
+    "isEditControlled": false
   },
   on: {
-    SET_VALUE: {
+    "VALUE.SET": {
       actions: "setValue"
     }
   },
@@ -31,61 +30,48 @@ const fetchMachine = createMachine({
     }
   },
   states: {
-    unknown: {
-      on: {
-        SETUP: [{
-          cond: "startWithEditView",
-          target: "edit"
-        }, {
-          target: "preview"
-        }]
-      }
-    },
     preview: {
-      // // https://bugzilla.mozilla.org/show_bug.cgi?id=559561
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=559561
       entry: ["blurInputIfNeeded"],
       on: {
-        EDIT: "edit",
-        DBLCLICK: {
-          cond: "activateOnDblClick",
-          target: "edit"
-        },
-        FOCUS: {
-          cond: "activateOnFocus",
+        "CONTROLLED.EDIT": {
           target: "edit",
-          actions: "setPreviousValue"
-        }
+          actions: ["setPreviousValue", "focusInput"]
+        },
+        EDIT: [{
+          cond: "isEditControlled",
+          actions: ["invokeOnEdit"]
+        }, {
+          target: "edit",
+          actions: ["setPreviousValue", "focusInput", "invokeOnEdit"]
+        }]
       }
     },
     edit: {
       activities: ["trackInteractOutside"],
-      entry: ["focusInput", "invokeOnEdit"],
       on: {
-        TYPE: {
-          cond: "!isAtMaxLength",
-          actions: "setValue"
-        },
-        BLUR: [{
-          cond: "submitOnBlur",
+        "CONTROLLED.PREVIEW": [{
+          cond: "isSubmitEvent",
           target: "preview",
-          actions: ["focusEditButton", "invokeOnSubmit"]
+          actions: ["setPreviousValue", "restoreFocus", "invokeOnSubmit"]
         }, {
           target: "preview",
-          actions: ["resetValueIfNeeded", "focusEditButton", "invokeOnCancel"]
+          actions: ["revertValue", "restoreFocus", "invokeOnCancel"]
         }],
-        CANCEL: {
+        CANCEL: [{
+          cond: "isEditControlled",
+          actions: ["invokeOnPreview"]
+        }, {
           target: "preview",
-          actions: ["focusEditButton", "resetValueIfNeeded", "invokeOnCancel"]
-        },
-        ENTER: {
-          cond: "submitOnEnter",
+          actions: ["revertValue", "restoreFocus", "invokeOnCancel", "invokeOnPreview"]
+        }],
+        SUBMIT: [{
+          cond: "isEditControlled",
+          actions: ["invokeOnPreview"]
+        }, {
           target: "preview",
-          actions: ["setPreviousValue", "invokeOnSubmit", "focusEditButton"]
-        },
-        SUBMIT: {
-          target: "preview",
-          actions: ["setPreviousValue", "invokeOnSubmit", "focusEditButton"]
-        }
+          actions: ["setPreviousValue", "restoreFocus", "invokeOnSubmit", "invokeOnPreview"]
+        }]
       }
     }
   }
@@ -98,11 +84,7 @@ const fetchMachine = createMachine({
     })
   },
   guards: {
-    "startWithEditView": ctx => ctx["startWithEditView"],
-    "activateOnDblClick": ctx => ctx["activateOnDblClick"],
-    "activateOnFocus": ctx => ctx["activateOnFocus"],
-    "!isAtMaxLength": ctx => ctx["!isAtMaxLength"],
-    "submitOnBlur": ctx => ctx["submitOnBlur"],
-    "submitOnEnter": ctx => ctx["submitOnEnter"]
+    "isEditControlled": ctx => ctx["isEditControlled"],
+    "isSubmitEvent": ctx => ctx["isSubmitEvent"]
   }
 });

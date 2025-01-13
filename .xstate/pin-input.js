@@ -11,32 +11,31 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "pin-input",
-  initial: "unknown",
+  initial: "idle",
   context: {
-    "hasIndex": false,
-    "isDisabled": false,
     "autoFocus": false,
-    "isFinalValue && isValidValue": false,
-    "isValidValue": false,
-    "isValidValue": false,
+    "hasIndex": false,
+    "isFinalValue": false,
     "hasValue": false,
     "hasValue": false,
-    "isValueComplete": false,
-    "!isValidValue": false
+    "isValueComplete": false
   },
+  entry: choose([{
+    cond: "autoFocus",
+    actions: ["setupValue", "setFocusIndexToFirst"]
+  }, {
+    actions: ["setupValue"]
+  }]),
   on: {
-    SET_VALUE: [{
+    "VALUE.SET": [{
       cond: "hasIndex",
-      actions: "setValueAtIndex"
+      actions: ["setValueAtIndex"]
     }, {
-      actions: "setValue"
+      actions: ["setValue"]
     }],
-    CLEAR_VALUE: [{
-      cond: "isDisabled",
-      actions: "clearValue"
-    }, {
+    "VALUE.CLEAR": {
       actions: ["clearValue", "setFocusIndexToFirst"]
-    }]
+    }
   },
   on: {
     UPDATE_CONTEXT: {
@@ -44,21 +43,9 @@ const fetchMachine = createMachine({
     }
   },
   states: {
-    unknown: {
-      on: {
-        SETUP: [{
-          cond: "autoFocus",
-          target: "focused",
-          actions: ["setupValue", "setFocusIndexToFirst"]
-        }, {
-          target: "idle",
-          actions: "setupValue"
-        }]
-      }
-    },
     idle: {
       on: {
-        FOCUS: {
+        "INPUT.FOCUS": {
           target: "focused",
           actions: "setFocusedIndex"
         }
@@ -66,46 +53,41 @@ const fetchMachine = createMachine({
     },
     focused: {
       on: {
-        INPUT: [{
-          cond: "isFinalValue && isValidValue",
-          actions: ["setFocusedValue", "dispatchInputEventIfNeeded"]
+        "INPUT.CHANGE": [{
+          cond: "isFinalValue",
+          actions: ["setFocusedValue", "syncInputValue"]
         }, {
-          cond: "isValidValue",
-          actions: ["setFocusedValue", "setNextFocusedIndex", "dispatchInputEventIfNeeded"]
+          actions: ["setFocusedValue", "setNextFocusedIndex", "syncInputValue"]
         }],
-        PASTE: [{
-          cond: "isValidValue",
+        "INPUT.PASTE": {
           actions: ["setPastedValue", "setLastValueFocusIndex"]
-        }, {
-          actions: "resetFocusedValue"
-        }],
-        BLUR: {
+        },
+        "INPUT.BLUR": {
           target: "idle",
           actions: "clearFocusedIndex"
         },
-        DELETE: {
+        "INPUT.DELETE": {
           cond: "hasValue",
           actions: "clearFocusedValue"
         },
-        ARROW_LEFT: {
+        "INPUT.ARROW_LEFT": {
           actions: "setPrevFocusedIndex"
         },
-        ARROW_RIGHT: {
+        "INPUT.ARROW_RIGHT": {
           actions: "setNextFocusedIndex"
         },
-        BACKSPACE: [{
+        "INPUT.BACKSPACE": [{
           cond: "hasValue",
-          actions: "clearFocusedValue"
+          actions: ["clearFocusedValue"]
         }, {
           actions: ["setPrevFocusedIndex", "clearFocusedValue"]
         }],
-        ENTER: {
+        "INPUT.ENTER": {
           cond: "isValueComplete",
           actions: "requestFormSubmit"
         },
-        KEY_DOWN: {
-          cond: "!isValidValue",
-          actions: ["preventDefault", "invokeOnInvalid"]
+        "VALUE.INVALID": {
+          actions: "invokeOnInvalid"
         }
       }
     }
@@ -119,13 +101,10 @@ const fetchMachine = createMachine({
     })
   },
   guards: {
-    "hasIndex": ctx => ctx["hasIndex"],
-    "isDisabled": ctx => ctx["isDisabled"],
     "autoFocus": ctx => ctx["autoFocus"],
-    "isFinalValue && isValidValue": ctx => ctx["isFinalValue && isValidValue"],
-    "isValidValue": ctx => ctx["isValidValue"],
+    "hasIndex": ctx => ctx["hasIndex"],
+    "isFinalValue": ctx => ctx["isFinalValue"],
     "hasValue": ctx => ctx["hasValue"],
-    "isValueComplete": ctx => ctx["isValueComplete"],
-    "!isValidValue": ctx => ctx["!isValidValue"]
+    "isValueComplete": ctx => ctx["isValueComplete"]
   }
 });

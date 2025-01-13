@@ -1,10 +1,7 @@
 {
   "name": "@zag-js/checkbox",
-  "version": "0.2.2",
+  "version": "0.81.2",
   "description": "Core logic for the checkbox widget implemented as a state machine",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
   "keywords": [
     "js",
     "machine",
@@ -20,16 +17,16 @@
   "repository": "https://github.com/chakra-ui/zag/tree/main/packages/checkbox",
   "sideEffects": false,
   "files": [
-    "dist/**/*"
+    "dist"
   ],
   "scripts": {
-    "build-fast": "tsup src/index.ts --format=esm,cjs",
-    "start": "pnpm build --watch",
-    "build": "tsup src/index.ts --format=esm,cjs --dts",
-    "test": "jest --config ../../jest.config.js --rootDir tests",
-    "lint": "eslint src --ext .ts,.tsx",
+    "build": "tsup",
+    "test": "vitest",
+    "lint": "eslint src",
     "test-ci": "pnpm test --ci --runInBand -u",
-    "test-watch": "pnpm test --watch"
+    "test-watch": "pnpm test --watch",
+    "prepack": "clean-package",
+    "postpack": "clean-package restore"
   },
   "publishConfig": {
     "access": "public"
@@ -38,12 +35,16 @@
     "url": "https://github.com/chakra-ui/zag/issues"
   },
   "dependencies": {
+    "@zag-js/anatomy": "workspace:*",
     "@zag-js/core": "workspace:*",
-    "@zag-js/types": "workspace:*"
+    "@zag-js/types": "workspace:*",
+    "@zag-js/dom-query": "workspace:*",
+    "@zag-js/focus-visible": "workspace:*",
+    "@zag-js/utils": "workspace:*"
   },
   "devDependencies": {
-    "@zag-js/dom-utils": "workspace:*",
-    "@zag-js/form-utils": "workspace:*",
-    "@zag-js/utils": "workspace:*"
-  }
+    "clean-package": "2.2.0"
+  },
+  "clean-package": "../../../clean-package.config.json",
+  "main": "src/index.ts"
 }

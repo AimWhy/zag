@@ -94,6 +94,9 @@ typings/
 .nuxt
 dist
 
+# SvelteKit sync output
+.svelte-kit
+
 # Storybook build outputs
 .out
 .storybook-out
@@ -172,3 +175,10 @@ temp/
 e2e/report
 e2e/junit.xml
 e2e/results
+
+public/sitemap.xml
+public/feed.xml
+.vercel
+
+# Contentlayer
+.contentlayer

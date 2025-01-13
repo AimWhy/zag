@@ -1,55 +1,81 @@
-import type { StateMachine as S } from "@zag-js/core"
+import type { Machine, StateMachine as S } from "@zag-js/core"
 import type { Placement, PositioningOptions } from "@zag-js/popper"
-import type { CommonProperties, RequiredBy, RootProperties } from "@zag-js/types"
+import type { CommonProperties, DirectionProperty, PropTypes, RequiredBy } from "@zag-js/types"
 
-type ElementIds = Partial<{
+/* -----------------------------------------------------------------------------
+ * Callback details
+ * -----------------------------------------------------------------------------*/
+
+export interface OpenChangeDetails {
+  open: boolean
+}
+
+/* -----------------------------------------------------------------------------
+ * Machine context
+ * -----------------------------------------------------------------------------*/
+
+export type ElementIds = Partial<{
   trigger: string
   content: string
+  arrow: string
+  positioner: string
 }>
 
-type PublicContext = CommonProperties & {
+interface PublicContext extends DirectionProperty, CommonProperties {
   /**
    * The ids of the elements in the tooltip. Useful for composition.
    */
-  ids?: ElementIds
+  ids?: ElementIds | undefined
   /**
    * The `id` of the tooltip.
    */
   id: string
   /**
    * The open delay of the tooltip.
+   * @default 1000
    */
   openDelay: number
   /**
    * The close delay of the tooltip.
+   * @default 500
    */
   closeDelay: number
   /**
    * Whether to close the tooltip on pointerdown.
+   * @default true
    */
   closeOnPointerDown: boolean
   /**
    * Whether to close the tooltip when the Escape key is pressed.
+   * @default true
    */
-  closeOnEsc?: boolean
+  closeOnEscape?: boolean | undefined
+  /**
+   * Whether the tooltip should close on scroll
+   * @default true
+   */
+  closeOnScroll?: boolean | undefined
+  /**
+   * Whether the tooltip should close on click
+   * @default true
+   */
+  closeOnClick?: boolean | undefined
   /**
    * Whether the tooltip's content is interactive.
    * In this mode, the tooltip will remain open when user hovers over the content.
    * @see https://www.w3.org/TR/WCAG21/#content-on-hover-or-focus
+   *
+   * @default false
    */
   interactive: boolean
   /**
    * Function called when the tooltip is opened.
    */
-  onOpen?: VoidFunction
-  /**
-   * Function called when the tooltip is closed.
-   */
-  onClose?: VoidFunction
+  onOpenChange?(details: OpenChangeDetails): void
   /**
    * Custom label for the tooltip.
    */
-  "aria-label"?: string
+  "aria-label"?: string | undefined
   /**
    * The user provided options used to position the popover content
    */
@@ -57,7 +83,15 @@ type PublicContext = CommonProperties & {
   /**
    * Whether the tooltip is disabled
    */
-  disabled?: boolean
+  disabled?: boolean | undefined
+  /**
+   * Whether the tooltip is open
+   */
+  open?: boolean | undefined
+  /**
+   * Whether the tooltip is controlled by the user
+   */
+  "open.controlled"?: boolean | undefined
 }
 
 export type UserDefinedContext = RequiredBy<PublicContext, "id">
@@ -66,29 +100,62 @@ type ComputedContext = Readonly<{
   /**
    * @computed Whether an `aria-label` is set.
    */
-  readonly hasAriaLabel: boolean
+  hasAriaLabel: boolean
 }>
 
-type PrivateContext = RootProperties & {
+interface PrivateContext {
   /**
    * @internal
    * The computed placement of the tooltip.
    */
-  currentPlacement?: Placement
+  currentPlacement?: Placement | undefined
   /**
    * @internal
-   * Whether the dynamic placement has been computed
+   * Whether the pointermove already opened the tooltip.
    */
-  isPlacementComplete?: boolean
+  hasPointerMoveOpened?: boolean | undefined
 }
 
-export type MachineContext = PublicContext & ComputedContext & PrivateContext
+export interface MachineContext extends PublicContext, ComputedContext, PrivateContext {}
 
-export type MachineState = {
-  value: "unknown" | "opening" | "open" | "closing" | "closed"
+export interface MachineState {
+  value: "opening" | "open" | "closing" | "closed"
   tags: "open" | "closed"
 }
 
 export type State = S.State<MachineContext, MachineState>
 
 export type Send = S.Send<S.AnyEventObject>
+
+export type Service = Machine<MachineContext, MachineState, S.AnyEventObject>
+
+/* -----------------------------------------------------------------------------
+ * Component API
+ * -----------------------------------------------------------------------------*/
+
+export interface MachineApi<T extends PropTypes = PropTypes> {
+  /**
+   * Whether the tooltip is open.
+   */
+  open: boolean
+  /**
+   * Function to open the tooltip.
+   */
+  setOpen(open: boolean): void
+  /**
+   * Function to reposition the popover
+   */
+  reposition(options?: Partial<PositioningOptions>): void
+
+  getTriggerProps(): T["button"]
+  getArrowProps(): T["element"]
+  getArrowTipProps(): T["element"]
+  getPositionerProps(): T["element"]
+  getContentProps(): T["element"]
+}
+
+/* -----------------------------------------------------------------------------
+ * Re-exported types
+ * -----------------------------------------------------------------------------*/
+
+export type { Placement, PositioningOptions }

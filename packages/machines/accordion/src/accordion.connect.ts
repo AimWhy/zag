@@ -1,109 +1,150 @@
-import { dataAttr, EventKeyMap, getEventKey, isSafari } from "@zag-js/dom-utils"
-import type { NormalizeProps, PropTypes } from "@zag-js/types"
-import { isArray } from "@zag-js/utils"
+import { dataAttr, isSafari, getEventKey } from "@zag-js/dom-query"
+import type { NormalizeProps, PropTypes, EventKeyMap } from "@zag-js/types"
+import { parts } from "./accordion.anatomy"
 import { dom } from "./accordion.dom"
-import type { ItemProps, Send, State } from "./accordion.types"
+import type { ItemProps, ItemState, MachineApi, Send, State } from "./accordion.types"
 
-export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>) {
+export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>): MachineApi<T> {
   const focusedValue = state.context.focusedValue
   const value = state.context.value
   const multiple = state.context.multiple
 
-  const api = {
-    value: value,
-    setValue(value: string | string[]) {
-      if (multiple && !Array.isArray(value)) {
-        value = [value]
-      }
-      send({ type: "SET_VALUE", value })
-    },
+  function setValue(value: string[]) {
+    let nextValue = value
+    if (multiple && nextValue.length > 1) {
+      nextValue = [nextValue[0]]
+    }
+    send({ type: "VALUE.SET", value: nextValue })
+  }
 
-    rootProps: normalize.element({
-      "data-part": "root",
-      id: dom.getRootId(state.context),
-    }),
+  function getItemState(props: ItemProps): ItemState {
+    return {
+      expanded: value.includes(props.value),
+      focused: focusedValue === props.value,
+      disabled: Boolean(props.disabled ?? state.context.disabled),
+    }
+  }
 
-    getItemState(props: ItemProps) {
-      return {
-        isOpen: isArray(value) ? value.includes(props.value) : props.value === value,
-        isFocused: focusedValue === props.value,
-        isDisabled: Boolean(props.disabled ?? state.context.disabled),
-      }
+  return {
+    focusedValue,
+    value,
+    setValue,
+    getItemState,
+
+    getRootProps() {
+      return normalize.element({
+        ...parts.root.attrs,
+        dir: state.context.dir,
+        id: dom.getRootId(state.context),
+        "data-orientation": state.context.orientation,
+      })
     },
 
     getItemProps(props: ItemProps) {
-      const { isOpen, isFocused } = api.getItemState(props)
+      const itemState = getItemState(props)
       return normalize.element({
-        "data-part": "item",
+        ...parts.item.attrs,
+        dir: state.context.dir,
         id: dom.getItemId(state.context, props.value),
-        "data-expanded": dataAttr(isOpen),
-        "data-focus": dataAttr(isFocused),
+        "data-state": itemState.expanded ? "open" : "closed",
+        "data-focus": dataAttr(itemState.focused),
+        "data-disabled": dataAttr(itemState.disabled),
+        "data-orientation": state.context.orientation,
       })
     },
 
-    getContentProps(props: ItemProps) {
-      const { isOpen, isFocused, isDisabled } = api.getItemState(props)
+    getItemContentProps(props: ItemProps) {
+      const itemState = getItemState(props)
       return normalize.element({
-        "data-part": "content",
+        ...parts.itemContent.attrs,
+        dir: state.context.dir,
         role: "region",
-        id: dom.getContentId(state.context, props.value),
-        "aria-labelledby": dom.getTriggerId(state.context, props.value),
-        hidden: !isOpen,
-        "data-disabled": dataAttr(isDisabled),
-        "data-focus": dataAttr(isFocused),
-        "data-expanded": dataAttr(isOpen),
+        id: dom.getItemContentId(state.context, props.value),
+        "aria-labelledby": dom.getItemTriggerId(state.context, props.value),
+        hidden: !itemState.expanded,
+        "data-state": itemState.expanded ? "open" : "closed",
+        "data-disabled": dataAttr(itemState.disabled),
+        "data-focus": dataAttr(itemState.focused),
+        "data-orientation": state.context.orientation,
       })
     },
 
-    getTriggerProps(props: ItemProps) {
+    getItemIndicatorProps(props) {
+      const itemState = getItemState(props)
+      return normalize.element({
+        ...parts.itemIndicator.attrs,
+        dir: state.context.dir,
+        "aria-hidden": true,
+        "data-state": itemState.expanded ? "open" : "closed",
+        "data-disabled": dataAttr(itemState.disabled),
+        "data-focus": dataAttr(itemState.focused),
+        "data-orientation": state.context.orientation,
+      })
+    },
+
+    getItemTriggerProps(props: ItemProps) {
       const { value } = props
-      const { isDisabled, isOpen } = api.getItemState(props)
+      const itemState = getItemState(props)
+
       return normalize.button({
-        "data-part": "trigger",
+        ...parts.itemTrigger.attrs,
         type: "button",
-        id: dom.getTriggerId(state.context, value),
-        "aria-controls": dom.getContentId(state.context, value),
-        "aria-expanded": isOpen,
-        disabled: isDisabled,
-        "aria-disabled": isDisabled,
-        "data-expanded": dataAttr(isOpen),
+        dir: state.context.dir,
+        id: dom.getItemTriggerId(state.context, value),
+        "aria-controls": dom.getItemContentId(state.context, value),
+        "aria-expanded": itemState.expanded,
+        disabled: itemState.disabled,
+        "data-orientation": state.context.orientation,
+        "aria-disabled": itemState.disabled,
+        "data-state": itemState.expanded ? "open" : "closed",
         "data-ownedby": dom.getRootId(state.context),
         onFocus() {
-          if (isDisabled) return
-          send({ type: "FOCUS", value })
+          if (itemState.disabled) return
+          send({ type: "TRIGGER.FOCUS", value })
         },
         onBlur() {
-          if (isDisabled) return
-          send("BLUR")
+          if (itemState.disabled) return
+          send("TRIGGER.BLUR")
         },
         onClick(event) {
-          if (isDisabled) return
+          if (itemState.disabled) return
           if (isSafari()) {
             event.currentTarget.focus()
           }
-          send({ type: "CLICK", value })
+          send({ type: "TRIGGER.CLICK", value })
         },
         onKeyDown(event) {
-          if (isDisabled) return
+          if (event.defaultPrevented) return
+          if (itemState.disabled) return
 
           const keyMap: EventKeyMap = {
             ArrowDown() {
-              send({ type: "ARROW_DOWN", value })
+              if (state.context.isHorizontal) return
+              send({ type: "GOTO.NEXT", value })
             },
             ArrowUp() {
-              send({ type: "ARROW_UP", value })
+              if (state.context.isHorizontal) return
+              send({ type: "GOTO.PREV", value })
+            },
+            ArrowRight() {
+              if (!state.context.isHorizontal) return
+              send({ type: "GOTO.NEXT", value })
+            },
+            ArrowLeft() {
+              if (!state.context.isHorizontal) return
+              send({ type: "GOTO.PREV", value })
             },
             Home() {
-              send({ type: "HOME", value })
+              send({ type: "GOTO.FIRST", value })
             },
             End() {
-              send({ type: "END", value })
+              send({ type: "GOTO.LAST", value })
             },
           }
 
           const key = getEventKey(event, {
             dir: state.context.dir,
-            orientation: "vertical",
+            orientation: state.context.orientation,
           })
 
           const exec = keyMap[key]
@@ -116,6 +157,4 @@ export function connect<T extends PropTypes>(state: State, send: Send, normalize
       })
     },
   }
-
-  return api
 }

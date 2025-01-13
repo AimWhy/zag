@@ -18,10 +18,7 @@
     "strict": false,
     "target": "esnext",
     "incremental": true,
-    "paths": {
-      "@zag-js/*": ["../../node_modules/@zag-js/*"]
-    }
   },
   "exclude": ["node_modules"],
-  "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", "next.config.js"]
+  "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", "next.config.js"],
 }

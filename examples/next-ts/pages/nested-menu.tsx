@@ -1,9 +1,10 @@
 import * as menu from "@zag-js/menu"
 import { normalizeProps, Portal, useMachine } from "@zag-js/react"
 import { menuData } from "@zag-js/shared"
-import { useEffect, useId } from "react"
+import { useId } from "react"
 import { StateVisualizer } from "../components/state-visualizer"
 import { Toolbar } from "../components/toolbar"
+import { useEffectOnce } from "../hooks/use-effect-once"
 
 export default function Page() {
   const [state, send, machine] = useMachine(
@@ -13,31 +14,21 @@ export default function Page() {
   )
   const root = menu.connect(state, send, normalizeProps)
 
-  const [subState, subSend, subMachine] = useMachine(
-    menu.machine({
-      id: useId(),
-    }),
-  )
+  const [subState, subSend, subMachine] = useMachine(menu.machine({ id: useId() }))
   const sub = menu.connect(subState, subSend, normalizeProps)
 
-  const [sub2State, sub2Send, sub2Machine] = useMachine(
-    menu.machine({
-      id: useId(),
-    }),
-  )
+  const [sub2State, sub2Send, sub2Machine] = useMachine(menu.machine({ id: useId() }))
   const sub2 = menu.connect(sub2State, sub2Send, normalizeProps)
 
-  useEffect(() => {
+  useEffectOnce(() => {
     root.setChild(subMachine)
     sub.setParent(machine)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  })
 
-  useEffect(() => {
+  useEffectOnce(() => {
     sub.setChild(sub2Machine)
     sub2.setParent(subMachine)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  })
 
   const triggerItemProps = root.getTriggerItemProps(sub)
   const triggerItem2Props = sub.getTriggerItemProps(sub2)
@@ -48,17 +39,17 @@ export default function Page() {
     <>
       <main>
         <div>
-          <button data-testid="trigger" {...root.triggerProps}>
+          <button data-testid="trigger" {...root.getTriggerProps()}>
             Click me
           </button>
 
           <Portal>
-            <div {...root.positionerProps}>
-              <ul data-testid="menu" className="menu-content" {...root.contentProps}>
+            <div {...root.getPositionerProps()}>
+              <ul data-testid="menu" {...root.getContentProps()}>
                 {level1.map((item) => {
-                  const props = item.trigger ? triggerItemProps : root.getItemProps({ id: item.id })
+                  const props = item.trigger ? triggerItemProps : root.getItemProps({ value: item.value })
                   return (
-                    <li key={item.id} data-testid={item.id} {...props}>
+                    <li key={item.value} data-testid={item.value} {...props}>
                       {item.label}
                     </li>
                   )
@@ -68,12 +59,12 @@ export default function Page() {
           </Portal>
 
           <Portal>
-            <div {...sub.positionerProps}>
-              <ul data-testid="more-tools-submenu" className="menu-content" {...sub.contentProps}>
+            <div {...sub.getPositionerProps()}>
+              <ul data-testid="more-tools-submenu" {...sub.getContentProps()}>
                 {level2.map((item) => {
-                  const props = item.trigger ? triggerItem2Props : sub.getItemProps({ id: item.id })
+                  const props = item.trigger ? triggerItem2Props : sub.getItemProps({ value: item.value })
                   return (
-                    <li key={item.id} data-testid={item.id} {...props}>
+                    <li key={item.value} data-testid={item.value} {...props}>
                       {item.label}
                     </li>
                   )
@@ -83,10 +74,10 @@ export default function Page() {
           </Portal>
 
           <Portal>
-            <div {...sub2.positionerProps}>
-              <ul data-testid="open-nested-submenu" className="menu-content" {...sub2.contentProps}>
+            <div {...sub2.getPositionerProps()}>
+              <ul data-testid="open-nested-submenu" {...sub2.getContentProps()}>
                 {level3.map((item) => (
-                  <li key={item.id} data-testid={item.id} {...sub2.getItemProps({ id: item.id })}>
+                  <li key={item.value} data-testid={item.value} {...sub2.getItemProps({ value: item.value })}>
                     {item.label}
                   </li>
                 ))}

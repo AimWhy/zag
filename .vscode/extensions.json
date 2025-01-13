@@ -1,3 +1,7 @@
 {
-  "recommendations": ["ms-playwright.playwright", "Vue.volar", "Vue.vscode-typescript-vue-plugin"]
+  "recommendations": [
+    "ms-playwright.playwright",
+    "Vue.volar",
+    "svelte.svelte-vscode"
+  ]
 }

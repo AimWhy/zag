@@ -11,9 +11,12 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "dialog",
-  initial: "unknown",
+  initial: ctx.open ? "open" : "closed",
   context: {
-    "isDefaultOpen": false
+    "isOpenControlled": false,
+    "isOpenControlled": false,
+    "isOpenControlled": false,
+    "isOpenControlled": false
   },
   on: {
     UPDATE_CONTEXT: {
@@ -21,29 +24,48 @@ const fetchMachine = createMachine({
     }
   },
   states: {
-    unknown: {
+    open: {
+      entry: ["checkRenderedElements", "syncZIndex"],
+      activities: ["trackDismissableElement", "trapFocus", "preventScroll", "hideContentBelow"],
       on: {
-        SETUP: [{
-          target: "open",
-          cond: "isDefaultOpen"
-        }, {
+        "CONTROLLED.CLOSE": {
           target: "closed"
+        },
+        CLOSE: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnClose"]
+        }, {
+          target: "closed",
+          actions: ["invokeOnClose"]
+        }],
+        TOGGLE: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnClose"]
+        }, {
+          target: "closed",
+          actions: ["invokeOnClose"]
         }]
       }
     },
-    open: {
-      entry: ["checkRenderedElements"],
-      activities: ["trackDismissableElement", "trapFocus", "preventScroll", "hideContentBelow"],
-      on: {
-        CLOSE: "closed",
-        TOGGLE: "closed"
-      }
-    },
     closed: {
-      entry: ["invokeOnClose"],
       on: {
-        OPEN: "open",
-        TOGGLE: "open"
+        "CONTROLLED.OPEN": {
+          target: "open"
+        },
+        OPEN: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnOpen"]
+        }, {
+          target: "open",
+          actions: ["invokeOnOpen"]
+        }],
+        TOGGLE: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnOpen"]
+        }, {
+          target: "open",
+          actions: ["invokeOnOpen"]
+        }]
       }
     }
   }
@@ -56,6 +78,6 @@ const fetchMachine = createMachine({
     })
   },
   guards: {
-    "isDefaultOpen": ctx => ctx["isDefaultOpen"]
+    "isOpenControlled": ctx => ctx["isOpenControlled"]
   }
 });

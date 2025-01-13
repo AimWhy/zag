@@ -1,6 +1,8 @@
 import * as combobox from "@zag-js/combobox"
 import { normalizeProps, useMachine } from "@zag-js/react"
 import { comboboxControls, comboboxData } from "@zag-js/shared"
+import { XIcon } from "lucide-react"
+import { matchSorter } from "match-sorter"
 import { useId, useState } from "react"
 import { StateVisualizer } from "../components/state-visualizer"
 import { Toolbar } from "../components/toolbar"
@@ -11,18 +13,30 @@ export default function Page() {
 
   const [options, setOptions] = useState(comboboxData)
 
+  const collection = combobox.collection({
+    items: options,
+    itemToValue: (item) => item.code,
+    itemToString: (item) => item.label,
+  })
+
   const [state, send] = useMachine(
     combobox.machine({
       id: useId(),
-      onOpen() {
+      collection,
+      onOpenChange() {
         setOptions(comboboxData)
       },
-      onInputChange({ value }) {
-        const filtered = comboboxData.filter((item) => item.label.toLowerCase().includes(value.toLowerCase()))
+      onInputValueChange({ inputValue }) {
+        const filtered = matchSorter(comboboxData, inputValue, { keys: ["label"] })
         setOptions(filtered.length > 0 ? filtered : comboboxData)
       },
     }),
-    { context: controls.context },
+    {
+      context: {
+        ...controls.context,
+        collection,
+      },
+    },
   )
 
   const api = combobox.connect(state, send, normalizeProps)
@@ -31,27 +45,30 @@ export default function Page() {
     <>
       <main className="combobox">
         <div>
-          <button onClick={() => api.setValue("TG")}>Set to Togo</button>
+          <button onClick={() => api.setValue(["TG"])}>Set to Togo</button>
+          <button data-testid="clear-value-button" onClick={() => api.clearValue()}>
+            Clear Value
+          </button>
           <br />
-          <div {...api.rootProps}>
-            <label {...api.labelProps}>Select country</label>
-            <div {...api.controlProps}>
-              <input data-testid="input" {...api.inputProps} />
-              <button data-testid="input-arrow" {...api.toggleButtonProps}>
+          <div {...api.getRootProps()}>
+            <label {...api.getLabelProps()}>Select country</label>
+            <div {...api.getControlProps()}>
+              <input data-testid="input" {...api.getInputProps()} />
+              <button data-testid="trigger" {...api.getTriggerProps()}>
                 ▼
+              </button>
+              <button {...api.getClearTriggerProps()}>
+                <XIcon />
               </button>
             </div>
           </div>
-          <div {...api.positionerProps}>
+          <div {...api.getPositionerProps()}>
             {options.length > 0 && (
-              <ul data-testid="combobox-listbox" {...api.listboxProps}>
-                {options.map((item, index) => (
-                  <li
-                    data-testid={item.code}
-                    key={`${item.code}:${index}`}
-                    {...api.getOptionProps({ label: item.label, value: item.code, index, disabled: item.disabled })}
-                  >
-                    {item.label}
+              <ul data-testid="combobox-content" {...api.getContentProps()}>
+                {options.map((item) => (
+                  <li data-testid={item.code} key={item.code} {...api.getItemProps({ item })}>
+                    <span {...api.getItemIndicatorProps({ item })}>✅</span>
+                    <span>{item.label}</span>
                   </li>
                 ))}
               </ul>
@@ -61,7 +78,7 @@ export default function Page() {
       </main>
 
       <Toolbar controls={controls.ui}>
-        <StateVisualizer state={state} />
+        <StateVisualizer state={state} omit={["collection"]} />
       </Toolbar>
     </>
   )

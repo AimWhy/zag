@@ -1,125 +1,136 @@
-import { dataAttr, visuallyHiddenStyle } from "@zag-js/dom-utils"
+import { dataAttr } from "@zag-js/dom-query"
+import { isFocusVisible } from "@zag-js/focus-visible"
 import { getPlacementStyles } from "@zag-js/popper"
 import type { NormalizeProps, PropTypes } from "@zag-js/types"
+import { parts } from "./tooltip.anatomy"
 import { dom } from "./tooltip.dom"
 import { store } from "./tooltip.store"
-import type { Send, State } from "./tooltip.types"
+import type { MachineApi, Send, State } from "./tooltip.types"
 
-export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>) {
+export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>): MachineApi<T> {
   const id = state.context.id
   const hasAriaLabel = state.context.hasAriaLabel
 
-  const isOpen = state.hasTag("open")
+  const open = state.hasTag("open")
 
   const triggerId = dom.getTriggerId(state.context)
   const contentId = dom.getContentId(state.context)
 
-  const isDisabled = state.context.disabled
+  const disabled = state.context.disabled
 
   const popperStyles = getPlacementStyles({
-    measured: !!state.context.isPlacementComplete,
+    ...state.context.positioning,
     placement: state.context.currentPlacement,
   })
 
   return {
-    isOpen,
-    open() {
-      send("OPEN")
+    open: open,
+    setOpen(nextOpen) {
+      if (nextOpen === open) return
+      send(nextOpen ? "OPEN" : "CLOSE")
     },
-    close() {
-      send("CLOSE")
-    },
-    getAnimationState() {
-      return {
-        enter: store.prevId === null && id === store.id,
-        exit: store.id === null,
-      }
+    reposition(options = {}) {
+      send({ type: "POSITIONING.SET", options })
     },
 
-    triggerProps: normalize.button({
-      "data-part": "trigger",
-      id: triggerId,
-      "data-expanded": dataAttr(isOpen),
-      "aria-describedby": isOpen ? contentId : undefined,
-      onClick() {
-        send("CLICK")
-      },
-      onFocus() {
-        send("FOCUS")
-      },
-      onBlur() {
-        if (id === store.id) {
-          send("BLUR")
-        }
-      },
-      onPointerDown() {
-        if (isDisabled) return
-        if (id === store.id) {
-          send("POINTER_DOWN")
-        }
-      },
-      onPointerMove() {
-        if (isDisabled) return
-        send("POINTER_ENTER")
-      },
-      onPointerLeave() {
-        if (isDisabled) return
-        send("POINTER_LEAVE")
-      },
-      onPointerCancel() {
-        if (isDisabled) return
-        send("POINTER_LEAVE")
-      },
-    }),
+    getTriggerProps() {
+      return normalize.button({
+        ...parts.trigger.attrs,
+        id: triggerId,
+        dir: state.context.dir,
+        "data-expanded": dataAttr(open),
+        "data-state": open ? "open" : "closed",
+        "aria-describedby": open ? contentId : undefined,
+        onClick(event) {
+          if (event.defaultPrevented) return
+          if (disabled) return
+          if (!state.context.closeOnClick) return
+          send({ type: "CLOSE", src: "trigger.click" })
+        },
+        onFocus(event) {
+          if (event.defaultPrevented) return
+          if (disabled) return
+          if (state.event.src === "trigger.pointerdown") return
+          if (!isFocusVisible()) return
+          send({ type: "OPEN", src: "trigger.focus" })
+        },
+        onBlur(event) {
+          if (event.defaultPrevented) return
+          if (disabled) return
+          if (id === store.id) {
+            send({ type: "CLOSE", src: "trigger.blur" })
+          }
+        },
+        onPointerDown(event) {
+          if (event.defaultPrevented) return
+          if (disabled) return
+          if (!state.context.closeOnPointerDown) return
+          if (id === store.id) {
+            send({ type: "CLOSE", src: "trigger.pointerdown" })
+          }
+        },
+        onPointerMove(event) {
+          if (event.defaultPrevented) return
+          if (disabled) return
+          if (event.pointerType === "touch") return
+          send("POINTER_MOVE")
+        },
+        onPointerLeave() {
+          if (disabled) return
+          send("POINTER_LEAVE")
+        },
+        onPointerCancel() {
+          if (disabled) return
+          send("POINTER_LEAVE")
+        },
+      })
+    },
 
-    arrowProps: normalize.element({
-      id: dom.getArrowId(state.context),
-      "data-part": "arrow",
-      style: popperStyles.arrow,
-    }),
+    getArrowProps() {
+      return normalize.element({
+        id: dom.getArrowId(state.context),
+        ...parts.arrow.attrs,
+        dir: state.context.dir,
+        style: popperStyles.arrow,
+      })
+    },
 
-    innerArrowProps: normalize.element({
-      "data-part": "arrow-inner",
-      style: popperStyles.innerArrow,
-    }),
+    getArrowTipProps() {
+      return normalize.element({
+        ...parts.arrowTip.attrs,
+        dir: state.context.dir,
+        style: popperStyles.arrowTip,
+      })
+    },
 
-    positionerProps: normalize.element({
-      id: dom.getPositionerId(state.context),
-      "data-part": "positioner",
-      style: popperStyles.floating,
-    }),
+    getPositionerProps() {
+      return normalize.element({
+        id: dom.getPositionerId(state.context),
+        ...parts.positioner.attrs,
+        dir: state.context.dir,
+        style: popperStyles.floating,
+      })
+    },
 
-    contentProps: normalize.element({
-      "data-part": "content",
-      role: hasAriaLabel ? undefined : "tooltip",
-      id: hasAriaLabel ? undefined : contentId,
-      "data-placement": state.context.currentPlacement,
-      onPointerEnter() {
-        send("TOOLTIP_POINTER_ENTER")
-      },
-      onPointerLeave() {
-        send("TOOLTIP_POINTER_LEAVE")
-      },
-      style: {
-        pointerEvents: state.context.interactive ? "auto" : "none",
-      },
-    }),
-
-    labelProps: normalize.element({
-      "data-part": "label",
-      id: contentId,
-      role: "tooltip",
-      style: visuallyHiddenStyle,
-      children: state.context["aria-label"],
-    }),
-
-    createPortal() {
-      const doc = dom.getDoc(state.context)
-      const exist = dom.getPortalEl(state.context)
-      if (exist) return exist
-      const portal = dom.createPortalEl(state.context)
-      doc.body.appendChild(portal)
-      return portal
+    getContentProps() {
+      return normalize.element({
+        ...parts.content.attrs,
+        dir: state.context.dir,
+        hidden: !open,
+        "data-state": open ? "open" : "closed",
+        role: hasAriaLabel ? undefined : "tooltip",
+        id: hasAriaLabel ? undefined : contentId,
+        "data-placement": state.context.currentPlacement,
+        onPointerEnter() {
+          send("CONTENT.POINTER_MOVE")
+        },
+        onPointerLeave() {
+          send("CONTENT.POINTER_LEAVE")
+        },
+        style: {
+          pointerEvents: state.context.interactive ? "auto" : "none",
+        },
+      })
     },
   }
 }

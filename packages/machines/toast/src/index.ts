@@ -1,17 +1,25 @@
-import { isDom } from "@zag-js/dom-utils"
-import { warn } from "@zag-js/utils"
-import { groupConnect, toaster } from "./toast-group.connect"
+import { groupConnect } from "./toast-group.connect"
 import { groupMachine } from "./toast-group.machine"
 import { createToastMachine as createMachine } from "./toast.machine"
 
+export { anatomy } from "./toast.anatomy"
 export { connect } from "./toast.connect"
 export type {
-  GroupMachineContext,
+  ActionOptions,
+  MachineApi as Api,
+  GenericOptions,
+  GroupMachineApi as GroupApi,
+  UserDefinedGroupContext as GroupMachineContext,
+  GroupProps,
+  GroupService,
+  GroupState,
   MachineContext,
-  MachineState,
+  Options,
   Placement,
+  PromiseOptions,
   Service,
-  ToastOptions,
+  Status,
+  StatusChangeDetails,
   Type,
 } from "./toast.types"
 export { createMachine }
@@ -19,12 +27,4 @@ export { createMachine }
 export const group = {
   connect: groupConnect,
   machine: groupMachine,
-}
-
-export function api() {
-  if (!isDom()) {
-    warn("toast.api() is only available in the browser")
-  } else {
-    return toaster
-  }
 }

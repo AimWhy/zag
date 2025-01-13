@@ -1,180 +1,403 @@
-import type { Machine, StateMachine as S } from "@zag-js/core"
-import type { CommonProperties, Context, Direction, DirectionProperty, RequiredBy, RootProperties } from "@zag-js/types"
+import type { Machine, Ref, StateMachine as S } from "@zag-js/core"
+import type { CommonProperties, Direction, DirectionProperty, PropTypes, RequiredBy } from "@zag-js/types"
 
-export type Type = "success" | "error" | "loading" | "info" | "custom"
+/* -----------------------------------------------------------------------------
+ * Base types
+ * -----------------------------------------------------------------------------*/
+
+export type Type = "success" | "error" | "loading" | "info" | (string & {})
 
 export type Placement = "top-start" | "top" | "top-end" | "bottom-start" | "bottom" | "bottom-end"
 
-type SharedContext = {
+export type Status = "visible" | "dismissing" | "unmounted"
+
+export interface GenericOptions<T = string> {
   /**
-   * Whether to pause toast when the user leaves the browser tab
+   * The title of the toast.
    */
-  pauseOnPageIdle?: boolean
+  title?: T | undefined
   /**
-   * Whether to pause the toast when interacted with
+   * The description of the toast.
    */
-  pauseOnInteraction?: boolean
+  description?: T | undefined
 }
 
-export type ToastOptions = {
+export interface StatusChangeDetails {
+  status: Status
+}
+
+/**
+ * @internal
+ */
+export interface ToastHeightDetails {
+  id: string
+  height: number
+  placement: Placement
+}
+
+export interface ActionOptions {
+  /**
+   * The label of the action
+   */
+  label: string
+  /**
+   * The function to call when the action is clicked
+   */
+  onClick: () => void
+}
+
+export interface Options<T> extends GenericOptions<T> {
+  /**
+   * The duration the toast will be visible
+   */
+  duration?: number | undefined
+  /**
+   * The duration for the toast to kept alive before it is removed.
+   * Useful for exit transitions.
+   */
+  removeDelay?: number | undefined
+  /**
+   * The placement of the toast
+   */
+  placement?: Placement | undefined
   /**
    * The unique id of the toast
    */
-  id: string
+  id?: string | undefined
   /**
    * The type of the toast
    */
-  type: Type
+  type?: Type | undefined
+  /**
+   * Function called when the toast is visible
+   */
+  onStatusChange?(details: StatusChangeDetails): void
+  /**
+   * The action of the toast
+   */
+  action?: ActionOptions | undefined
+  /**
+   * The metadata of the toast
+   */
+  meta?: Record<string, any> | undefined
+}
+
+/* -----------------------------------------------------------------------------
+ * Machine context
+ * -----------------------------------------------------------------------------*/
+
+export interface MachineContext<T = any>
+  extends Omit<CommonProperties, "id">,
+    MachinePrivateContext,
+    Omit<Options<T>, "removeDelay"> {
+  /**
+   * The duration for the toast to kept alive before it is removed.
+   * Useful for exit transitions.
+   */
+  removeDelay: number
+  /**
+   * The document's text/writing direction.
+   */
+  dir?: Direction | undefined
+  /**
+   * The time the toast was created
+   */
+  createdAt: number
+  /**
+   * The time left before the toast is removed
+   */
+  remaining: number
+}
+
+interface MachinePrivateContext {
+  /**
+   * @internal
+   * The height of the toast
+   */
+  height: number
+  /**
+   * @internal
+   * The absolute height of the toast relative to other toasts
+   */
+  offset: number
+  /**
+   * @internal
+   * Whether the toast is in the front
+   */
+  frontmost: boolean
+  /**
+   * @internal
+   * The index of the toast in the group
+   */
+  index: number
+  /**
+   * @internal
+   * Whether the toast is mounted
+   */
+  mounted: boolean
+  /**
+   * @internal
+   * The z-index of the toast
+   */
+  zIndex: number
+  /**
+   * @internal
+   * Whether the toast is stacked
+   */
+  stacked?: boolean | undefined
+}
+
+export interface MachineState {
+  value: "visible" | "visible:updating" | "dismissing" | "unmounted" | "visible:persist"
+  tags: "visible" | "paused" | "updating"
+}
+
+export type State<T = any> = S.State<MachineContext<T>, MachineState>
+
+export type Send = S.Send
+
+export type Service<T = any> = Machine<MachineContext<T>, MachineState>
+
+/* -----------------------------------------------------------------------------
+ * Group machine context
+ * -----------------------------------------------------------------------------*/
+
+interface GroupPublicContext extends DirectionProperty, CommonProperties {
+  /**
+   * Whether to pause toast when the user leaves the browser tab
+   * @default false
+   */
+  pauseOnPageIdle: boolean
+  /**
+   * The gap or spacing between toasts
+   * @default 16
+   */
+  gap: number
+  /**
+   * The maximum number of toasts that can be shown at once
+   * @default Number.MAX_SAFE_INTEGER
+   */
+  max: number
+  /**
+   * The offset from the safe environment edge of the viewport
+   * @default "1rem"
+   */
+  offsets: string | Record<"left" | "right" | "bottom" | "top", string>
+  /**
+   * The hotkey that will move focus to the toast group
+   * @default '["altKey", "KeyT"]'
+   */
+  hotkey: string[]
+  /**
+   * Whether the toasts should overlap each other
+   */
+  overlap?: boolean | undefined
   /**
    * The placement of the toast
    */
   placement: Placement
   /**
-   * The message of the toast
+   * The duration for the toast to kept alive before it is removed.
+   * Useful for exit transitions.
+   *
+   * @default 200
    */
-  title?: string
-  /**
-   * The description of the toast
-   */
-  description?: string
+  removeDelay: number
   /**
    * The duration the toast will be visible
    */
-  duration: number
-  /**
-   * Custom function to render the toast element.
-   */
-  render?: (options: RenderOptions) => any
-  /**
-   * The duration for the toast to kept alive before it is removed.
-   * Useful for exit transitions.
-   */
-  removeDelay?: number
-  /**
-   * Function called when the toast has been closed and removed
-   */
-  onClose?: VoidFunction
-  /**
-   * Function called when the toast is leaving
-   */
-  onClosing?: VoidFunction
-  /**
-   * Function called when the toast is shown
-   */
-  onOpen?: VoidFunction
-  /**
-   * Function called when the toast is updated
-   */
-  onUpdate?: VoidFunction
+  duration?: number | undefined
 }
 
-export type Options = Partial<ToastOptions>
-
-export type RenderOptions = Omit<ToastOptions, "render"> & {
-  dismiss(): void
-}
-
-export type MachineContext = SharedContext &
-  RootProperties &
-  CommonProperties &
-  Omit<ToastOptions, "removeDelay"> & {
-    /**
-     * The duration for the toast to kept alive before it is removed.
-     * Useful for exit transitions.
-     */
-    removeDelay: number
-    /**
-     * The document's text/writing direction.
-     */
-    dir?: Direction
-    /**
-     * The time the toast was created
-     */
-    createdAt: number
-    /**
-     * The time left before the toast is removed
-     */
-    remaining: number
-  }
-
-export type MachineState = {
-  value: "active" | "active:temp" | "dismissing" | "inactive" | "persist"
-  tags: "visible" | "paused" | "updating"
-}
-
-export type State = S.State<MachineContext, MachineState>
-
-export type Send = S.Send
-
-export type Service = Machine<MachineContext, MachineState>
-
-type GroupPublicContext = SharedContext &
-  DirectionProperty &
-  CommonProperties & {
-    /**
-     * The gutter or spacing between toasts
-     */
-    gutter: string
-    /**
-     * The z-index applied to each toast group
-     */
-    zIndex: number
-    /**
-     * The maximum number of toasts that can be shown at once
-     */
-    max: number
-    /**
-     * The offset from the safe environment edge of the viewport
-     */
-    offsets: string | Record<"left" | "right" | "bottom" | "top", string>
-  }
-
-export type UserDefinedGroupContext = RequiredBy<GroupPublicContext, "id">
+export interface UserDefinedGroupContext extends RequiredBy<GroupPublicContext, "id"> {}
 
 type GroupComputedContext = Readonly<{
   /**
    * @computed
    * The total number of toasts in the group
    */
-  readonly count: number
+  count: number
 }>
 
-type GroupPrivateContext = Context<{
+interface GroupPrivateContext<T> extends GenericOptions<T> {
   /**
    * @internal
    * The child toast machines (spawned by the toast group)
    */
-  toasts: Service[]
-}>
+  toasts: Service<T>[]
+  /**
+   * @internal
+   * The height of each toast
+   */
+  heights: ToastHeightDetails[]
+  /**
+   * @internal
+   */
+  _cleanup?: VoidFunction | undefined
+  /**
+   * @internal
+   */
+  lastFocusedEl: Ref<HTMLElement> | null
+  /**
+   * @internal
+   */
+  isFocusWithin: boolean
+}
 
-export type GroupMachineContext = GroupPublicContext & GroupComputedContext & GroupPrivateContext
+export interface GroupMachineContext<T = any>
+  extends GroupPublicContext,
+    GroupPrivateContext<T>,
+    GroupComputedContext {}
 
-export type GroupState = S.State<GroupMachineContext>
+export interface GroupMachineState {
+  value: "stack" | "overlap"
+}
 
-export type GroupSend = (event: S.Event<S.AnyEventObject>) => void
+export type GroupState<T = any> = S.State<GroupMachineContext<T>>
+
+export type GroupSend = S.Send
+
+export type GroupService<T = any> = Machine<GroupMachineContext<T>, GroupMachineState>
+
+/* -----------------------------------------------------------------------------
+ * Component API
+ * -----------------------------------------------------------------------------*/
 
 type MaybeFunction<Value, Args> = Value | ((arg: Args) => Value)
 
-export type PromiseOptions<Value> = {
-  loading: ToastOptions
-  success: MaybeFunction<ToastOptions, Value>
-  error: MaybeFunction<ToastOptions, Error>
+export interface PromiseOptions<V, O = any> {
+  loading: Options<O>
+  success: MaybeFunction<Options<O>, V>
+  error: MaybeFunction<Options<O>, Error>
+  finally?: (() => void | Promise<void>) | undefined
 }
 
-export type GroupProps = {
+export interface GroupProps {
+  /**
+   * The placement of the toast region
+   */
   placement: Placement
-  label?: string
+  /**
+   * The human-readable label for the toast region
+   */
+  label?: string | undefined
 }
 
-export type Toaster = {
-  count: number
+export interface GroupMachineApi<T extends PropTypes = PropTypes, O = any> {
+  /**
+   * The total number of toasts
+   */
+  getCount(): number
+  /**
+   * The placements of the active toasts
+   */
+  getPlacements(): Placement[]
+  /**
+   * The active toasts by placement
+   */
+  getToastsByPlacement(placement: Placement): Service<O>[]
+  /**
+   * Returns whether the toast id is visible
+   */
   isVisible(id: string): boolean
-  upsert(options: ToastOptions): string | undefined
-  create(options: ToastOptions): string | undefined
-  success(options: ToastOptions): string | undefined
-  error(options: ToastOptions): string | undefined
-  loading(options: ToastOptions): string | undefined
+  /**
+   * Function to create a toast.
+   */
+  create(options: Options<O>): string | undefined
+  /**
+   * Function to create or update a toast.
+   */
+  upsert(options: Options<O>): string | undefined
+  /**
+   * Function to update a toast's options by id.
+   */
+  update(id: string, options: Options<O>): void
+  /**
+   * Function to create a success toast.
+   */
+  success(options: Options<O>): string | undefined
+  /**
+   * Function to create an error toast.
+   */
+  error(options: Options<O>): string | undefined
+  /**
+   * Function to create a loading toast.
+   */
+  loading(options: Options<O>): string | undefined
+  /**
+   * Function to resume a toast by id.
+   */
+  resume(id?: string | undefined): void
+  /**
+   * Function to pause a toast by id.
+   */
+  pause(id?: string | undefined): void
+  /**
+   * Function to dismiss a toast by id.
+   * If no id is provided, all toasts will be dismissed.
+   */
   dismiss(id?: string | undefined): void
+  /**
+   * Function to dismiss all toasts by placement.
+   */
+  dismissByPlacement(placement: Placement): void
+  /**
+   * Function to remove a toast by id.
+   * If no id is provided, all toasts will be removed.
+   */
   remove(id?: string | undefined): void
-  promise<T>(promise: Promise<T>, options: PromiseOptions<T>, shared?: ToastOptions): Promise<T>
+  /**
+   * Function to create a toast from a promise.
+   * - When the promise resolves, the toast will be updated with the success options.
+   * - When the promise rejects, the toast will be updated with the error options.
+   */
+  promise<T>(
+    promise: Promise<T> | (() => Promise<T>),
+    options: PromiseOptions<T, O>,
+    shared?: Partial<Options<O>>,
+  ): string
+  /**
+   * Function to subscribe to the toast group.
+   */
+  subscribe(callback: (toasts: Options<O>[]) => void): VoidFunction
+  getGroupProps(options: GroupProps): T["element"]
+}
+
+export interface MachineApi<T extends PropTypes = PropTypes, O = any> extends GenericOptions<O> {
+  /**
+   * The type of the toast.
+   */
+  type: Type
+  /**
+   * The current placement of the toast.
+   */
+  placement: Placement
+  /**
+   * Whether the toast is visible.
+   */
+  visible: boolean
+  /**
+   * Whether the toast is paused.
+   */
+  paused: boolean
+  /**
+   * Function to pause the toast (keeping it visible).
+   */
+  pause(): void
+  /**
+   * Function to resume the toast dismissing.
+   */
+  resume(): void
+  /**
+   * Function to instantly dismiss the toast.
+   */
+  dismiss(): void
+
+  getRootProps(): T["element"]
+  getTitleProps(): T["element"]
+  getGhostBeforeProps(): T["element"]
+  getGhostAfterProps(): T["element"]
+  getDescriptionProps(): T["element"]
+  getCloseTriggerProps(): T["button"]
+  getActionTriggerProps(): T["button"]
 }

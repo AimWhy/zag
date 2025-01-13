@@ -32,13 +32,15 @@ export default function Page() {
             console.log(formData)
           }}
         >
-          <label {...api.labelProps}>Enter Pin</label>
-          <div {...api.rootProps}>
-            <input data-testid="input-1" {...api.getInputProps({ index: 0 })} />
-            <input data-testid="input-2" {...api.getInputProps({ index: 1 })} />
-            <input data-testid="input-3" {...api.getInputProps({ index: 2 })} />
+          <div {...api.getRootProps()}>
+            <label {...api.getLabelProps()}>Enter code:</label>
+            <div {...api.getControlProps()}>
+              <input data-testid="input-1" {...api.getInputProps({ index: 0 })} />
+              <input data-testid="input-2" {...api.getInputProps({ index: 1 })} />
+              <input data-testid="input-3" {...api.getInputProps({ index: 2 })} />
+            </div>
+            <input {...api.getHiddenInputProps()} />
           </div>
-          <input {...api.hiddenInputProps} />
           <button data-testid="clear-button" onClick={api.clearValue}>
             Clear
           </button>

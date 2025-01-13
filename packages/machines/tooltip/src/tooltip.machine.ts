@@ -1,34 +1,35 @@
-import { createMachine, subscribe } from "@zag-js/core"
-import {
-  addDomEvent,
-  addPointerEvent,
-  addPointerlockChangeListener,
-  getScrollParents,
-  isHTMLElement,
-  isSafari,
-  raf,
-} from "@zag-js/dom-utils"
+import { createMachine, guards, subscribe } from "@zag-js/core"
+import { addDomEvent, getOverflowAncestors, isComposingEvent } from "@zag-js/dom-query"
+import { trackFocusVisible } from "@zag-js/focus-visible"
 import { getPlacement } from "@zag-js/popper"
 import { compact } from "@zag-js/utils"
 import { dom } from "./tooltip.dom"
 import { store } from "./tooltip.store"
 import type { MachineContext, MachineState, UserDefinedContext } from "./tooltip.types"
 
+const { and, not } = guards
+
 export function machine(userContext: UserDefinedContext) {
   const ctx = compact(userContext)
   return createMachine<MachineContext, MachineState>(
     {
       id: "tooltip",
-      initial: "unknown",
+      initial: ctx.open ? "open" : "closed",
+
+      activities: ["trackFocusVisible"],
 
       context: {
         openDelay: 1000,
         closeDelay: 500,
         closeOnPointerDown: true,
-        closeOnEsc: true,
-        interactive: true,
-        currentPlacement: undefined,
+        closeOnEscape: true,
+        interactive: false,
+        closeOnScroll: true,
+        closeOnClick: true,
+        disabled: false,
         ...ctx,
+        currentPlacement: undefined,
+        hasPointerMoveOpened: false,
         positioning: {
           placement: "bottom",
           ...ctx.positioning,
@@ -41,31 +42,38 @@ export function machine(userContext: UserDefinedContext) {
 
       watch: {
         disabled: ["closeIfDisabled"],
-      },
-
-      on: {
-        OPEN: "open",
-        CLOSE: "closed",
+        open: ["toggleVisibility"],
       },
 
       states: {
-        unknown: {
-          on: {
-            SETUP: "closed",
-          },
-        },
-
         closed: {
           tags: ["closed"],
-          entry: ["clearGlobalId", "invokeOnClose"],
+          entry: ["clearGlobalId"],
           on: {
-            FOCUS: "open",
-            POINTER_ENTER: [
+            "CONTROLLED.OPEN": "open",
+            OPEN: [
               {
-                guard: "noVisibleTooltip",
+                guard: "isOpenControlled",
+                actions: ["invokeOnOpen"],
+              },
+              {
+                target: "open",
+                actions: ["invokeOnOpen"],
+              },
+            ],
+            POINTER_LEAVE: {
+              actions: ["clearPointerMoveOpened"],
+            },
+            POINTER_MOVE: [
+              {
+                guard: and("noVisibleTooltip", not("hasPointerMoveOpened")),
                 target: "opening",
               },
-              { target: "open" },
+              {
+                guard: not("hasPointerMoveOpened"),
+                target: "open",
+                actions: ["setPointerMoveOpened", "invokeOnOpen"],
+              },
             ],
           },
         },
@@ -74,66 +82,142 @@ export function machine(userContext: UserDefinedContext) {
           tags: ["closed"],
           activities: ["trackScroll", "trackPointerlockChange"],
           after: {
-            OPEN_DELAY: "open",
+            OPEN_DELAY: [
+              {
+                guard: "isOpenControlled",
+                actions: ["setPointerMoveOpened", "invokeOnOpen"],
+              },
+              {
+                target: "open",
+                actions: ["setPointerMoveOpened", "invokeOnOpen"],
+              },
+            ],
           },
           on: {
-            POINTER_LEAVE: "closed",
-            BLUR: "closed",
-            SCROLL: "closed",
-            POINTER_LOCK_CHANGE: "closed",
-            POINTER_DOWN: {
-              guard: "closeOnPointerDown",
-              target: "closed",
-            },
+            "CONTROLLED.OPEN": "open",
+            "CONTROLLED.CLOSE": "closed",
+            OPEN: [
+              {
+                guard: "isOpenControlled",
+                actions: ["invokeOnOpen"],
+              },
+              {
+                target: "open",
+                actions: ["invokeOnOpen"],
+              },
+            ],
+            POINTER_LEAVE: [
+              {
+                guard: "isOpenControlled",
+                // We trigger toggleVisibility manually since the `ctx.open` has not changed yet (at this point)
+                actions: ["clearPointerMoveOpened", "invokeOnClose", "toggleVisibility"],
+              },
+              {
+                target: "closed",
+                actions: ["clearPointerMoveOpened", "invokeOnClose"],
+              },
+            ],
+            CLOSE: [
+              {
+                guard: "isOpenControlled",
+                // We trigger toggleVisibility manually since the `ctx.open` has not changed yet (at this point)
+                actions: ["invokeOnClose", "toggleVisibility"],
+              },
+              {
+                target: "closed",
+                actions: ["invokeOnClose"],
+              },
+            ],
           },
         },
 
         open: {
           tags: ["open"],
-          activities: [
-            "trackEscapeKey",
-            "trackDisabledTriggerOnSafari",
-            "trackScroll",
-            "trackPointerlockChange",
-            "computePlacement",
-          ],
-          entry: ["setGlobalId", "invokeOnOpen"],
+          activities: ["trackEscapeKey", "trackScroll", "trackPointerlockChange", "trackPositioning"],
+          entry: ["setGlobalId"],
           on: {
+            "CONTROLLED.CLOSE": "closed",
+            CLOSE: [
+              {
+                guard: "isOpenControlled",
+                actions: ["invokeOnClose"],
+              },
+              {
+                target: "closed",
+                actions: ["invokeOnClose"],
+              },
+            ],
             POINTER_LEAVE: [
               {
                 guard: "isVisible",
                 target: "closing",
+                actions: ["clearPointerMoveOpened"],
               },
-              { target: "closed" },
+              // == group ==
+              {
+                guard: "isOpenControlled",
+                actions: ["clearPointerMoveOpened", "invokeOnClose"],
+              },
+              {
+                target: "closed",
+                actions: ["clearPointerMoveOpened", "invokeOnClose"],
+              },
             ],
-            BLUR: "closed",
-            ESCAPE: "closed",
-            SCROLL: "closed",
-            POINTER_LOCK_CHANGE: "closed",
-            TOOLTIP_POINTER_LEAVE: {
+            "CONTENT.POINTER_LEAVE": {
               guard: "isInteractive",
               target: "closing",
             },
-            POINTER_DOWN: {
-              guard: "closeOnPointerDown",
-              target: "closed",
+            "POSITIONING.SET": {
+              actions: "reposition",
             },
-            CLICK: "closed",
           },
         },
 
         closing: {
           tags: ["open"],
-          activities: ["trackStore", "computePlacement"],
+          activities: ["trackStore", "trackPositioning"],
           after: {
-            CLOSE_DELAY: "closed",
+            CLOSE_DELAY: [
+              {
+                guard: "isOpenControlled",
+                actions: ["invokeOnClose"],
+              },
+              {
+                target: "closed",
+                actions: ["invokeOnClose"],
+              },
+            ],
           },
           on: {
-            FORCE_CLOSE: "closed",
-            POINTER_ENTER: "open",
-            TOOLTIP_POINTER_ENTER: {
+            "CONTROLLED.CLOSE": "closed",
+            "CONTROLLED.OPEN": "open",
+            CLOSE: [
+              {
+                guard: "isOpenControlled",
+                actions: ["invokeOnClose"],
+              },
+              {
+                target: "closed",
+                actions: ["invokeOnClose"],
+              },
+            ],
+            POINTER_MOVE: [
+              {
+                guard: "isOpenControlled",
+                // We trigger toggleVisibility manually since the `ctx.open` has not changed yet (at this point)
+                actions: ["setPointerMoveOpened", "invokeOnOpen", "toggleVisibility"],
+              },
+              {
+                target: "open",
+                actions: ["setPointerMoveOpened", "invokeOnOpen"],
+              },
+            ],
+            "CONTENT.POINTER_MOVE": {
               guard: "isInteractive",
               target: "open",
+            },
+            "POSITIONING.SET": {
+              actions: "reposition",
             },
           },
         },
@@ -141,36 +225,39 @@ export function machine(userContext: UserDefinedContext) {
     },
     {
       activities: {
-        computePlacement(ctx) {
+        trackFocusVisible(ctx) {
+          return trackFocusVisible({ root: dom.getRootNode(ctx) })
+        },
+        trackPositioning(ctx) {
           ctx.currentPlacement = ctx.positioning.placement
-          let cleanup: VoidFunction | undefined
-          raf(() => {
-            cleanup = getPlacement(dom.getTriggerEl(ctx), dom.getPositionerEl(ctx), {
-              ...ctx.positioning,
-              onComplete(data) {
-                ctx.currentPlacement = data.placement
-                ctx.isPlacementComplete = true
-              },
-              onCleanup() {
-                ctx.currentPlacement = undefined
-                ctx.isPlacementComplete = false
-              },
-            })
+          const getPositionerEl = () => dom.getPositionerEl(ctx)
+          return getPlacement(dom.getTriggerEl(ctx), getPositionerEl, {
+            ...ctx.positioning,
+            defer: true,
+            onComplete(data) {
+              ctx.currentPlacement = data.placement
+            },
           })
-          return cleanup
         },
         trackPointerlockChange(ctx, _evt, { send }) {
-          return addPointerlockChangeListener(dom.getDoc(ctx), () => {
-            send("POINTER_LOCK_CHANGE")
-          })
+          const onChange = () => send({ type: "CLOSE", src: "pointerlock:change" })
+          return addDomEvent(dom.getDoc(ctx), "pointerlockchange", onChange, false)
         },
         trackScroll(ctx, _evt, { send }) {
-          const trigger = dom.getTriggerEl(ctx)
-          if (!trigger) return
-          const cleanups = getScrollParents(trigger).map((el) => {
-            const opts = { passive: true, capture: true } as const
-            return addDomEvent(el, "scroll", () => send("SCROLL"), opts)
+          if (!ctx.closeOnScroll) return
+
+          const triggerEl = dom.getTriggerEl(ctx)
+          if (!triggerEl) return
+
+          const overflowParents = getOverflowAncestors(triggerEl)
+
+          const cleanups = overflowParents.map((overflowParent) => {
+            const onScroll = () => {
+              send({ type: "CLOSE", src: "scroll" })
+            }
+            return addDomEvent(overflowParent, "scroll", onScroll, { passive: true, capture: true })
           })
+
           return () => {
             cleanups.forEach((fn) => fn?.())
           }
@@ -178,27 +265,21 @@ export function machine(userContext: UserDefinedContext) {
         trackStore(ctx, _evt, { send }) {
           return subscribe(store, () => {
             if (store.id !== ctx.id) {
-              send("FORCE_CLOSE")
+              send({ type: "CLOSE", src: "id.change" })
             }
-          })
-        },
-        trackDisabledTriggerOnSafari(ctx, _evt, { send }) {
-          if (!isSafari()) return
-          const doc = dom.getDoc(ctx)
-          return addPointerEvent(doc, "pointermove", (event) => {
-            const selector = "[data-part=trigger][data-expanded]"
-            if (isHTMLElement(event.target) && event.target.closest(selector)) return
-            send("POINTER_LEAVE")
           })
         },
         trackEscapeKey(ctx, _evt, { send }) {
-          if (!ctx.closeOnEsc) return
-          const doc = dom.getDoc(ctx)
-          return addDomEvent(doc, "keydown", (event) => {
-            if (event.key === "Escape") {
-              send("ESCAPE")
-            }
-          })
+          if (!ctx.closeOnEscape) return
+
+          const onKeyDown = (event: KeyboardEvent) => {
+            if (isComposingEvent(event)) return
+            if (event.key !== "Escape") return
+            event.stopPropagation()
+            send({ type: "CLOSE", src: "keydown.escape" })
+          }
+
+          return addDomEvent(dom.getDoc(ctx), "keydown", onKeyDown, true)
         },
       },
       actions: {
@@ -210,29 +291,46 @@ export function machine(userContext: UserDefinedContext) {
             store.setId(null)
           }
         },
-        invokeOnOpen(ctx, evt) {
-          const omit = ["TOOLTIP_POINTER_ENTER", "POINTER_ENTER"]
-          if (!omit.includes(evt.type)) {
-            ctx.onOpen?.()
-          }
+        invokeOnOpen(ctx) {
+          ctx.onOpenChange?.({ open: true })
         },
-        invokeOnClose(ctx, evt) {
-          const omit = ["SETUP"]
-          if (!omit.includes(evt.type)) {
-            ctx.onClose?.()
-          }
+        invokeOnClose(ctx) {
+          ctx.onOpenChange?.({ open: false })
         },
         closeIfDisabled(ctx, _evt, { send }) {
-          if (ctx.disabled) {
-            send("CLOSE")
-          }
+          if (!ctx.disabled) return
+          send({ type: "CLOSE", src: "disabled.change" })
+        },
+        reposition(ctx, evt) {
+          const getPositionerEl = () => dom.getPositionerEl(ctx)
+          getPlacement(dom.getTriggerEl(ctx), getPositionerEl, {
+            ...ctx.positioning,
+            ...evt.options,
+            defer: true,
+            listeners: false,
+            onComplete(data) {
+              ctx.currentPlacement = data.placement
+            },
+          })
+        },
+        toggleVisibility(ctx, evt, { send }) {
+          queueMicrotask(() => {
+            send({ type: ctx.open ? "CONTROLLED.OPEN" : "CONTROLLED.CLOSE", previousEvent: evt })
+          })
+        },
+        setPointerMoveOpened(ctx) {
+          ctx.hasPointerMoveOpened = true
+        },
+        clearPointerMoveOpened(ctx) {
+          ctx.hasPointerMoveOpened = false
         },
       },
       guards: {
-        closeOnPointerDown: (ctx) => ctx.closeOnPointerDown,
         noVisibleTooltip: () => store.id === null,
         isVisible: (ctx) => ctx.id === store.id,
         isInteractive: (ctx) => ctx.interactive,
+        hasPointerMoveOpened: (ctx) => !!ctx.hasPointerMoveOpened,
+        isOpenControlled: (ctx) => !!ctx["open.controlled"],
       },
       delays: {
         OPEN_DELAY: (ctx) => ctx.openDelay,

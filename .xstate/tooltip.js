@@ -11,18 +11,24 @@ const {
 } = actions;
 const fetchMachine = createMachine({
   id: "tooltip",
-  initial: "unknown",
+  initial: ctx.open ? "open" : "closed",
+  activities: ["trackFocusVisible"],
   context: {
-    "noVisibleTooltip": false,
-    "closeOnPointerDown": false,
+    "isOpenControlled": false,
+    "noVisibleTooltip && !hasPointerMoveOpened": false,
+    "!hasPointerMoveOpened": false,
+    "isOpenControlled": false,
+    "isOpenControlled": false,
+    "isOpenControlled": false,
+    "isOpenControlled": false,
+    "isOpenControlled": false,
     "isVisible": false,
+    "isOpenControlled": false,
     "isInteractive": false,
-    "closeOnPointerDown": false,
+    "isOpenControlled": false,
+    "isOpenControlled": false,
+    "isOpenControlled": false,
     "isInteractive": false
-  },
-  on: {
-    OPEN: "open",
-    CLOSE: "closed"
   },
   on: {
     UPDATE_CONTEXT: {
@@ -30,21 +36,28 @@ const fetchMachine = createMachine({
     }
   },
   states: {
-    unknown: {
-      on: {
-        SETUP: "closed"
-      }
-    },
     closed: {
       tags: ["closed"],
-      entry: ["clearGlobalId", "invokeOnClose"],
+      entry: ["clearGlobalId"],
       on: {
-        FOCUS: "open",
-        POINTER_ENTER: [{
-          cond: "noVisibleTooltip",
+        "CONTROLLED.OPEN": "open",
+        OPEN: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnOpen"]
+        }, {
+          target: "open",
+          actions: ["invokeOnOpen"]
+        }],
+        POINTER_LEAVE: {
+          actions: ["clearPointerMoveOpened"]
+        },
+        POINTER_MOVE: [{
+          cond: "noVisibleTooltip && !hasPointerMoveOpened",
           target: "opening"
         }, {
-          target: "open"
+          cond: "!hasPointerMoveOpened",
+          target: "open",
+          actions: ["setPointerMoveOpened", "invokeOnOpen"]
         }]
       }
     },
@@ -52,57 +65,113 @@ const fetchMachine = createMachine({
       tags: ["closed"],
       activities: ["trackScroll", "trackPointerlockChange"],
       after: {
-        OPEN_DELAY: "open"
+        OPEN_DELAY: [{
+          cond: "isOpenControlled",
+          actions: ["setPointerMoveOpened", "invokeOnOpen"]
+        }, {
+          target: "open",
+          actions: ["setPointerMoveOpened", "invokeOnOpen"]
+        }]
       },
       on: {
-        POINTER_LEAVE: "closed",
-        BLUR: "closed",
-        SCROLL: "closed",
-        POINTER_LOCK_CHANGE: "closed",
-        POINTER_DOWN: {
-          cond: "closeOnPointerDown",
-          target: "closed"
-        }
+        "CONTROLLED.OPEN": "open",
+        "CONTROLLED.CLOSE": "closed",
+        OPEN: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnOpen"]
+        }, {
+          target: "open",
+          actions: ["invokeOnOpen"]
+        }],
+        POINTER_LEAVE: [{
+          cond: "isOpenControlled",
+          // We trigger toggleVisibility manually since the `ctx.open` has not changed yet (at this point)
+          actions: ["clearPointerMoveOpened", "invokeOnClose", "toggleVisibility"]
+        }, {
+          target: "closed",
+          actions: ["clearPointerMoveOpened", "invokeOnClose"]
+        }],
+        CLOSE: [{
+          cond: "isOpenControlled",
+          // We trigger toggleVisibility manually since the `ctx.open` has not changed yet (at this point)
+          actions: ["invokeOnClose", "toggleVisibility"]
+        }, {
+          target: "closed",
+          actions: ["invokeOnClose"]
+        }]
       }
     },
     open: {
       tags: ["open"],
-      activities: ["trackEscapeKey", "trackDisabledTriggerOnSafari", "trackScroll", "trackPointerlockChange", "computePlacement"],
-      entry: ["setGlobalId", "invokeOnOpen"],
+      activities: ["trackEscapeKey", "trackScroll", "trackPointerlockChange", "trackPositioning"],
+      entry: ["setGlobalId"],
       on: {
+        "CONTROLLED.CLOSE": "closed",
+        CLOSE: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnClose"]
+        }, {
+          target: "closed",
+          actions: ["invokeOnClose"]
+        }],
         POINTER_LEAVE: [{
           cond: "isVisible",
-          target: "closing"
+          target: "closing",
+          actions: ["clearPointerMoveOpened"]
+        },
+        // == group ==
+        {
+          cond: "isOpenControlled",
+          actions: ["clearPointerMoveOpened", "invokeOnClose"]
         }, {
-          target: "closed"
+          target: "closed",
+          actions: ["clearPointerMoveOpened", "invokeOnClose"]
         }],
-        BLUR: "closed",
-        ESCAPE: "closed",
-        SCROLL: "closed",
-        POINTER_LOCK_CHANGE: "closed",
-        TOOLTIP_POINTER_LEAVE: {
+        "CONTENT.POINTER_LEAVE": {
           cond: "isInteractive",
           target: "closing"
         },
-        POINTER_DOWN: {
-          cond: "closeOnPointerDown",
-          target: "closed"
-        },
-        CLICK: "closed"
+        "POSITIONING.SET": {
+          actions: "reposition"
+        }
       }
     },
     closing: {
       tags: ["open"],
-      activities: ["trackStore", "computePlacement"],
+      activities: ["trackStore", "trackPositioning"],
       after: {
-        CLOSE_DELAY: "closed"
+        CLOSE_DELAY: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnClose"]
+        }, {
+          target: "closed",
+          actions: ["invokeOnClose"]
+        }]
       },
       on: {
-        FORCE_CLOSE: "closed",
-        POINTER_ENTER: "open",
-        TOOLTIP_POINTER_ENTER: {
+        "CONTROLLED.CLOSE": "closed",
+        "CONTROLLED.OPEN": "open",
+        CLOSE: [{
+          cond: "isOpenControlled",
+          actions: ["invokeOnClose"]
+        }, {
+          target: "closed",
+          actions: ["invokeOnClose"]
+        }],
+        POINTER_MOVE: [{
+          cond: "isOpenControlled",
+          // We trigger toggleVisibility manually since the `ctx.open` has not changed yet (at this point)
+          actions: ["setPointerMoveOpened", "invokeOnOpen", "toggleVisibility"]
+        }, {
+          target: "open",
+          actions: ["setPointerMoveOpened", "invokeOnOpen"]
+        }],
+        "CONTENT.POINTER_MOVE": {
           cond: "isInteractive",
           target: "open"
+        },
+        "POSITIONING.SET": {
+          actions: "reposition"
         }
       }
     }
@@ -120,8 +189,9 @@ const fetchMachine = createMachine({
     CLOSE_DELAY: 500
   },
   guards: {
-    "noVisibleTooltip": ctx => ctx["noVisibleTooltip"],
-    "closeOnPointerDown": ctx => ctx["closeOnPointerDown"],
+    "isOpenControlled": ctx => ctx["isOpenControlled"],
+    "noVisibleTooltip && !hasPointerMoveOpened": ctx => ctx["noVisibleTooltip && !hasPointerMoveOpened"],
+    "!hasPointerMoveOpened": ctx => ctx["!hasPointerMoveOpened"],
     "isVisible": ctx => ctx["isVisible"],
     "isInteractive": ctx => ctx["isInteractive"]
   }

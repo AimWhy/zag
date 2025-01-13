@@ -1,22 +1,24 @@
 import * as pagination from "@zag-js/pagination"
-import { useMachine, normalizeProps } from "@zag-js/react"
-import { visuallyHiddenStyle } from "@zag-js/dom-utils"
+import { normalizeProps, useMachine } from "@zag-js/react"
 import { paginationControls, paginationData } from "@zag-js/shared"
-import { useId } from "react"
+import { useId, useState } from "react"
+import { Print } from "../components/print"
 import { StateVisualizer } from "../components/state-visualizer"
 import { Toolbar } from "../components/toolbar"
 import { useControls } from "../hooks/use-controls"
 
 export default function Page() {
   const controls = useControls(paginationControls)
+  const [details, setDetails] = useState({} as any)
 
   const [state, send] = useMachine(
     pagination.machine({
       id: useId(),
       count: paginationData.length,
-      onChange: console.log,
+      onPageChange(details) {
+        setDetails(details)
+      },
     }),
-
     {
       context: controls.context,
     },
@@ -24,7 +26,7 @@ export default function Page() {
 
   const api = pagination.connect(state, send, normalizeProps)
 
-  const data = paginationData.slice(api.pageRange.start, api.pageRange.end)
+  const data = api.slice(paginationData)
 
   return (
     <>
@@ -54,20 +56,18 @@ export default function Page() {
           </tbody>
         </table>
         {api.totalPages > 1 && (
-          <nav {...api.rootProps}>
+          <nav {...api.getRootProps()}>
             <ul>
               <li>
-                <a href="#previous" {...api.prevItemProps}>
-                  Previous <span style={visuallyHiddenStyle}>Page</span>
-                </a>
+                <button {...api.getPrevTriggerProps()}>Previous</button>
               </li>
               {api.pages.map((page, i) => {
                 if (page.type === "page")
                   return (
                     <li key={page.value}>
-                      <a href={`#${page.value}`} data-testid={`item-${page.value}`} {...api.getItemProps(page)}>
+                      <button data-testid={`item-${page.value}`} {...api.getItemProps(page)}>
                         {page.value}
-                      </a>
+                      </button>
                     </li>
                   )
                 else
@@ -78,13 +78,13 @@ export default function Page() {
                   )
               })}
               <li>
-                <a href="#next" {...api.nextItemProps}>
-                  Next <span style={visuallyHiddenStyle}>Page</span>
-                </a>
+                <button {...api.getNextTriggerProps()}>Next</button>
               </li>
             </ul>
           </nav>
         )}
+
+        <Print title="OpenChange Details" value={details} />
       </main>
 
       <Toolbar controls={controls.ui}>

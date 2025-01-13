@@ -1,4 +1,18 @@
+<a href="https://zagjs.com/" >
+  <img alt="Zag.js hero image" src="https://repository-images.githubusercontent.com/383777434/87c5d462-1c65-45d7-9561-3f3f64d814f4"></img>
+</a>
+
 # Zag
+
+<p>
+  <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/@zag-js/core.svg?style=flat"/>
+  <img alt="Github Stars" src="https://badgen.net/github/stars/chakra-ui/zag" />
+  <a href="https://zagjs.com/discord">
+    <img alt="Discord" src="https://img.shields.io/discord/660863154703695893.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2" />
+  </a>
+</p>
+
+
 
 Finite state machines for accessible JavaScript components
 
@@ -11,7 +25,19 @@ Finite state machines for accessible JavaScript components
 - **Powered by state machines 🌳**: Zag is built on top of the latest ideas in Statecharts. We don't follow the SCXML
   specifications, but we've created an API that we think will help us build more complex components fast.
 
-## The problem
+---
+
+## Documentation
+
+To see the documentation, visit [zagjs.com/](https://zagjs.com/)
+
+## Releases
+
+For changelog, Check [CHANGELOG.md](./CHANGELOG.md)
+
+---
+
+## Problem
 
 With the rise of design systems and component-driven development, there's an endless re-implementation of common
 component patterns (Tabs, Menu, Modal, etc.) in multiple frameworks.
@@ -42,23 +68,28 @@ For framework specific solutions, we provide simple wrappers to help you consume
 - 💚 `@zag-js/vue` - Vue composition for consuming machines in Vue applications
 - 🎷 `@zag-js/solid` - Solid.js utilities for consuming machines in Solid.js applications
 
-### Usage
+## Usage
 
 ```jsx
-import * as toggle from "@zag-js/toggle"
 import { normalizeProps, useMachine } from "@zag-js/react"
+import * as toggle from "@zag-js/toggle-group"
+import { useId } from "react"
 
-function Example() {
-  // if you need access to `state` or `send` from machine
-  const [state, send] = useMachine(toggle.machine({ id: "2" }))
-
-  // convert machine details into `DOM` props
+export function ToggleGroup() {
+  const [state, send] = useMachine(toggle.machine({ id: useId() }))
   const api = toggle.connect(state, send, normalizeProps)
 
-  // consume into components
-  return <button {...api.buttonProps}>Toggle me</button>
+  return (
+    <div {...api.getRootProps()}>
+      <button {...api.getItemProps({ value: "bold" })}>B</button>
+      <button {...api.getItemProps({ value: "italic" })}>I</button>
+      <button {...api.getItemProps({ value: "underline" })}>U</button>
+    </div>
+  )
 }
 ```
+
+---
 
 ## Guiding Principles
 
@@ -68,6 +99,8 @@ function Example() {
   component patterns to work the same way!**
 - All machines should be light-weight, simple, and easy to understand. Avoid using complex machine concepts like spawn,
   nested states, etc.
+
+---
 
 ## Fun Facts
 
@@ -85,16 +118,15 @@ power the logic behind UI components.
 
 - The Zag community will be called **"zag nation"** 🔥
 
+---
+
 ## Commands
 
 ### Build commands
 
 Our build is managed with esbuild and turborepo to provide fast, concurrent builds across the packages.
 
-- `build-fast` : Build the CJS and ESM versions, without the types.
 - `build` : Build the CJS, ESM and DTS files. This is the actual production build that we run in the CI.
-- `start` : The command to run when developing for Zag. It runs the `build:fast` command, watches for changes and
-  rebuilds as needed.
 
 ### Examples
 
@@ -125,6 +157,12 @@ ensure that the component works the same way regardless of the framework.
 - `test` : Run the tests for all packages
 - `lint` : Lint all packages
 
+### Website
+
+- `start-website`: Starts the website
+
+---
+
 ## Inspirations
 
 - Duplicate code in Chakra UI [React](https://chakra-ui.com/) and [Vue](https://vue.chakra-ui.com/) 😅
@@ -132,9 +170,13 @@ ensure that the component works the same way regardless of the framework.
 - [Pure UI Control](https://asolove.medium.com/pure-ui-control-ac8d1be97a8d) - Adam Solve
 - [Material Components Web](https://github.com/material-components/material-components-web) for inspiring my first
   prototype
+- [Radix UI](https://radix-ui.com/) for inspiring the dimissable and presence pattern
 - [XState](https://xstate.js.org/) for inspiring the base implementation of the state machine
 - [Vue.js](https://vuejs.org/) and [Lit](https://lit-element.polymer-project.org/) for inspiring new patterns in the
   machine (`computed` and `watch`)
+- [Sonner](https://sonner.emilkowal.ski/toaster) for inspiring the toast machine
+
+---
 
 ## Contributions
 
@@ -148,6 +190,8 @@ Please file an issue for bugs, missing documentation, or unexpected behavior.
 
 Please file an issue to suggest new features. Vote on feature requests by adding a 👍. This helps maintainers prioritize
 what to work on.
+
+---
 
 ## License
 

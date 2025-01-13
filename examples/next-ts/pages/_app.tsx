@@ -1,4 +1,4 @@
-import { dataAttr } from "@zag-js/dom-utils"
+import { dataAttr } from "@zag-js/dom-query"
 import { routesData } from "@zag-js/shared"
 import "@zag-js/shared/src/style.css"
 import { AppProps } from "next/app"
@@ -19,8 +19,8 @@ export default function App({ Component, pageProps, router }: AppProps) {
           .map((route) => {
             const active = router.pathname === route.path
             return (
-              <Link href={route.path} key={route.label} passHref>
-                <a data-active={dataAttr(active)}>{route.label}</a>
+              <Link data-active={dataAttr(active)} href={route.path} key={route.label} passHref>
+                {route.label}
               </Link>
             )
           })}

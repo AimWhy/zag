@@ -1,3 +1,16 @@
+export { anatomy } from "./tabs.anatomy"
 export { connect } from "./tabs.connect"
 export { machine } from "./tabs.machine"
-export type { UserDefinedContext as Context } from "./tabs.types"
+export * from "./tabs.props"
+export type {
+  MachineApi as Api,
+  ContentProps,
+  UserDefinedContext as Context,
+  ElementIds,
+  FocusChangeDetails,
+  IntlTranslations,
+  NavigateDetails,
+  Service,
+  TriggerProps,
+  ValueChangeDetails,
+} from "./tabs.types"

@@ -1,13 +1,13 @@
 # @zag-js/interact-outside
 
-Track interations or focus outside an element
+Track interactions or focus outside an element
 
 ## Installation
 
 ```sh
-yarn add  @zag-js/interact-outside
+yarn add @zag-js/interact-outside
 # or
-npm i  @zag-js/interact-outside
+npm i @zag-js/interact-outside
 ```
 
 ## Contribution

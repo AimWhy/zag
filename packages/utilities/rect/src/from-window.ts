@@ -1,4 +1,5 @@
-import { createRect, Rect } from "./rect"
+import { createRect } from "./rect"
+import type { Rect } from "./types"
 
 export type WindowRectOptions = {
   /**
@@ -8,7 +9,7 @@ export type WindowRectOptions = {
 }
 
 /**
- * Creates a rectange from window object
+ * Creates a rectangle from window object
  */
 export function getWindowRect(win: Window, opts: WindowRectOptions = {}): Rect {
   return createRect(getViewportRect(win, opts))

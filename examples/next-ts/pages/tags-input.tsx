@@ -28,26 +28,28 @@ export default function Page() {
   return (
     <>
       <main className="tags-input">
-        <div {...api.rootProps}>
-          <label {...api.labelProps}>Enter frameworks:</label>
-          <div {...api.controlProps}>
+        <div {...api.getRootProps()}>
+          <label {...api.getLabelProps()}>Enter frameworks:</label>
+          <div {...api.getControlProps()}>
             {api.value.map((value, index) => (
-              <span key={`${toDashCase(value)}-tag-${index}`}>
-                <div data-testid={`${toDashCase(value)}-tag`} {...api.getTagProps({ index, value })}>
-                  <span data-testid={`${toDashCase(value)}-valuetext`}>{value} </span>
+              <span key={`${toDashCase(value)}-tag-${index}`} {...api.getItemProps({ index, value })}>
+                <div data-testid={`${toDashCase(value)}-tag`} {...api.getItemPreviewProps({ index, value })}>
+                  <span data-testid={`${toDashCase(value)}-valuetext`} {...api.getItemTextProps({ index, value })}>
+                    {value}{" "}
+                  </span>
                   <button
                     data-testid={`${toDashCase(value)}-close-button`}
-                    {...api.getTagDeleteButtonProps({ index, value })}
+                    {...api.getItemDeleteTriggerProps({ index, value })}
                   >
                     &#x2715;
                   </button>
                 </div>
-                <input data-testid={`${toDashCase(value)}-input`} {...api.getTagInputProps({ index, value })} />
+                <input data-testid={`${toDashCase(value)}-input`} {...api.getItemInputProps({ index, value })} />
               </span>
             ))}
-            <input data-testid="input" placeholder="add tag" {...api.inputProps} />
+            <input data-testid="input" placeholder="add tag" {...api.getInputProps()} />
           </div>
-          <input {...api.hiddenInputProps} />
+          <input {...api.getHiddenInputProps()} />
         </div>
       </main>
       <Toolbar controls={controls.ui}>

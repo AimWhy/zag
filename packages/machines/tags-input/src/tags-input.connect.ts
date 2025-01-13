@@ -1,43 +1,55 @@
-import { dataAttr, EventKeyMap, getEventKey, getNativeEvent } from "@zag-js/dom-utils"
-import type { NormalizeProps, PropTypes } from "@zag-js/types"
+import { ariaAttr, dataAttr, getEventKey, getNativeEvent, isComposingEvent } from "@zag-js/dom-query"
+import type { EventKeyMap, NormalizeProps, PropTypes } from "@zag-js/types"
+import { parts } from "./tags-input.anatomy"
 import { dom } from "./tags-input.dom"
-import type { Send, State, TagProps } from "./tags-input.types"
+import type { ItemProps, ItemState, MachineApi, Send, State } from "./tags-input.types"
 
-export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>) {
-  const isInteractive = state.context.isInteractive
-  const isDisabled = state.context.disabled
-  const isReadOnly = state.context.readOnly
-  const isInvalid = state.context.invalid || state.context.isOverflowing
+export function connect<T extends PropTypes>(state: State, send: Send, normalize: NormalizeProps<T>): MachineApi<T> {
+  const interactive = state.context.isInteractive
+  const disabled = state.context.disabled
+  const readOnly = state.context.readOnly
+  const invalid = state.context.invalid || state.context.isOverflowing
 
   const translations = state.context.translations
 
-  const isInputFocused = state.hasTag("focused")
-  const isEditingTag = state.matches("editing:tag")
-  const isEmpty = state.context.count === 0
+  const focused = state.hasTag("focused")
+  const editingTag = state.matches("editing:tag")
+  const empty = state.context.count === 0
+
+  function getItemState(options: ItemProps): ItemState {
+    const id = dom.getItemId(state.context, options)
+    return {
+      id,
+      editing: editingTag && state.context.editedTagId === id,
+      highlighted: id === state.context.highlightedTagId,
+      disabled: Boolean(options.disabled || disabled),
+    }
+  }
 
   return {
-    isEmpty,
+    empty: empty,
     inputValue: state.context.trimmedInputValue,
     value: state.context.value,
-    count: state.context.count,
     valueAsString: state.context.valueAsString,
-    isAtMax: state.context.isAtMax,
-    setValue(value: string[]) {
+    count: state.context.count,
+    atMax: state.context.isAtMax,
+    setValue(value) {
       send({ type: "SET_VALUE", value })
     },
-    clearAll() {
-      send("CLEAR_ALL")
+    clearValue(id) {
+      if (id) {
+        send({ type: "CLEAR_TAG", id })
+      } else {
+        send("CLEAR_VALUE")
+      }
     },
-    addValue(value: string) {
+    addValue(value) {
       send({ type: "ADD_TAG", value })
     },
-    deleteValue(id: string) {
-      send({ type: "DELETE_TAG", id })
-    },
-    setValueAtIndex(index: number, value: string) {
+    setValueAtIndex(index, value) {
       send({ type: "SET_VALUE_AT_INDEX", index, value })
     },
-    setInputValue(value: string) {
+    setInputValue(value) {
       send({ type: "SET_INPUT_VALUE", value })
     },
     clearInputValue() {
@@ -46,171 +58,212 @@ export function connect<T extends PropTypes>(state: State, send: Send, normalize
     focus() {
       dom.getInputEl(state.context)?.focus()
     },
+    getItemState,
 
-    rootProps: normalize.element({
-      dir: state.context.dir,
-      "data-part": "root",
-      "data-invalid": dataAttr(isInvalid),
-      "data-readonly": dataAttr(isReadOnly),
-      "data-disabled": dataAttr(isDisabled),
-      "data-focus": dataAttr(isInputFocused),
-      "data-empty": dataAttr(isEmpty),
-      id: dom.getRootId(state.context),
-      onPointerDown() {
-        if (!isInteractive) return
-        send("POINTER_DOWN")
-      },
-    }),
-
-    labelProps: normalize.label({
-      "data-part": "label",
-      "data-disabled": dataAttr(isDisabled),
-      "data-invalid": dataAttr(isInvalid),
-      "data-readonly": dataAttr(isReadOnly),
-      id: dom.getLabelId(state.context),
-      htmlFor: dom.getInputId(state.context),
-    }),
-
-    controlProps: normalize.element({
-      id: dom.getControlId(state.context),
-      "data-part": "control",
-      tabIndex: isReadOnly ? 0 : undefined,
-      "data-disabled": dataAttr(isDisabled),
-      "data-readonly": dataAttr(isReadOnly),
-      "data-invalid": dataAttr(isInvalid),
-      "data-focus": dataAttr(isInputFocused),
-    }),
-
-    inputProps: normalize.input({
-      "data-part": "input",
-      "data-invalid": dataAttr(isInvalid),
-      "aria-invalid": isInvalid,
-      "data-readonly": dataAttr(isReadOnly),
-      maxLength: state.context.maxLength,
-      id: dom.getInputId(state.context),
-      defaultValue: state.context.inputValue,
-      autoComplete: "off",
-      autoCorrect: "off",
-      autoCapitalize: "none",
-      disabled: isDisabled || isReadOnly,
-      onChange(event) {
-        const evt = getNativeEvent(event)
-
-        if (evt.inputType === "insertFromPaste") return
-        let value = event.target.value
-
-        if (value.endsWith(state.context.delimiter!)) {
-          send("DELIMITER_KEY")
-        } else {
-          send({ type: "TYPE", value, key: evt.inputType })
-        }
-      },
-      onFocus() {
-        send("FOCUS")
-      },
-      onPaste(event) {
-        const value = event.clipboardData.getData("text/plain")
-        send({ type: "PASTE", value })
-      },
-      onKeyDown(event) {
-        // handle composition when used as combobox
-        const target = event.currentTarget as HTMLElement
-        const isCombobox = target.getAttribute("role") === "combobox"
-        const isExpanded = target.ariaExpanded === "true"
-
-        const keyMap: EventKeyMap = {
-          ArrowDown() {
-            send("ARROW_DOWN")
-          },
-          ArrowLeft() {
-            if (isCombobox && isExpanded) return
-            send("ARROW_LEFT")
-          },
-          ArrowRight() {
-            if (state.context.focusedId) {
-              event.preventDefault()
-            }
-            if (isCombobox && isExpanded) return
-            send("ARROW_RIGHT")
-          },
-          Escape(event) {
-            event.preventDefault()
-            send("ESCAPE")
-          },
-          Backspace() {
-            send("BACKSPACE")
-          },
-          Delete() {
-            send("DELETE")
-          },
-          Enter(event) {
-            event.preventDefault()
-            send("ENTER")
-          },
-        }
-
-        const key = getEventKey(event, state.context)
-        const exec = keyMap[key]
-
-        if (exec) {
-          exec(event)
-          return
-        }
-      },
-    }),
-
-    hiddenInputProps: normalize.input({
-      "data-part": "hidden-input",
-      type: "text",
-      hidden: true,
-      name: state.context.name,
-      form: state.context.form,
-      id: dom.getHiddenInputId(state.context),
-      defaultValue: state.context.valueAsString,
-    }),
-
-    getTagProps(options: TagProps) {
-      const { value } = options
-      const id = dom.getTagId(state.context, options)
+    getRootProps() {
       return normalize.element({
-        "data-part": "tag",
-        id,
-        hidden: isEditingTag ? state.context.editedId === id : false,
-        "data-value": value,
-        "data-disabled": dataAttr(isDisabled),
-        "data-selected": dataAttr(id === state.context.focusedId),
-        onPointerDown(event) {
-          if (!isInteractive) return
-          event.preventDefault()
-          send({ type: "POINTER_DOWN_TAG", id })
-        },
-        onDoubleClick() {
-          if (!isInteractive) return
-          send({ type: "DOUBLE_CLICK_TAG", id })
+        dir: state.context.dir,
+        ...parts.root.attrs,
+        "data-invalid": dataAttr(invalid),
+        "data-readonly": dataAttr(readOnly),
+        "data-disabled": dataAttr(disabled),
+        "data-focus": dataAttr(focused),
+        "data-empty": dataAttr(empty),
+        id: dom.getRootId(state.context),
+        onPointerDown() {
+          if (!interactive) return
+          send("POINTER_DOWN")
         },
       })
     },
 
-    getTagInputProps(options: TagProps) {
-      const id = dom.getTagId(state.context, options)
-      const active = state.context.editedId === id
+    getLabelProps() {
+      return normalize.label({
+        ...parts.label.attrs,
+        "data-disabled": dataAttr(disabled),
+        "data-invalid": dataAttr(invalid),
+        "data-readonly": dataAttr(readOnly),
+        id: dom.getLabelId(state.context),
+        dir: state.context.dir,
+        htmlFor: dom.getInputId(state.context),
+      })
+    },
+
+    getControlProps() {
+      return normalize.element({
+        id: dom.getControlId(state.context),
+        ...parts.control.attrs,
+        dir: state.context.dir,
+        tabIndex: readOnly ? 0 : undefined,
+        "data-disabled": dataAttr(disabled),
+        "data-readonly": dataAttr(readOnly),
+        "data-invalid": dataAttr(invalid),
+        "data-focus": dataAttr(focused),
+      })
+    },
+
+    getInputProps() {
       return normalize.input({
-        "data-part": "tag-input",
-        "aria-label": translations.tagEdited(options.value),
-        "aria-hidden": true,
-        disabled: isDisabled,
-        id: dom.getTagInputId(state.context, options),
-        type: "text",
-        tabIndex: -1,
-        hidden: isEditingTag ? !active : true,
-        defaultValue: active ? state.context.editedTagValue : "",
+        ...parts.input.attrs,
+        dir: state.context.dir,
+        "data-invalid": dataAttr(invalid),
+        "aria-invalid": ariaAttr(invalid),
+        "data-readonly": dataAttr(readOnly),
+        maxLength: state.context.maxLength,
+        id: dom.getInputId(state.context),
+        defaultValue: state.context.inputValue,
+        autoComplete: "off",
+        autoCorrect: "off",
+        autoCapitalize: "none",
+        disabled: disabled || readOnly,
         onChange(event) {
-          send({ type: "TAG_INPUT_TYPE", value: event.target.value })
+          const evt = getNativeEvent(event)
+          const value = event.currentTarget.value
+
+          if (evt.inputType === "insertFromPaste") {
+            send({ type: "PASTE", value })
+            return
+          }
+
+          if (endsWith(value, state.context.delimiter)) {
+            send("DELIMITER_KEY")
+            return
+          }
+
+          send({ type: "TYPE", value, key: evt.inputType })
         },
-        onBlur(event) {
-          send({ type: "TAG_INPUT_BLUR", target: event.relatedTarget, id })
+        onFocus() {
+          send("FOCUS")
         },
         onKeyDown(event) {
+          if (event.defaultPrevented) return
+          if (isComposingEvent(event)) return
+
+          // handle composition when used as combobox
+          const target = event.currentTarget as HTMLElement
+          const isCombobox = target.getAttribute("role") === "combobox"
+          const isExpanded = target.ariaExpanded === "true"
+
+          const keyMap: EventKeyMap = {
+            ArrowDown() {
+              send("ARROW_DOWN")
+            },
+            ArrowLeft() {
+              if (isCombobox && isExpanded) return
+              send("ARROW_LEFT")
+            },
+            ArrowRight(event) {
+              if (state.context.highlightedTagId) {
+                event.preventDefault()
+              }
+              if (isCombobox && isExpanded) return
+              send("ARROW_RIGHT")
+            },
+            Escape(event) {
+              event.preventDefault()
+              send("ESCAPE")
+            },
+            Backspace() {
+              send("BACKSPACE")
+            },
+            Delete() {
+              send("DELETE")
+            },
+            Enter(event) {
+              if (isCombobox && isExpanded) return
+              send("ENTER")
+              event.preventDefault()
+            },
+          }
+
+          const key = getEventKey(event, state.context)
+          const exec = keyMap[key]
+
+          if (exec) {
+            exec(event)
+            return
+          }
+        },
+      })
+    },
+
+    getHiddenInputProps() {
+      return normalize.input({
+        type: "text",
+        hidden: true,
+        name: state.context.name,
+        form: state.context.form,
+        disabled,
+        readOnly,
+        required: state.context.required,
+        id: dom.getHiddenInputId(state.context),
+        defaultValue: state.context.valueAsString,
+      })
+    },
+
+    getItemProps(props) {
+      return normalize.element({
+        ...parts.item.attrs,
+        dir: state.context.dir,
+        "data-value": props.value,
+        "data-disabled": dataAttr(disabled),
+      })
+    },
+
+    getItemPreviewProps(props) {
+      const itemState = getItemState(props)
+      return normalize.element({
+        ...parts.itemPreview.attrs,
+        id: itemState.id,
+        dir: state.context.dir,
+        hidden: itemState.editing,
+        "data-value": props.value,
+        "data-disabled": dataAttr(disabled),
+        "data-highlighted": dataAttr(itemState.highlighted),
+        onPointerDown(event) {
+          if (!interactive || itemState.disabled) return
+          event.preventDefault()
+          send({ type: "POINTER_DOWN_TAG", id: itemState.id })
+        },
+        onDoubleClick() {
+          if (!interactive || itemState.disabled) return
+          send({ type: "DOUBLE_CLICK_TAG", id: itemState.id })
+        },
+      })
+    },
+
+    getItemTextProps(props) {
+      const itemState = getItemState(props)
+      return normalize.element({
+        ...parts.itemText.attrs,
+        dir: state.context.dir,
+        "data-disabled": dataAttr(disabled),
+        "data-highlighted": dataAttr(itemState.highlighted),
+      })
+    },
+
+    getItemInputProps(props) {
+      const itemState = getItemState(props)
+      return normalize.input({
+        ...parts.itemInput.attrs,
+        dir: state.context.dir,
+        "aria-label": translations.tagEdited(props.value),
+        "aria-hidden": true,
+        disabled: disabled,
+        id: dom.getItemInputId(state.context, props),
+        tabIndex: -1,
+        hidden: !itemState.editing,
+        defaultValue: itemState.editing ? state.context.editedTagValue : "",
+        onChange(event) {
+          send({ type: "TAG_INPUT_TYPE", value: event.currentTarget.value })
+        },
+        onBlur(event) {
+          send({ type: "TAG_INPUT_BLUR", target: event.relatedTarget, id: itemState.id })
+        },
+        onKeyDown(event) {
+          if (event.defaultPrevented) return
+          if (isComposingEvent(event)) return
+
           const keyMap: EventKeyMap = {
             Enter() {
               send("TAG_INPUT_ENTER")
@@ -230,47 +283,57 @@ export function connect<T extends PropTypes>(state: State, send: Send, normalize
       })
     },
 
-    getTagDeleteButtonProps(options: TagProps) {
-      const id = dom.getTagId(state.context, options)
+    getItemDeleteTriggerProps(props) {
+      const id = dom.getItemId(state.context, props)
       return normalize.button({
-        "data-part": "delete-button",
-        id: dom.getTagDeleteBtnId(state.context, options),
+        ...parts.itemDeleteTrigger.attrs,
+        dir: state.context.dir,
+        id: dom.getItemDeleteTriggerId(state.context, props),
         type: "button",
-        disabled: isDisabled,
-        "aria-label": translations.deleteTagButtonLabel(options.value),
+        disabled: disabled,
+        "aria-label": translations.deleteTagTriggerLabel(props.value),
         tabIndex: -1,
         onPointerDown(event) {
-          if (!isInteractive) {
+          if (!interactive) {
             event.preventDefault()
           }
         },
         onPointerMove(event) {
-          if (!isInteractive) return
+          if (!interactive) return
           dom.setHoverIntent(event.currentTarget)
         },
         onPointerLeave(event) {
-          if (!isInteractive) return
+          if (!interactive) return
           dom.clearHoverIntent(event.currentTarget)
         },
         onClick() {
-          if (!isInteractive) return
-          send({ type: "DELETE_TAG", id })
+          if (!interactive) return
+          send({ type: "CLICK_DELETE_TAG", id })
         },
       })
     },
 
-    clearButtonProps: normalize.button({
-      "data-part": "clear-button",
-      id: dom.getClearButtonId(state.context),
-      type: "button",
-      "data-readonly": dataAttr(isReadOnly),
-      disabled: isDisabled,
-      "aria-label": translations.clearButtonLabel,
-      hidden: isEmpty,
-      onClick() {
-        if (!isInteractive) return
-        send("CLEAR_ALL")
-      },
-    }),
+    getClearTriggerProps() {
+      return normalize.button({
+        ...parts.clearTrigger.attrs,
+        dir: state.context.dir,
+        id: dom.getClearTriggerId(state.context),
+        type: "button",
+        "data-readonly": dataAttr(readOnly),
+        disabled: disabled,
+        "aria-label": translations.clearTriggerLabel,
+        hidden: empty,
+        onClick() {
+          if (!interactive) return
+          send("CLEAR_VALUE")
+        },
+      })
+    },
   }
+}
+
+function endsWith(str: string, del: string | RegExp | undefined) {
+  if (!del) return false
+  if (typeof del === "string") return str.endsWith(del)
+  return new RegExp(`${del.source}$`).test(str)
 }

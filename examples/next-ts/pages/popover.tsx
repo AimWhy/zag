@@ -1,7 +1,7 @@
 import * as popover from "@zag-js/popover"
 import { normalizeProps, Portal, useMachine } from "@zag-js/react"
 import { popoverControls } from "@zag-js/shared"
-import * as React from "react"
+import { Fragment, useId } from "react"
 import { StateVisualizer } from "../components/state-visualizer"
 import { Toolbar } from "../components/toolbar"
 import { useControls } from "../hooks/use-controls"
@@ -11,7 +11,7 @@ export default function Page() {
 
   const [state, send] = useMachine(
     popover.machine({
-      id: React.useId(),
+      id: useId(),
     }),
     {
       context: controls.context,
@@ -20,7 +20,7 @@ export default function Page() {
 
   const api = popover.connect(state, send, normalizeProps)
 
-  const Wrapper = api.portalled ? Portal : React.Fragment
+  const Wrapper = api.portalled ? Portal : Fragment
 
   return (
     <>
@@ -28,19 +28,20 @@ export default function Page() {
         <div data-part="root">
           <button data-testid="button-before">Button :before</button>
 
-          <button data-testid="popover-trigger" {...api.triggerProps}>
+          <button data-testid="popover-trigger" {...api.getTriggerProps()}>
             Click me
+            <div {...api.getIndicatorProps()}>{">"}</div>
           </button>
 
-          <div {...api.anchorProps}>anchor</div>
+          <div {...api.getAnchorProps()}>anchor</div>
 
           <Wrapper>
-            <div {...api.positionerProps}>
-              <div data-testid="popover-content" className="popover-content" {...api.contentProps}>
-                <div {...api.arrowProps}>
-                  <div {...api.innerArrowProps} />
+            <div {...api.getPositionerProps()}>
+              <div data-testid="popover-content" className="popover-content" {...api.getContentProps()}>
+                <div {...api.getArrowProps()}>
+                  <div {...api.getArrowTipProps()} />
                 </div>
-                <div data-testid="popover-title" {...api.titleProps}>
+                <div data-testid="popover-title" {...api.getTitleProps()}>
                   Popover Title
                 </div>
                 <div data-part="body" data-testid="popover-body">
@@ -49,7 +50,7 @@ export default function Page() {
                     Focusable Link
                   </a>
                   <input data-testid="input" placeholder="input" />
-                  <button data-testid="popover-close-button" {...api.closeButtonProps}>
+                  <button data-testid="popover-close-button" {...api.getCloseTriggerProps()}>
                     X
                   </button>
                 </div>

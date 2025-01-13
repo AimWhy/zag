@@ -1,6 +1,6 @@
-import * as slider from "@zag-js/range-slider"
+import * as slider from "@zag-js/slider"
 import { normalizeProps, useMachine } from "@zag-js/react"
-import { rangeSliderControls } from "@zag-js/shared"
+import { sliderControls } from "@zag-js/shared"
 import serialize from "form-serialize"
 import { useId } from "react"
 import { StateVisualizer } from "../components/state-visualizer"
@@ -8,13 +8,13 @@ import { Toolbar } from "../components/toolbar"
 import { useControls } from "../hooks/use-controls"
 
 export default function Page() {
-  const controls = useControls(rangeSliderControls)
+  const controls = useControls(sliderControls)
 
   const [state, send] = useMachine(
     slider.machine({
       id: useId(),
       name: "quantity",
-      values: [10, 60],
+      value: [10, 60],
     }),
     { context: controls.context },
   )
@@ -31,21 +31,27 @@ export default function Page() {
             console.log(formData)
           }}
         >
-          <div {...api.rootProps}>
+          <div {...api.getRootProps()}>
             <div>
-              <label {...api.labelProps}>Quantity:</label>
-              <output {...api.outputProps}>{api.values.join(" - ")}</output>
+              <label {...api.getLabelProps()}>Quantity:</label>
+              <output {...api.getValueTextProps()}>{api.value.join(" - ")}</output>
             </div>
             <div className="control-area">
-              <div {...api.controlProps}>
-                <div {...api.trackProps}>
-                  <div {...api.rangeProps} />
+              <div {...api.getControlProps()}>
+                <div {...api.getTrackProps()}>
+                  <div {...api.getRangeProps()} />
                 </div>
-                {api.values.map((_, index) => (
-                  <div key={index} {...api.getThumbProps(index)}>
-                    <input {...api.getInputProps(index)} />
+                {api.value.map((_, index) => (
+                  <div key={index} {...api.getThumbProps({ index })}>
+                    <input {...api.getHiddenInputProps({ index })} />
                   </div>
                 ))}
+              </div>
+              <div {...api.getMarkerGroupProps()}>
+                <span {...api.getMarkerProps({ value: 10 })}>*</span>
+                <span {...api.getMarkerProps({ value: 30 })}>*</span>
+                <span {...api.getMarkerProps({ value: 50 })}>*</span>
+                <span {...api.getMarkerProps({ value: 90 })}>*</span>
               </div>
             </div>
           </div>

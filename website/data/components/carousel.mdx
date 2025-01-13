@@ -1,0 +1,277 @@
+---
+title: Carousel
+description: Using the carousel machine in your project.
+package: "@zag-js/carousel"
+---
+
+# Carousel
+
+an accessible carousel component that leverages native CSS Scroll Snap for
+smooth, performant scrolling between slides.
+
+<Resources pkg="@zag-js/carousel" />
+
+<Showcase id="Carousel" />
+
+**Features**
+
+- Uses native CSS Scroll Snap.
+- Supports horizontal and vertical orientations.
+- Supports alignment of slides (start, center or end alignment).
+- Show multiple slides at a time.
+- Supports looping and auto-playing.
+- Supports custom spacing between slides.
+
+## Installation
+
+To use the carousel machine in your project, run the following command in your
+command line:
+
+<CodeSnippet id="carousel/installation.mdx" />
+
+This command will install the framework agnostic carousel logic and the reactive
+utilities for your framework of choice.
+
+## Anatomy
+
+To set up the carousel correctly, you'll need to understand its anatomy and how
+we name its parts.
+
+> Each part includes a `data-part` attribute to help identify them in the DOM.
+
+<Anatomy id="carousel" />
+
+## Usage
+
+First, import the carousel package into your project
+
+```jsx
+import * as carousel from "@zag-js/carousel"
+```
+
+The carousel package exports two key functions:
+
+- `machine` — The state machine logic for the carousel widget.
+- `connect` — The function that translates the machine's state to JSX attributes
+  and event handlers.
+
+> You'll also need to provide a unique `id` to the `useMachine` hook. This is
+> used to ensure that every part has a unique identifier.
+
+Next, import the required hooks and functions for your framework and use the
+carousel machine in your project 🔥
+
+<CodeSnippet id="carousel/usage.mdx" />
+
+## Vertical carousel
+
+To create a vertical carousel, set the `orientation` property in the machine's
+context to `vertical`.
+
+```jsx {3}
+const [state, send] = useMachine(
+  carousel.machine({
+    orientation: "vertical",
+  }),
+)
+```
+
+## Setting the initial slide
+
+To set the initial slide of the carousel, pass the `page` property to the
+machine's context.
+
+The `page` corresponds to the scroll snap position index based on the layout. It
+does not necessarily correspond to the index of the slide in the carousel.
+
+```jsx {3}
+const [state, send] = useMachine(
+  carousel.machine({
+    page: 2,
+  }),
+)
+```
+
+## Setting the number of slides to show at a time
+
+To customize number of slides to show at a time, set the `slidesPerPage`
+property in the machine's context. The value must be an integer.
+
+```jsx {3}
+const [state, send] = useMachine(
+  carousel.machine({
+    slidesPerPage: 2,
+  }),
+)
+```
+
+## Setting the number of slides to move at a time
+
+To customize number of slides to move at a time, set the `slidesPerMove`
+property in the machine's context. The value must be an integer or `auto`.
+
+> If the value is `auto`, the carousel will move the number of slides equal to
+> the number of slides per page.
+
+```jsx {3}
+const [state, send] = useMachine(
+  carousel.machine({
+    slidesPerMove: 2,
+  }),
+)
+```
+
+> Ensure the `slidesPerMove` is less than or equal to the `slidesPerPage` to
+> avoid skipping slides.
+
+## Setting the carousel should loop around
+
+To allow looping of slides, set the `loop` property in the machine's context to
+`true`.
+
+```jsx {3}
+const [state, send] = useMachine(
+  carousel.machine({
+    loop: true,
+  }),
+)
+```
+
+## Setting the gap between slides
+
+To customize spacing between slides, set the `spacing` property in the machine's
+context to a valid CSS unit.
+
+```jsx {3}
+const [state, send] = useMachine(
+  carousel.machine({
+    spacing: "16px",
+  }),
+)
+```
+
+## Listening for page changes
+
+When the carousel page changes, the `onPageChange` callback is invoked.
+
+```jsx {3-6}
+const [state, send] = useMachine(
+  carousel.machine({
+    onPageChange(details) {
+      // details => { page: number }
+      console.log("selected page:", details.page)
+    },
+  }),
+)
+```
+
+## Dragging the carousel
+
+To allow dragging the carousel with the mouse, set the `allowMouseDrag` property
+in the machine's context to `true`.
+
+```jsx {3}
+const [state, send] = useMachine(
+  carousel.machine({
+    allowMouseDrag: true,
+  }),
+)
+```
+
+## Autoplaying the carousel
+
+To allow the carousel to autoplay, set the `autoplay` property in the machine's
+context to `true`.
+
+```jsx {3}
+const [state, send] = useMachine(
+  carousel.machine({
+    autoplay: true,
+  }),
+)
+```
+
+Alternatively, you can configure the autoplay interval by setting the `delay`
+property in the machine's context.
+
+```jsx {3}
+const [state, send] = useMachine(
+  carousel.machine({
+    autoplay: { delay: 2000 },
+  }),
+)
+```
+
+## Styling guide
+
+Earlier, we mentioned that each carousel part has a `data-part` attribute added
+to them to select and style them in the DOM.
+
+```css
+[data-part="root"] {
+  /* styles for the root part */
+}
+
+[data-part="item-group"] {
+  /* styles for the item-group part */
+}
+
+[data-part="item"] {
+  /* styles for the root part */
+}
+
+[data-part="control"] {
+  /* styles for the control part */
+}
+
+[data-part="next-trigger"] {
+  /* styles for the next-trigger part */
+}
+
+[data-part="prev-trigger"] {
+  /* styles for the prev-trigger part */
+}
+
+[data-part="indicator-group"] {
+  /* styles for the indicator-group part */
+}
+
+[data-part="indicator"] {
+  /* styles for the indicator part */
+}
+
+[data-part="autoplay-trigger"] {
+  /* styles for the autoplay-trigger part */
+}
+```
+
+### Active state
+
+When a carousel's indicator is active, a `data-current` attribute is set on the
+indicator.
+
+```css
+[data-part="indicator"][data-current] {
+  /* styles for the indicator's active state */
+}
+```
+
+## Methods and Properties
+
+The carousel's `api` exposes the following methods and properties:
+
+### Machine Context
+
+The carousel machine exposes the following context properties:
+
+<ContextTable name="carousel" />
+
+### Machine API
+
+The carousel `api` exposes the following methods:
+
+<ApiTable name="carousel" />
+
+### Data Attributes
+
+<DataAttrTable name="carousel" />

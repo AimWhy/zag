@@ -1,81 +1,94 @@
-// Credits: https://github.com/pmndrs/valtio
+/// <reference types="react/experimental" />
 
-import { useCallback, useDebugValue, useEffect, useMemo, useRef, useSyncExternalStore } from "react"
-import { affectedToPathList, createProxy as createProxyToCompare, isChanged } from "proxy-compare"
-import { snapshot, subscribe } from "@zag-js/store"
+import type { Machine, StateMachine as S } from "@zag-js/core"
+import { snapshot, subscribe, type Snapshot, globalRef } from "@zag-js/store"
+import { compact, isEqual } from "@zag-js/utils"
+import { createProxy as createProxyToCompare, isChanged } from "proxy-compare"
+import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react"
+import { useUpdateEffect } from "./use-update-effect"
 
-const __DEV__ = process.env.NODE_ENV !== "production"
+const targetCache = globalRef("__zag__targetCache", () => new WeakMap())
 
-interface AsRef {
-  $$valtioRef: true
-}
-type AnyFunction = (...args: any[]) => any
-type Snapshot<T> = T extends AnyFunction
-  ? T
-  : T extends AsRef
-  ? T
-  : T extends Promise<infer V>
-  ? Snapshot<V>
-  : {
-      readonly [K in keyof T]: Snapshot<T[K]>
-    }
+export function useSnapshot<
+  TContext extends Record<string, any>,
+  TState extends S.StateSchema,
+  TEvent extends S.EventObject = S.AnyEventObject,
+>(
+  service: Machine<TContext, TState, TEvent>,
+  options?: S.HookOptions<TContext, TState, TEvent>,
+): S.State<TContext, TState, TEvent> {
+  //
+  type State = S.State<TContext, TState, TEvent>
 
-const useAffectedDebugValue = (state: object, affected: WeakMap<object, unknown>) => {
-  const pathList = useRef<(string | number | symbol)[][]>()
-  useEffect(() => {
-    pathList.current = affectedToPathList(state, affected)
-  })
-  useDebugValue(pathList.current)
-}
+  const { actions, context, sync: notifyInSync } = options ?? {}
 
-interface Options {
-  sync?: boolean
-}
+  /* -----------------------------------------------------------------------------
+   * Subscribe to the service state and create a snapshot of it
+   * -----------------------------------------------------------------------------*/
 
-export function useSnapshot<T extends object>(proxyObject: T, options?: Options): Snapshot<T> {
-  const notifyInSync = options?.sync
-  const lastSnapshot = useRef<Snapshot<T>>()
-  const lastAffected = useRef<WeakMap<object, unknown>>()
-  let inRender = true
+  const lastSnapshot = useRef<Snapshot<State>>(undefined)
+  const lastAffected = useRef<WeakMap<object, unknown>>(undefined)
+
   const currSnapshot = useSyncExternalStore(
-    useCallback(
-      (callback) => {
-        const unsub = subscribe(proxyObject, callback, notifyInSync)
-        callback() // Note: do we really need this?
-        return unsub
-      },
-      [proxyObject, notifyInSync],
-    ),
+    useCallback((callback) => subscribe(service.state, callback, notifyInSync), [notifyInSync]),
     () => {
-      const nextSnapshot = snapshot(proxyObject)
+      const nextSnapshot = snapshot(service.state)
       try {
         if (
-          !inRender &&
           lastSnapshot.current &&
           lastAffected.current &&
           !isChanged(lastSnapshot.current, nextSnapshot, lastAffected.current, new WeakMap())
         ) {
-          // not changed
           return lastSnapshot.current
         }
-      } catch (e) {
+      } catch {
         // ignore if a promise or something is thrown
       }
       return nextSnapshot
     },
-    () => snapshot(proxyObject),
+    () => snapshot(service.state),
   )
-  inRender = false
+
+  /* -----------------------------------------------------------------------------
+   * Sync actions
+   * -----------------------------------------------------------------------------*/
+
+  service.setOptions({ actions })
+
+  /* -----------------------------------------------------------------------------
+   * Sync context (if changed) to avoid unnecessary renders
+   * -----------------------------------------------------------------------------*/
+
+  const ctx = useMemo(() => compact(context ?? {}), [context])
+
+  useUpdateEffect(() => {
+    const entries = Object.entries(ctx)
+
+    const previousCtx = service.contextSnapshot ?? {}
+
+    const equality = entries.map(([key, value]) => ({
+      key,
+      curr: value,
+      prev: previousCtx[key],
+      equal: isEqual(previousCtx[key], value),
+    }))
+
+    const allEqual = equality.every(({ equal }) => equal)
+
+    if (!allEqual) {
+      // console.log(equality.filter(({ equal }) => !equal))
+      service.setContext(ctx)
+    }
+  }, [ctx])
+
   const currAffected = new WeakMap()
+
   useEffect(() => {
     lastSnapshot.current = currSnapshot
     lastAffected.current = currAffected
   })
 
-  if (__DEV__) {
-    useAffectedDebugValue(currSnapshot, currAffected)
-  }
-
   const proxyCache = useMemo(() => new WeakMap(), []) // per-hook proxyCache
-  return createProxyToCompare(currSnapshot, currAffected, proxyCache)
+
+  return createProxyToCompare(currSnapshot, currAffected, proxyCache, targetCache) as any
 }

@@ -1,10 +1,8 @@
-import { setVisuallyHidden } from "@zag-js/dom-utils"
-
-export type LiveRegionOptions = {
+export interface LiveRegionOptions {
   level: "polite" | "assertive"
-  document?: Document
-  root?: HTMLElement | null
-  delay?: number
+  document?: Document | undefined
+  root?: HTMLElement | null | undefined
+  delay?: number | undefined
 }
 
 export type LiveRegion = ReturnType<typeof createLiveRegion>
@@ -39,7 +37,18 @@ export function createLiveRegion(opts: Partial<LiveRegionOptions> = {}) {
     region.setAttribute("role", role)
 
     // hide live region
-    setVisuallyHidden(region)
+    Object.assign(region.style, {
+      border: "0",
+      clip: "rect(0 0 0 0)",
+      height: "1px",
+      margin: "-1px",
+      overflow: "hidden",
+      padding: "0",
+      position: "absolute",
+      width: "1px",
+      whiteSpace: "nowrap",
+      wordWrap: "normal",
+    })
 
     parent.appendChild(region)
 
